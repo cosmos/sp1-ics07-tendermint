@@ -3,7 +3,7 @@ pragma solidity ^0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {Fibonacci} from "../src/Fibonacci.sol";
+import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 
 struct SP1ProofFixtureJson {
@@ -18,7 +18,7 @@ struct SP1ProofFixtureJson {
 contract FibonacciTest is Test {
     using stdJson for string;
 
-    Fibonacci public fibonacci;
+    SP1ICS07Tendermint public fibonacci;
 
     function loadFixture() public view returns (SP1ProofFixtureJson memory) {
         string memory root = vm.projectRoot();
@@ -30,7 +30,7 @@ contract FibonacciTest is Test {
 
     function setUp() public {
         SP1ProofFixtureJson memory fixture = loadFixture();
-        fibonacci = new Fibonacci(fixture.vkey);
+        fibonacci = new SP1ICS07Tendermint(fixture.vkey);
     }
 
     function test_ValidFibonacciProof() public view {

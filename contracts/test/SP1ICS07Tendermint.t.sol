@@ -15,10 +15,10 @@ struct SP1ProofFixtureJson {
     bytes32 vkey;
 }
 
-contract FibonacciTest is Test {
+contract SP1ICS07TendermintTest is Test {
     using stdJson for string;
 
-    SP1ICS07Tendermint public fibonacci;
+    SP1ICS07Tendermint public ics07Tendermint;
 
     function loadFixture() public view returns (SP1ProofFixtureJson memory) {
         string memory root = vm.projectRoot();
@@ -30,12 +30,16 @@ contract FibonacciTest is Test {
 
     function setUp() public {
         SP1ProofFixtureJson memory fixture = loadFixture();
-        fibonacci = new SP1ICS07Tendermint(fixture.vkey);
+        SP1Verifier verifier = new SP1Verifier();
+        ics07Tendermint = new SP1ICS07Tendermint(
+            fixture.vkey,
+            address(verifier)
+        );
     }
 
-    function test_ValidFibonacciProof() public view {
+    function test_ValidSP1ICS07TendermintProof() public view {
         SP1ProofFixtureJson memory fixture = loadFixture();
-        (uint32 n, uint32 a, uint32 b) = fibonacci.verifyFibonacciProof(
+        (uint32 n, uint32 a, uint32 b) = ics07Tendermint.verifyIcs07Proof(
             fixture.proof,
             fixture.publicValues
         );
@@ -44,12 +48,12 @@ contract FibonacciTest is Test {
         assert(b == fixture.b);
     }
 
-    function testFail_InvalidFibonacciProof() public view {
+    function testFail_InvalidSP1ICS07TendermintProof() public view {
         SP1ProofFixtureJson memory fixture = loadFixture();
 
         // Create a fake proof.
         bytes memory fakeProof = new bytes(fixture.proof.length);
 
-        fibonacci.verifyFibonacciProof(fakeProof, fixture.publicValues);
+        ics07Tendermint.verifyIcs07Proof(fakeProof, fixture.publicValues);
     }
 }

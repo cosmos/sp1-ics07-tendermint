@@ -21,9 +21,21 @@ contract SP1ICS07Tendermint {
     // @notice The constructor sets the program verification key.
     // @param _ics07ProgramVkey The verification key for the program.
     // @param _verifier The address of the SP1 verifier contract.
-    constructor(bytes32 _ics07ProgramVkey, address _verifier) {
+    constructor(
+        bytes32 _ics07ProgramVkey,
+        address _verifier,
+        bytes memory _clientState,
+        bytes memory _consensusState
+    ) {
         ics07ProgramVkey = _ics07ProgramVkey;
         verifier = ISP1Verifier(_verifier);
+
+        clientState = abi.decode(_clientState, (ICS07Tendermint.ClientState));
+        ICS07Tendermint.ConsensusState memory consensusState = abi.decode(
+            _consensusState,
+            (ICS07Tendermint.ConsensusState)
+        );
+        consensusStates[consensusState.timestamp] = consensusState;
     }
 
     /// @notice The entrypoint for verifying the proof.

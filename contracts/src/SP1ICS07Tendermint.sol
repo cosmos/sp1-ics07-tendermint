@@ -1,17 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import {ICS07Tendermint} from "ibc-lite-shared/ics07-tendermint/ICS07Tendermint.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 
-/// @title Fibonacci.
-/// @author Succinct Labs
-/// @notice This contract implements a simple example of verifying the proof of a computing a
-///         fibonacci number.
+/// @title SP1ICS07Tendermint
+/// @author srdtrk
+/// @notice This contract implements an ICS07 IBC tendermint light client.
 contract SP1ICS07Tendermint {
-    /// @notice The verification key for the fibonacci program.
+    /// @notice The verification key for the program.
     bytes32 public ics07ProgramVkey;
     // @notice The SP1 verifier contract.
     ISP1Verifier public verifier;
+
+    // @notice The ICS07Tendermint client state
+    ICS07Tendermint.ClientState public clientState;
+    // @notice The mapping from height to consensus state
+    mapping(uint64 => ICS07Tendermint.ConsensusState) public consensusStates;
 
     // @notice The constructor sets the program verification key.
     // @param _ics07ProgramVkey The verification key for the program.

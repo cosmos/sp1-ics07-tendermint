@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-// @title ICS07Tendermint
-// @notice Defines shared types for ICS07Tendermint implementations.
+/// @title ICS07Tendermint
+/// @author srdtrk
+/// @notice Defines shared types for ICS07Tendermint implementations.
 contract ICS07Tendermint {
     // Height of the counterparty chain
     struct Height {

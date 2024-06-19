@@ -1,0 +1,6 @@
+[package]
+name = "sp1-ics07-tendermint-shared"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

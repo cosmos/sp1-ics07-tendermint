@@ -28,6 +28,7 @@ contract SP1ICS07TendermintTest is Test {
         return abi.decode(jsonBytes, (SP1ProofFixtureJson));
     }
 
+    // TODO: fix after some rust code
     function setUp() public {
         SP1ProofFixtureJson memory fixture = loadFixture();
         SP1Verifier verifier = new SP1Verifier();

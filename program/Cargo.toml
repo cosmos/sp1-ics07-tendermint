@@ -1,9 +1,16 @@
 [workspace]
 [package]
 version = "0.1.0"
-name = "fibonacci-program"
+name = "sp1-ics07-tendermint-update-client-program"
 edition = "2021"
 
 [dependencies]
-alloy-sol-types = "0.7.2"
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.7-testnet" }
+sp1-ics07-tendermint-shared = { path = "../shared" }
+tendermint-light-client-verifier = { version = "0.36.0", default-features = false }
+ibc-client-tendermint = { version = "0.53.0", default-features = false, features = ["serde"] }
+serde = { version = "1.0", default-features = false }
+
+[patch.crates-io]
+sha2-v0-10-8 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", branch = "patch-v0.10.8" }
+ed25519-consensus = { git = "https://github.com/sp1-patches/ed25519-consensus", branch = "patch-v2.1.0" }

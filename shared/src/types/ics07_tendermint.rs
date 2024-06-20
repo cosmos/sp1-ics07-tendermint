@@ -1,8 +1,6 @@
 //! This module contains the shared types for `sp1-ics07-tendermint`.
 
-use alloy_sol_types::sol;
-
-sol! {
+alloy_sol_types::sol! {
     /// Height of the counterparty chain
     struct Height {
         /// Previously known as "epoch"

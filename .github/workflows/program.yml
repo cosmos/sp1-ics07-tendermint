@@ -15,20 +15,26 @@ jobs:
       fail-fast: true
 
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2024-04-17
+          override: true
+
       - name: Install SP1 toolchain
         run: |
           curl -L https://sp1.succinct.xyz | bash
-          source /home/runner/.bashrc
-          sp1up 
-          cargo-prove prove --version
+          ~/.config/.sp1/bin/sp1up 
+          ~/.config/.sp1/bin/cargo-prove prove --version
 
       - name: Build SP1 program
         run: |
           cd program
-          cargo-prove prove build --release
+          ~/.config/.sp1/bin/cargo-prove prove build

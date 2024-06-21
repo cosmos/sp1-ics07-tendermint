@@ -15,7 +15,7 @@ jobs:
       fail-fast: true
 
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,10 +31,10 @@ jobs:
       - name: Install SP1 toolchain
         run: |
           curl -L https://sp1.succinct.xyz | bash
-          $HOME/.sp1/bin/sp1up 
-          $HOME/.sp1/bin/cargo-prove prove --version
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
 
       - name: Build SP1 program
         run: |
           cd program
-          $HOME/.sp1/bin/cargo-prove prove build --release
+          ~/.sp1/bin/cargo-prove prove build --release

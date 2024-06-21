@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 alloy-sol-types = "0.7.2"
+tendermint-light-client-verifier = { version = "0.36.0", default-features = false }
+serde = { version = "1.0", default-features = false }

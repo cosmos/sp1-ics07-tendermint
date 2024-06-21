@@ -31,18 +31,16 @@ pub fn main() {
     // input 2: the proposed header
     let proposed_header = sp1_zkvm::io::read::<Header>();
     // input 3: environment
-    let env = sp1_zkvm::io::read::<types::Env>();
+    let env = sp1_zkvm::io::read::<types::validation::Env>();
 
     let client_id = ClientId::from_str(&env.client_id).unwrap();
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();
     let options = Options {
-        trust_threshold: env.trust_threshold,
-        // TODO: check if this is nanos
-        // 2 week trusting period.
+        trust_threshold: env.trust_threshold.clone().into(),
         trusting_period: Duration::from_nanos(env.trusting_period),
         clock_drift: Duration::default(),
     };
-    let ctx = types::ClientValidationCtx::new(env, trusted_consensus_state);
+    let ctx = types::validation::ClientValidationCtx::new(env, trusted_consensus_state);
 
     verify_header::<_, sha2::Sha256>(
         &ctx,

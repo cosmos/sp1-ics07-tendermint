@@ -1,5 +1,7 @@
 //! This module contains the shared types for `sp1-ics07-tendermint`.
 
+use tendermint_light_client_verifier::types::TrustThreshold as TendermintTrustThreshold;
+
 alloy_sol_types::sol! {
     /// Height of the counterparty chain
     struct Height {
@@ -10,6 +12,7 @@ alloy_sol_types::sol! {
     }
 
     /// Fraction of validator overlap needed to update header
+    #[derive(Debug, serde::Deserialize, serde::Serialize)]
     struct TrustThreshold {
         /// numerator of the fraction
         uint64 numerator;
@@ -43,5 +46,12 @@ alloy_sol_types::sol! {
         bytes root;
         /// next validators hash
         bytes next_validators_hash;
+    }
+}
+
+#[allow(clippy::fallible_impl_from)]
+impl From<TrustThreshold> for TendermintTrustThreshold {
+    fn from(trust_threshold: TrustThreshold) -> Self {
+        Self::new(trust_threshold.numerator, trust_threshold.denominator).unwrap()
     }
 }

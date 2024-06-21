@@ -37,4 +37,4 @@ jobs:
       - name: Build SP1 program
         run: |
           cd program
-          ~/.config/.sp1/bin/cargo-prove prove build --release
+          ~/.config/.sp1/bin/cargo-prove prove build

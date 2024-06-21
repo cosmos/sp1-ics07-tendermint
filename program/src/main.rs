@@ -13,6 +13,7 @@ sp1_zkvm::entrypoint!(main);
 
 use std::{str::FromStr, time::Duration};
 
+use alloy_sol_types::SolValue;
 use ibc_client_tendermint::{
     client_state::verify_header,
     types::{ConsensusState, Header},
@@ -40,7 +41,8 @@ pub fn main() {
         trusting_period: Duration::from_nanos(env.trusting_period),
         clock_drift: Duration::default(),
     };
-    let ctx = types::validation::ClientValidationCtx::new(env, trusted_consensus_state);
+    let ctx =
+        types::validation::ClientValidationCtx::new(env.clone(), trusted_consensus_state.clone());
 
     verify_header::<_, sha2::Sha256>(
         &ctx,
@@ -52,5 +54,12 @@ pub fn main() {
     )
     .unwrap();
 
-    todo!()
+    let new_consensus_state = ConsensusState::from(proposed_header);
+    let output = types::output::SP1ICS07TendermintOutput {
+        trusted_consensus_state: trusted_consensus_state.into(),
+        new_consensus_state: new_consensus_state.into(),
+        env,
+    };
+
+    sp1_zkvm::io::commit_slice(&output.abi_encode());
 }

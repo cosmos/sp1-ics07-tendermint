@@ -1,5 +1,6 @@
 //! This module contains the shared types for `sp1-ics07-tendermint`.
 
+use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
 use tendermint_light_client_verifier::types::TrustThreshold as TendermintTrustThreshold;
 
 alloy_sol_types::sol! {
@@ -53,5 +54,22 @@ alloy_sol_types::sol! {
 impl From<TrustThreshold> for TendermintTrustThreshold {
     fn from(trust_threshold: TrustThreshold) -> Self {
         Self::new(trust_threshold.numerator, trust_threshold.denominator).unwrap()
+    }
+}
+
+impl From<ICS07TendermintConsensusState> for ConsensusState {
+    fn from(ics07_tendermint_consensus_state: ICS07TendermintConsensusState) -> Self {
+        Self {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            timestamp: ics07_tendermint_consensus_state
+                .timestamp
+                .unix_timestamp_nanos() as u64,
+            root: ics07_tendermint_consensus_state.root.into_vec().into(),
+            next_validators_hash: ics07_tendermint_consensus_state
+                .next_validators_hash
+                .as_bytes()
+                .to_vec()
+                .into(),
+        }
     }
 }

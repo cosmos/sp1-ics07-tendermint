@@ -1833,6 +1833,7 @@ name = "sp1-ics07-tendermint-shared"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "ibc-client-tendermint-types",
  "serde",
  "tendermint-light-client-verifier",
 ]

@@ -5,7 +5,7 @@ use sp1_ics07_tendermint_shared::types::ics07_tendermint::ConsensusState;
 
 alloy_sol_types::sol! {
     /// The public value output for the sp1 program.
-    struct ICS07TendermintOutput {
+    struct SP1ICS07TendermintOutput {
         /// The trusted consensus state.
         ConsensusState trusted_consensus_state;
         /// The new consensus state with the verified header.

@@ -1840,7 +1840,12 @@ name = "sp1-ics07-tendermint-update-client-program"
 version = "0.1.0"
 dependencies = [
  "ibc-client-tendermint",
+ "ibc-core-client",
+ "ibc-core-handler-types",
+ "ibc-core-host",
+ "ibc-primitives",
  "serde",
+ "sha2 0.10.8",
  "sp1-ics07-tendermint-shared",
  "sp1-zkvm",
  "tendermint-light-client-verifier",

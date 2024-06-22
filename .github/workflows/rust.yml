@@ -33,7 +33,7 @@ jobs:
 
 
   build-all-features:
-    name: Build with All Features
+    name: Build (without programs)
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -50,11 +50,11 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-program-update-client --locked --all-features
         env:
           RUST_BACKTRACE: 1
       - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-program-update-client --locked --all-features

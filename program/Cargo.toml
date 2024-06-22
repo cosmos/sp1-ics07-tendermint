@@ -1,25 +1,21 @@
-[workspace]
 [package]
-version = "0.1.0"
-name = "sp1-ics07-tendermint-update-client-program"
-edition = "2021"
+name = "sp1-ics07-tendermint-program-update-client"
+description = "IBC Lite Client Router for CosmWasm"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
 
 [dependencies]
-sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.7-testnet" }
-
-sp1-ics07-tendermint-shared = { path = "../shared" }
-
-tendermint-light-client-verifier = { version = "0.36.0", default-features = false }
-ibc-client-tendermint = { version = "0.53.0", default-features = false, features = ["serde"] }
-ibc-core-host = { version = "0.53.0", default-features = false }
-ibc-core-client = { version = "0.53.0", default-features = false }
-ibc-primitives = { version = "0.53.0", default-features = false }
-ibc-core-handler-types = { version = "0.53.0", default-features = false }
-
-serde = { version = "1.0", default-features = false }
-sha2 = { version = "0.10.8", default-features = false }
-alloy-sol-types = "0.7.2"
-
-[patch.crates-io]
-sha2-v0-10-8 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", branch = "patch-v0.10.8" }
-ed25519-consensus = { git = "https://github.com/sp1-patches/ed25519-consensus", branch = "patch-v2.1.0" }
+sp1-zkvm = { workspace = true }
+sp1-ics07-tendermint-shared = { workspace = true }
+tendermint-light-client-verifier = { workspace = true }
+ibc-client-tendermint = { workspace = true }
+ibc-core-host = { workspace = true }
+ibc-core-client = { workspace = true }
+ibc-primitives = { workspace = true }
+ibc-core-handler-types = { workspace = true }
+serde = { workspace = true }
+sha2 = { workspace = true }
+alloy-sol-types = { workspace = true }

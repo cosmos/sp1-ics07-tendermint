@@ -2,7 +2,7 @@ use alloy_primitives::U256;
 use alloy_sol_types::{sol, SolCall, SolValue};
 use log::{debug, info};
 use sp1_ics07_tendermint_operator::{
-    contract::ContractClient, util::TendermintRPCClient, TendermintProver,
+    contract::ContractClient, util::TendermintRPCClient, SP1ICS07TendermintProver,
 };
 use sp1_sdk::utils::setup_logger;
 use std::time::Duration;
@@ -33,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Instantiate a Tendermint prover based on the environment variable.
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let prover = TendermintProver::new();
+    let prover = SP1ICS07TendermintProver::new();
 
     loop {
         // Read the existing trusted header hash from the contract.
@@ -55,7 +55,7 @@ async fn main() -> anyhow::Result<()> {
 
         // Generate a proof of the transition from the trusted block to the target block.
         let proof_data =
-            prover.generate_tendermint_proof(&trusted_light_block, &target_light_block);
+            prover.generate_ics07_update_client_proof(&trusted_light_block, &target_light_block);
 
         // Construct the on-chain call and relay the proof to the contract.
         let proof_as_bytes = hex::decode(&proof_data.proof.encoded_proof).unwrap();

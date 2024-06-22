@@ -1,7 +1,7 @@
 use alloy_sol_types::{sol, SolType};
 use clap::Parser;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, TendermintProver};
+use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf};
 
@@ -56,11 +56,11 @@ async fn main() -> anyhow::Result<()> {
         .get_light_blocks(args.trusted_block, args.target_block)
         .await;
 
-    let tendermint_prover = TendermintProver::new();
+    let tendermint_prover = SP1ICS07TendermintProver::new();
 
     // Generate a header update proof for the specified blocks.
-    let proof_data =
-        tendermint_prover.generate_tendermint_proof(&trusted_light_block, &target_light_block);
+    let proof_data = tendermint_prover
+        .generate_ics07_update_client_proof(&trusted_light_block, &target_light_block);
 
     let bytes = proof_data.public_values.as_slice();
     let (trusted_height, target_height, trusted_header_hash, target_header_hash) =

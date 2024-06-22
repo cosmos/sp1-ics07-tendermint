@@ -40,3 +40,4 @@ clap = { workspace = true }
 log = { workspace = true }
 async-trait = { workspace = true }
 hex = { workspace = true }
+sp1-ics07-tendermint-update-client = { workspace = true }

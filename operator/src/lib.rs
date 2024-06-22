@@ -8,19 +8,19 @@ pub mod util;
 // The path to the ELF file for the Succinct zkVM program.
 pub const TENDERMINT_ELF: &[u8] = include_bytes!("../../elf/riscv32im-succinct-zkvm-elf");
 
-pub struct TendermintProver {
+pub struct SP1ICS07TendermintProver {
     pub prover_client: ProverClient,
     pub pkey: SP1ProvingKey,
     pub vkey: SP1VerifyingKey,
 }
 
-impl Default for TendermintProver {
+impl Default for SP1ICS07TendermintProver {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl TendermintProver {
+impl SP1ICS07TendermintProver {
     pub fn new() -> Self {
         log::info!("Initializing SP1 ProverClient...");
         let prover_client = ProverClient::new();
@@ -35,7 +35,7 @@ impl TendermintProver {
 
     /// Generate a proof of an update from trusted_light_block to target_light_block. Returns an
     /// SP1Groth16Proof.
-    pub fn generate_tendermint_proof(
+    pub fn generate_ics07_update_client_proof(
         &self,
         trusted_light_block: &LightBlock,
         target_light_block: &LightBlock,

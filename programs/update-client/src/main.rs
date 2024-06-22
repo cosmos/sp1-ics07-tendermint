@@ -19,7 +19,7 @@ use ibc_client_tendermint::{
     types::{ConsensusState, Header},
 };
 use ibc_core_host::types::identifiers::{ChainId, ClientId};
-use sp1_ics07_tendermint_program_update_client::types;
+use sp1_ics07_tendermint_update_client::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 
 /// The main function of the program.

@@ -5283,6 +5283,7 @@ dependencies = [
  "serde_cbor",
  "serde_json",
  "sha2 0.10.8",
+ "sp1-ics07-tendermint-update-client",
  "sp1-sdk",
  "subtle-encoding",
  "tendermint",
@@ -5291,7 +5292,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp1-ics07-tendermint-program-update-client"
+name = "sp1-ics07-tendermint-shared"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "ibc-client-tendermint-types",
+ "serde",
+ "tendermint-light-client-verifier",
+]
+
+[[package]]
+name = "sp1-ics07-tendermint-update-client"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
@@ -5304,16 +5315,6 @@ dependencies = [
  "sha2 0.10.8",
  "sp1-ics07-tendermint-shared",
  "sp1-zkvm",
- "tendermint-light-client-verifier",
-]
-
-[[package]]
-name = "sp1-ics07-tendermint-shared"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
- "ibc-client-tendermint-types",
- "serde",
  "tendermint-light-client-verifier",
 ]
 

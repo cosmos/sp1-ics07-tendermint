@@ -36,5 +36,5 @@ jobs:
 
       - name: Build SP1 program
         run: |
-          cd program
+          cd programs/update-client
           ~/.config/.sp1/bin/cargo-prove prove build

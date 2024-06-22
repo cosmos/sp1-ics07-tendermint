@@ -1,0 +1,21 @@
+[package]
+name = "sp1-ics07-tendermint-program-update-client"
+description = "IBC Lite Client Router for CosmWasm"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+sp1-zkvm = { workspace = true }
+sp1-ics07-tendermint-shared = { workspace = true }
+tendermint-light-client-verifier = { workspace = true }
+ibc-client-tendermint = { workspace = true }
+ibc-core-host = { workspace = true }
+ibc-core-client = { workspace = true }
+ibc-primitives = { workspace = true }
+ibc-core-handler-types = { workspace = true }
+serde = { workspace = true }
+sha2 = { workspace = true }
+alloy-sol-types = { workspace = true }

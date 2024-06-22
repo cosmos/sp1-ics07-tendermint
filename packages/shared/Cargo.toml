@@ -1,0 +1,13 @@
+[package]
+name = "sp1-ics07-tendermint-shared"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+alloy-sol-types = { workspace = true }
+tendermint-light-client-verifier = { workspace = true }
+serde = { workspace = true }
+ibc-client-tendermint-types = { workspace = true }

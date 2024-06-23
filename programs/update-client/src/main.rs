@@ -19,7 +19,9 @@ use ibc_client_tendermint::{
     types::{ConsensusState, Header, TENDERMINT_CLIENT_TYPE},
 };
 use ibc_core_host::types::identifiers::{ChainId, ClientId};
-use sp1_ics07_tendermint_shared::types::ics07_tendermint;
+use sp1_ics07_tendermint_shared::types::ics07_tendermint::{
+    self, ConsensusState as SolConsensusState,
+};
 use sp1_ics07_tendermint_update_client::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 
@@ -28,12 +30,16 @@ use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 /// # Panics
 /// Panics if the verification fails.
 pub fn main() {
-    // input 1: the trusted consensus state
-    let trusted_consensus_state = sp1_zkvm::io::read::<ConsensusState>();
-    // input 2: the proposed header
-    let proposed_header = sp1_zkvm::io::read::<Header>();
+    let encoded_1 = sp1_zkvm::io::read_vec();
+    let encoded_2 = sp1_zkvm::io::read_vec();
+    let encoded_3 = sp1_zkvm::io::read_vec();
+
     // input 3: environment
-    let env = sp1_zkvm::io::read::<types::validation::Env>();
+    let env = serde_cbor::from_slice::<types::validation::Env>(&encoded_3).unwrap();
+    // input 2: the proposed header
+    let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
+    // input 1: the trusted consensus state
+    let trusted_consensus_state = SolConsensusState::abi_decode(&encoded_1, true).unwrap();
 
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();
@@ -42,8 +48,10 @@ pub fn main() {
         trusting_period: Duration::from_nanos(env.trusting_period),
         clock_drift: Duration::default(),
     };
-    let ctx =
-        types::validation::ClientValidationCtx::new(env.clone(), trusted_consensus_state.clone());
+    let ctx = types::validation::ClientValidationCtx::new(
+        env.clone(),
+        trusted_consensus_state.clone().into(),
+    );
 
     verify_header::<_, sha2::Sha256>(
         &ctx,
@@ -66,7 +74,7 @@ pub fn main() {
     let new_consensus_state = ConsensusState::from(proposed_header);
 
     let output = types::output::SP1ICS07TendermintOutput {
-        trusted_consensus_state: trusted_consensus_state.into(),
+        trusted_consensus_state,
         new_consensus_state: new_consensus_state.into(),
         env,
         trusted_height,

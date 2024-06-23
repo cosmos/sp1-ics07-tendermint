@@ -76,7 +76,7 @@ async fn main() -> anyhow::Result<()> {
 
         // Generate a proof of the transition from the trusted block to the target block.
         let proof_data = prover.generate_ics07_update_client_proof(
-            &trusted_consensus_state.into(),
+            &trusted_consensus_state,
             &proposed_header,
             &contract_env,
         );

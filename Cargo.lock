@@ -5319,6 +5319,8 @@ dependencies = [
  "ibc-core-host",
  "ibc-primitives",
  "serde",
+ "serde_cbor",
+ "serde_json",
  "sha2 0.10.8",
  "sp1-ics07-tendermint-shared",
  "sp1-zkvm",

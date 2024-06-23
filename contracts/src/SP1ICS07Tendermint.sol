@@ -9,7 +9,7 @@ import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 /// @notice This contract implements an ICS07 IBC tendermint light client.
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the program.
-    bytes32 public ics07ProgramVkey;
+    bytes32 public ics07UpdateClientProgramVkey;
     // @notice The SP1 verifier contract.
     ISP1Verifier public verifier;
 
@@ -17,6 +17,9 @@ contract SP1ICS07Tendermint {
     ICS07Tendermint.ClientState public clientState;
     // @notice The mapping from height to consensus state
     mapping(uint64 => ICS07Tendermint.ConsensusState) public consensusStates;
+
+    /// Allowed clock drift in nanoseconds
+    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 6_000_000_000_000; // 6000 seconds
 
     // @notice The constructor sets the program verification key.
     // @param _ics07ProgramVkey The verification key for the program.
@@ -27,7 +30,7 @@ contract SP1ICS07Tendermint {
         bytes memory _clientState,
         bytes memory _consensusState
     ) {
-        ics07ProgramVkey = _ics07ProgramVkey;
+        ics07UpdateClientProgramVkey = _ics07ProgramVkey;
         verifier = ISP1Verifier(_verifier);
 
         clientState = abi.decode(_clientState, (ICS07Tendermint.ClientState));
@@ -35,22 +38,67 @@ contract SP1ICS07Tendermint {
             _consensusState,
             (ICS07Tendermint.ConsensusState)
         );
-        consensusStates[consensusState.timestamp] = consensusState;
+        consensusStates[
+            clientState.latest_height.revision_height
+        ] = consensusState;
     }
 
     /// @notice The entrypoint for verifying the proof.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
-    // TODO: modify the return tyoe and the public values to match the actual program.
-    function verifyIcs07Proof(
+    function verifyIcs07UpdateClientProof(
         bytes memory proof,
         bytes memory publicValues
-    ) public view returns (uint32, uint32, uint32) {
-        verifier.verifyProof(ics07ProgramVkey, publicValues, proof);
-        (uint32 n, uint32 a, uint32 b) = abi.decode(
+    ) public {
+        SP1ICS07TendermintOutput memory output = abi.decode(
             publicValues,
-            (uint32, uint32, uint32)
+            (SP1ICS07TendermintOutput)
         );
-        return (n, a, b);
+
+        require(
+            clientState.is_frozen == false,
+            "SP1ICS07Tendermint: client is frozen"
+        );
+        require(
+            block.timestamp * 1e9 <= output.env.now + ALLOWED_SP1_CLOCK_DRIFT,
+            "SP1ICS07Tendermint: invalid timestamp"
+        );
+
+        // TODO: verify that the client state and the saved consensus state match the public values.
+        // More checks need to be made here get the trusted consensus clientState and etc
+
+        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
+
+        // adding the new consensus state to the mapping
+        clientState.latest_height = output.new_height;
+        consensusStates[output.new_consensus_state.timestamp] = output
+            .new_consensus_state;
+    }
+
+    /// The public value output for the sp1 program.
+    struct SP1ICS07TendermintOutput {
+        /// The trusted consensus state.
+        ICS07Tendermint.ConsensusState trusted_consensus_state;
+        /// The new consensus state with the verified header.
+        ICS07Tendermint.ConsensusState new_consensus_state;
+        /// The validation environment.
+        Env env;
+        /// trusted height
+        ICS07Tendermint.Height trusted_height;
+        /// new height
+        ICS07Tendermint.Height new_height;
+    }
+
+    /// The environment output for the sp1 program.
+    struct Env {
+        /// The chain ID of the chain that the client is tracking.
+        string chain_id;
+        /// Fraction of validator overlap needed to update header
+        ICS07Tendermint.TrustThreshold trust_threshold;
+        /// Duration of the period since the `LatestTimestamp` during which the
+        /// submitted headers are valid for upgrade
+        uint64 trusting_period;
+        /// Timestamp in nanoseconds
+        uint64 now;
     }
 }

@@ -26,6 +26,9 @@ serde_json = { workspace = true }
 serde = { workspace = true }
 tendermint = { workspace = true }
 tendermint-light-client-verifier = { workspace = true }
+ibc-client-tendermint = { workspace = true }
+ibc-core-client-types = { workspace = true }
+ibc-core-commitment-types = { workspace = true }
 alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 bincode = { workspace = true }
@@ -40,3 +43,5 @@ clap = { workspace = true }
 log = { workspace = true }
 async-trait = { workspace = true }
 hex = { workspace = true }
+sp1-ics07-tendermint-update-client = { workspace = true }
+sp1-ics07-tendermint-shared = { workspace = true }

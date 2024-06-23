@@ -5276,6 +5276,9 @@ dependencies = [
  "dotenv",
  "ethers",
  "hex",
+ "ibc-client-tendermint",
+ "ibc-core-client-types",
+ "ibc-core-commitment-types",
  "itertools 0.12.1",
  "log",
  "reqwest 0.11.27",
@@ -5283,6 +5286,8 @@ dependencies = [
  "serde_cbor",
  "serde_json",
  "sha2 0.10.8",
+ "sp1-ics07-tendermint-shared",
+ "sp1-ics07-tendermint-update-client",
  "sp1-sdk",
  "subtle-encoding",
  "tendermint",
@@ -5291,7 +5296,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp1-ics07-tendermint-program-update-client"
+name = "sp1-ics07-tendermint-shared"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "ibc-client-tendermint-types",
+ "ibc-core-commitment-types",
+ "serde",
+ "tendermint",
+ "tendermint-light-client-verifier",
+ "time",
+]
+
+[[package]]
+name = "sp1-ics07-tendermint-update-client"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
@@ -5301,19 +5319,11 @@ dependencies = [
  "ibc-core-host",
  "ibc-primitives",
  "serde",
+ "serde_cbor",
+ "serde_json",
  "sha2 0.10.8",
  "sp1-ics07-tendermint-shared",
  "sp1-zkvm",
- "tendermint-light-client-verifier",
-]
-
-[[package]]
-name = "sp1-ics07-tendermint-shared"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
- "ibc-client-tendermint-types",
- "serde",
  "tendermint-light-client-verifier",
 ]
 

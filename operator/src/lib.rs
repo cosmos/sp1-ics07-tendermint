@@ -1,5 +1,8 @@
+use alloy_sol_types::SolValue;
+use ibc_client_tendermint::types::Header;
+use sp1_ics07_tendermint_shared::types::ics07_tendermint::ConsensusState;
+use sp1_ics07_tendermint_update_client::types::validation::Env;
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
-use tendermint_light_client_verifier::types::LightBlock;
 
 pub mod contract;
 mod types;
@@ -8,19 +11,19 @@ pub mod util;
 // The path to the ELF file for the Succinct zkVM program.
 pub const TENDERMINT_ELF: &[u8] = include_bytes!("../../elf/riscv32im-succinct-zkvm-elf");
 
-pub struct TendermintProver {
+pub struct SP1ICS07TendermintProver {
     pub prover_client: ProverClient,
     pub pkey: SP1ProvingKey,
     pub vkey: SP1VerifyingKey,
 }
 
-impl Default for TendermintProver {
+impl Default for SP1ICS07TendermintProver {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl TendermintProver {
+impl SP1ICS07TendermintProver {
     pub fn new() -> Self {
         log::info!("Initializing SP1 ProverClient...");
         let prover_client = ProverClient::new();
@@ -35,19 +38,23 @@ impl TendermintProver {
 
     /// Generate a proof of an update from trusted_light_block to target_light_block. Returns an
     /// SP1Groth16Proof.
-    pub fn generate_tendermint_proof(
+    pub fn generate_ics07_update_client_proof(
         &self,
-        trusted_light_block: &LightBlock,
-        target_light_block: &LightBlock,
+        trusted_consensus_state: &ConsensusState,
+        proposed_header: &Header,
+        contract_env: &Env,
     ) -> SP1PlonkBn254Proof {
         // Encode the light blocks to be input into our program.
-        let encoded_1 = serde_cbor::to_vec(&trusted_light_block).unwrap();
-        let encoded_2 = serde_cbor::to_vec(&target_light_block).unwrap();
+        // TODO: make sure the encoding is correct.
+        let encoded_1 = trusted_consensus_state.abi_encode();
+        let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
+        let encoded_3 = serde_cbor::to_vec(contract_env).unwrap();
 
         // Write the encoded light blocks to stdin.
         let mut stdin = SP1Stdin::new();
         stdin.write_vec(encoded_1);
         stdin.write_vec(encoded_2);
+        stdin.write_vec(encoded_3);
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
         let proof = self

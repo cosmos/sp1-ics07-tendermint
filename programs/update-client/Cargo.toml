@@ -1,5 +1,5 @@
 [package]
-name = "sp1-ics07-tendermint-program-update-client"
+name = "sp1-ics07-tendermint-update-client"
 description = "IBC Lite Client Router for CosmWasm"
 version = { workspace = true }
 authors = { workspace = true }
@@ -19,3 +19,5 @@ ibc-core-handler-types = { workspace = true }
 serde = { workspace = true }
 sha2 = { workspace = true }
 alloy-sol-types = { workspace = true }
+serde_cbor = { workspace = true }
+serde_json = { workspace = true }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {ICS07Tendermint} from "ibc-lite-shared/ics07-tendermint/ICS07Tendermint.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
+import "forge-std/console.sol";
 
 /// @title SP1ICS07Tendermint
 /// @author srdtrk
@@ -59,19 +60,48 @@ contract SP1ICS07Tendermint {
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
         );
+        // TODO: Make sure this timestamp check is correct
         require(
             block.timestamp * 1e9 <= output.env.now + ALLOWED_SP1_CLOCK_DRIFT,
             "SP1ICS07Tendermint: invalid timestamp"
         );
+        require(
+            keccak256(bytes(output.env.chain_id)) ==
+                keccak256(bytes(clientState.chain_id)),
+            "SP1ICS07Tendermint: chain ID mismatch"
+        );
+        require(
+            output.env.trust_threshold.numerator ==
+                clientState.trust_level.numerator &&
+                output.env.trust_threshold.denominator ==
+                clientState.trust_level.denominator,
+            "SP1ICS07Tendermint: trust threshold mismatch"
+        );
+        require(
+            output.env.trusting_period == clientState.trusting_period,
+            "SP1ICS07Tendermint: trusting period mismatch"
+        );
+        require(
+            output.env.trusting_period == clientState.unbonding_period,
+            "SP1ICS07Tendermint: unbonding period mismatch"
+        );
+        require(
+            keccak256(
+                abi.encode(
+                    consensusStates[output.trusted_height.revision_height]
+                )
+            ) == keccak256(abi.encode(output.trusted_consensus_state)),
+            "SP1ICS07Tendermint: trusted consensus state mismatch"
+        );
+        // TODO: Make sure that we don't need more checks here.
 
-        // TODO: verify that the client state and the saved consensus state match the public values.
-        // More checks need to be made here get the trusted consensus clientState and etc
-
+        // TODO: Make sure that other checks have been made in the proof verification
+        // such as the consensus state not being outside the trusting period.
         verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
 
         // adding the new consensus state to the mapping
         clientState.latest_height = output.new_height;
-        consensusStates[output.new_consensus_state.timestamp] = output
+        consensusStates[output.new_height.revision_height] = output
             .new_consensus_state;
     }
 

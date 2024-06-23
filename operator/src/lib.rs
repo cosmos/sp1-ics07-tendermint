@@ -1,5 +1,6 @@
+use ibc_client_tendermint::types::{ConsensusState, Header};
+use sp1_ics07_tendermint_update_client::types::validation::Env;
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
-use tendermint_light_client_verifier::types::LightBlock;
 
 pub mod contract;
 mod types;
@@ -37,17 +38,21 @@ impl SP1ICS07TendermintProver {
     /// SP1Groth16Proof.
     pub fn generate_ics07_update_client_proof(
         &self,
-        trusted_light_block: &LightBlock,
-        target_light_block: &LightBlock,
+        trusted_consensus_state: &ConsensusState,
+        proposed_header: &Header,
+        contract_env: &Env,
     ) -> SP1PlonkBn254Proof {
         // Encode the light blocks to be input into our program.
-        let encoded_1 = serde_cbor::to_vec(&trusted_light_block).unwrap();
-        let encoded_2 = serde_cbor::to_vec(&target_light_block).unwrap();
+        // TODO: make sure the encoding is correct.
+        let encoded_1 = serde_cbor::to_vec(trusted_consensus_state).unwrap();
+        let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
+        let encoded_3 = serde_cbor::to_vec(contract_env).unwrap();
 
         // Write the encoded light blocks to stdin.
         let mut stdin = SP1Stdin::new();
         stdin.write_vec(encoded_1);
         stdin.write_vec(encoded_2);
+        stdin.write_vec(encoded_3);
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
         let proof = self

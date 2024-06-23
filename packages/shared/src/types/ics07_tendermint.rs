@@ -1,7 +1,10 @@
 //! This module contains the shared types for `sp1-ics07-tendermint`.
 
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
-use tendermint_light_client_verifier::types::TrustThreshold as TendermintTrustThreshold;
+use ibc_core_commitment_types::commitment::CommitmentRoot;
+use tendermint::{hash::Algorithm, Time};
+use tendermint_light_client_verifier::types::{Hash, TrustThreshold as TendermintTrustThreshold};
+use time::OffsetDateTime;
 
 alloy_sol_types::sol! {
     /// Height of the counterparty chain
@@ -15,9 +18,9 @@ alloy_sol_types::sol! {
     /// Fraction of validator overlap needed to update header
     #[derive(Debug, serde::Deserialize, serde::Serialize)]
     struct TrustThreshold {
-        /// numerator of the fraction
+        /// Numerator of the fraction
         uint64 numerator;
-        /// denominator of the fraction
+        /// Denominator of the fraction
         uint64 denominator;
     }
 
@@ -48,6 +51,25 @@ alloy_sol_types::sol! {
         /// next validators hash
         bytes next_validators_hash;
     }
+
+/// @title SP1ICS07Tendermint
+/// @author srdtrk
+/// @notice This contract implements an ICS07 IBC tendermint light client.
+#[allow(missing_docs, clippy::pub_underscore_fields)]
+contract SP1ICS07Tendermint {
+    /// @notice The verification key for the program.
+    bytes32 public ics07ProgramVkey;
+
+    /// @notice The ICS07Tendermint client state
+    ClientState public clientState;
+    /// @notice The mapping from height to consensus state
+    mapping(uint64 => ConsensusState) public consensusStates;
+
+    function verifyTendermintProof(
+        bytes calldata proof,
+        bytes calldata publicValues
+    ) public;
+}
 }
 
 #[allow(clippy::fallible_impl_from)]
@@ -70,6 +92,25 @@ impl From<ICS07TendermintConsensusState> for ConsensusState {
                 .as_bytes()
                 .to_vec()
                 .into(),
+        }
+    }
+}
+
+#[allow(clippy::fallible_impl_from)]
+impl From<ConsensusState> for ICS07TendermintConsensusState {
+    fn from(consensus_state: ConsensusState) -> Self {
+        let time = OffsetDateTime::from_unix_timestamp_nanos(i128::from(consensus_state.timestamp))
+            .unwrap();
+        let seconds = time.unix_timestamp();
+        let nanos = time.nanosecond();
+        Self {
+            timestamp: Time::from_unix_timestamp(seconds, nanos).unwrap(),
+            root: CommitmentRoot::from_bytes(&consensus_state.root),
+            next_validators_hash: Hash::from_bytes(
+                Algorithm::Sha256,
+                &consensus_state.next_validators_hash,
+            )
+            .unwrap(),
         }
     }
 }

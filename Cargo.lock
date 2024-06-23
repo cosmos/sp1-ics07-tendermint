@@ -5276,6 +5276,8 @@ dependencies = [
  "dotenv",
  "ethers",
  "hex",
+ "ibc-client-tendermint",
+ "ibc-core-client-types",
  "itertools 0.12.1",
  "log",
  "reqwest 0.11.27",
@@ -5283,6 +5285,7 @@ dependencies = [
  "serde_cbor",
  "serde_json",
  "sha2 0.10.8",
+ "sp1-ics07-tendermint-shared",
  "sp1-ics07-tendermint-update-client",
  "sp1-sdk",
  "subtle-encoding",
@@ -5297,8 +5300,11 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "ibc-client-tendermint-types",
+ "ibc-core-commitment-types",
  "serde",
+ "tendermint",
  "tendermint-light-client-verifier",
+ "time",
 ]
 
 [[package]]

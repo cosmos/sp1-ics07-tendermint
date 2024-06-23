@@ -18,6 +18,9 @@ contract SP1ICS07Tendermint {
     // @notice The mapping from height to consensus state
     mapping(uint64 => ICS07Tendermint.ConsensusState) public consensusStates;
 
+    /// Allowed clock drift in nanoseconds
+    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 6_000_000_000_000; // 6000 seconds
+
     // @notice The constructor sets the program verification key.
     // @param _ics07ProgramVkey The verification key for the program.
     // @param _verifier The address of the SP1 verifier contract.
@@ -45,12 +48,47 @@ contract SP1ICS07Tendermint {
     function verifyIcs07Proof(
         bytes memory proof,
         bytes memory publicValues
-    ) public view returns (uint32, uint32, uint32) {
-        verifier.verifyProof(ics07ProgramVkey, publicValues, proof);
-        (uint32 n, uint32 a, uint32 b) = abi.decode(
+    ) public {
+        SP1ICS07TendermintOutput memory output = abi.decode(
             publicValues,
-            (uint32, uint32, uint32)
+            (SP1ICS07TendermintOutput)
         );
-        return (n, a, b);
+
+        require(
+            block.timestamp * 1e9 <= output.env.now + ALLOWED_SP1_CLOCK_DRIFT,
+            "SP1ICS07Tendermint: invalid timestamp"
+        );
+
+        // TODO: verify that the client state and the saved consensus state match the public values.
+
+        verifier.verifyProof(ics07ProgramVkey, publicValues, proof);
+        // adding the new consensus state to the mapping
+        consensusStates[output.new_consensus_state.timestamp] = output
+            .new_consensus_state;
+    }
+
+    /// The public value output for the sp1 program.
+    struct SP1ICS07TendermintOutput {
+        /// The trusted consensus state.
+        ICS07Tendermint.ConsensusState trusted_consensus_state;
+        /// The new consensus state with the verified header.
+        ICS07Tendermint.ConsensusState new_consensus_state;
+        /// The validation environment.
+        Env env;
+    }
+
+    /// The environment output for the sp1 program.
+    struct Env {
+        /// The chain ID of the chain that the client is tracking.
+        string chain_id;
+        /// The client ID of the client that is being updated.
+        string client_id;
+        /// Fraction of validator overlap needed to update header
+        ICS07Tendermint.TrustThreshold trust_threshold;
+        /// Duration of the period since the `LatestTimestamp` during which the
+        /// submitted headers are valid for upgrade
+        uint64 trusting_period;
+        /// Timestamp in nanoseconds
+        uint64 now;
     }
 }

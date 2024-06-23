@@ -56,6 +56,10 @@ contract SP1ICS07Tendermint {
         );
 
         require(
+            clientState.is_frozen == false,
+            "SP1ICS07Tendermint: client is frozen"
+        );
+        require(
             block.timestamp * 1e9 <= output.env.now + ALLOWED_SP1_CLOCK_DRIFT,
             "SP1ICS07Tendermint: invalid timestamp"
         );

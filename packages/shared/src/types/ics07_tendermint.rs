@@ -65,9 +65,12 @@ contract SP1ICS07Tendermint {
     /// @notice The mapping from height to consensus state
     mapping(uint64 => ConsensusState) public consensusStates;
 
-    function verifyTendermintProof(
-        bytes calldata proof,
-        bytes calldata publicValues
+    /// @notice The entrypoint for verifying the proof.
+    /// @param proof The encoded proof.
+    /// @param publicValues The encoded public values.
+    function verifyIcs07UpdateClientProof(
+        bytes memory proof,
+        bytes memory publicValues
     ) public;
 }
 }

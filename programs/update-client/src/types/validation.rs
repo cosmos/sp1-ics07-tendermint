@@ -15,8 +15,6 @@ alloy_sol_types::sol! {
     struct Env {
         /// The chain ID of the chain that the client is tracking.
         string chain_id;
-        /// The client ID of the client that is being updated.
-        string client_id;
         /// Fraction of validator overlap needed to update header
         TrustThreshold trust_threshold;
         /// Duration of the period since the `LatestTimestamp` during which the

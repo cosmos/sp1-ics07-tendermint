@@ -16,9 +16,10 @@ use std::{str::FromStr, time::Duration};
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::{
     client_state::verify_header,
-    types::{ConsensusState, Header},
+    types::{ConsensusState, Header, TENDERMINT_CLIENT_TYPE},
 };
 use ibc_core_host::types::identifiers::{ChainId, ClientId};
+use sp1_ics07_tendermint_shared::types::ics07_tendermint;
 use sp1_ics07_tendermint_update_client::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 
@@ -34,7 +35,7 @@ pub fn main() {
     // input 3: environment
     let env = sp1_zkvm::io::read::<types::validation::Env>();
 
-    let client_id = ClientId::from_str(&env.client_id).unwrap();
+    let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();
     let options = Options {
         trust_threshold: env.trust_threshold.clone().into(),
@@ -54,11 +55,22 @@ pub fn main() {
     )
     .unwrap();
 
+    let trusted_height = ics07_tendermint::Height {
+        revision_number: proposed_header.trusted_height.revision_number(),
+        revision_height: proposed_header.trusted_height.revision_height(),
+    };
+    let new_height = ics07_tendermint::Height {
+        revision_number: proposed_header.height().revision_number(),
+        revision_height: proposed_header.height().revision_height(),
+    };
     let new_consensus_state = ConsensusState::from(proposed_header);
+
     let output = types::output::SP1ICS07TendermintOutput {
         trusted_consensus_state: trusted_consensus_state.into(),
         new_consensus_state: new_consensus_state.into(),
         env,
+        trusted_height,
+        new_height,
     };
 
     sp1_zkvm::io::commit_slice(&output.abi_encode());

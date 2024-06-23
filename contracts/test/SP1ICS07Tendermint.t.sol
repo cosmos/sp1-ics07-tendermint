@@ -48,6 +48,34 @@ contract SP1TendermintTest is Test {
             mockFixture.trustedClientState,
             mockFixture.trustedConsensusState
         );
+
+        (
+            string memory chain_id,
+            ICS07Tendermint.TrustThreshold memory trust_level,
+            ICS07Tendermint.Height memory latest_height,
+            uint64 trusting_period,
+            uint64 unbonding_period,
+            bool is_frozen
+        ) = mockIcs07Tendermint.clientState();
+
+        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
+        assert(trust_level.numerator == 1);
+        assert(trust_level.denominator == 3);
+        assert(latest_height.revision_number == 4);
+        assert(latest_height.revision_height == 2110658);
+        assert(trusting_period == 1_209_600_000_000_000);
+        assert(unbonding_period == 1_209_600_000_000_000);
+        assert(is_frozen == false);
+
+        (
+            uint64 timestamp,
+            bytes memory root,
+            bytes memory next_validators_hash
+        ) = mockIcs07Tendermint.consensusStates(2110658);
+
+        assert(timestamp > 0);
+        assert(root.length > 0);
+        assert(next_validators_hash.length > 0);
     }
 
     function loadFixture(
@@ -87,6 +115,52 @@ contract SP1TendermintTest is Test {
             "mock_fixture.json"
         );
 
+        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
+            bytes(""),
+            fixture.publicValues
+        );
+
+        (
+            string memory chain_id,
+            ICS07Tendermint.TrustThreshold memory trust_level,
+            ICS07Tendermint.Height memory latest_height,
+            uint64 trusting_period,
+            uint64 unbonding_period,
+            bool is_frozen
+        ) = mockIcs07Tendermint.clientState();
+
+        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
+        assert(trust_level.numerator == 1);
+        assert(trust_level.denominator == 3);
+        assert(latest_height.revision_number == 4);
+        assert(latest_height.revision_height == 2110668);
+        assert(trusting_period == 1_209_600_000_000_000);
+        assert(unbonding_period == 1_209_600_000_000_000);
+        assert(is_frozen == false);
+
+        (
+            uint64 timestamp,
+            bytes memory root,
+            bytes memory next_validators_hash
+        ) = mockIcs07Tendermint.consensusStates(2110668);
+
+        assert(timestamp > 0);
+        assert(root.length > 0);
+        assert(next_validators_hash.length > 0);
+    }
+
+    // Confirm that submitting a non-empty proof with the mock verifier fails. This typically
+    // indicates that the user has passed in a real proof to the mock verifier.
+    function testFail_Invalid_MockTendermint() public {
+        SP1TendermintFixtureJson memory fixture = loadFixture(
+            "mock_fixture.json"
+        );
+
+        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
+            bytes("aa"),
+            fixture.publicValues
+        );
+
         (
             string memory chain_id,
             ICS07Tendermint.TrustThreshold memory trust_level,
@@ -104,26 +178,5 @@ contract SP1TendermintTest is Test {
         assert(trusting_period == 1_209_600_000_000_000);
         assert(unbonding_period == 1_209_600_000_000_000);
         assert(is_frozen == false);
-
-        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
-            bytes(""),
-            fixture.publicValues
-        );
-    }
-
-    // Confirm that submitting a non-empty proof with the mock verifier fails. This typically
-    // indicates that the user has passed in a real proof to the mock verifier.
-    function testFail_Invalid_MockTendermint() public {
-        SP1TendermintFixtureJson memory fixture = loadFixture(
-            "mock_fixture.json"
-        );
-
-        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
-            bytes("aa"),
-            fixture.publicValues
-        );
-
-        // assert(mockIcs07Tendermint.latestHeader() == fixture.targetHeaderHash);
-        // assert(mockIcs07Tendermint.latestHeight() == fixture.targetHeight);
     }
 }

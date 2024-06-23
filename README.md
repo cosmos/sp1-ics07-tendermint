@@ -36,21 +36,19 @@ just build-program
 1. Generate the initialization parameters for the contract.
 
     ```sh
-    cd operator
     TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ cargo run --bin genesis --release
     ```
 
-    This will show the tendermint vkey hash, trusted header hash, and trusted height, which you will
-    need to initialize the SP1 Tendermint contract.
+    This will generate the `contracts/script/genesis.json` file which contains the initialization parameters for the contract.
 
-2. Deploy the `SP1Tendermint` contract with the initialization parameters:
+2. Deploy the `SP1ICS07Tendermint` contract with the initialization parameters:
 
     ```sh
     cd ../contracts
 
     forge install
 
-    TENDERMINT_VKEY_HASH=<tendermint_vkey_hash> TRUSTED_HEADER_HASH=<trusted_header_hash> TRUSTED_HEIGHT=<trusted_height> forge script script/SP1Tendermint.s.sol --rpc-url https://ethereum-sepolia.publicnode.com/ --private-key <PRIVATE_KEY> --broadcast
+    forge script script/SP1Tendermint.s.sol --rpc-url https://ethereum-sepolia.publicnode.com/ --private-key <PRIVATE_KEY> --broadcast
     ```
 
     If you see the following error, add `--legacy` to the command.

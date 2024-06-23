@@ -21,37 +21,65 @@ This project is structured as a cargo workspace with the following directories:
 - [Rust](https://rustup.rs/)
 - [SP1](https://succinctlabs.github.io/sp1/getting-started/install.html)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
+- [Just](https://just.systems/man/en/) (recommended)
 
-## Standard Proof Generation
+## Build the programs
 
-> [!WARNING]
-> You will need at least 16GB RAM to generate the default proof.
+You can build the program for zkVM by running the following command:
 
-Generate the proof for your program using the standard prover.
-
+```sh
+just build-program
 ```
-cd script
-RUST_LOG=info cargo run --bin prove --release
-```
+
+## Run ICS-07 Tendermint Light Client End to End
+
+1. Generate the initialization parameters for the contract.
+
+    ```sh
+    cd operator
+    TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ cargo run --bin genesis --release
+    ```
+
+    This will show the tendermint vkey hash, trusted header hash, and trusted height, which you will
+    need to initialize the SP1 Tendermint contract.
+
+2. Deploy the `SP1Tendermint` contract with the initialization parameters:
+
+    ```sh
+    cd ../contracts
+
+    forge install
+
+    TENDERMINT_VKEY_HASH=<tendermint_vkey_hash> TRUSTED_HEADER_HASH=<trusted_header_hash> TRUSTED_HEIGHT=<trusted_height> forge script script/SP1Tendermint.s.sol --rpc-url https://ethereum-sepolia.publicnode.com/ --private-key <PRIVATE_KEY> --broadcast
+    ```
+
+    If you see the following error, add `--legacy` to the command.
+    ```shell
+    Error: Failed to get EIP-1559 fees    
+    ```
 
 ## EVM-Compatible Proof Generation & Verification
 
 > [!WARNING]
 > You will need at least 128GB RAM to generate the PLONK proof.
 
-Generate the proof that is small enough to be verified on-chain and verifiable by the EVM. This command also generates a fixture that can be used to test the verification of SP1 zkVM proofs inside Solidity.
+Here, I will show you how to generate a proof to be used in the fixtures for the foundry tests. You can do this locally or by using the SP1 prover network. To do this on your local machine, run the following command:
 
+```sh
+RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="local" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
 ```
-cd script
-RUST_LOG=info cargo run --bin prove --release -- --evm
+
+To use the SP1 prover network, you will need to set the `SP1_PROVER` environment variable to `network` and provide your private key. You can do this by running the following command:
+
+```sh
+RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="network" SP1_PRIVATE_KEY="YOUR_PRIVATE_KEY" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
 ```
 
 ### Solidity Proof Verification
 
 After generating the verify the proof with the SP1 EVM verifier.
 
-```
-cd ../contracts
-forge test -v
+```sh
+just test-foundry
 ```
 

@@ -50,11 +50,11 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --workspace --exclude sp1-ics07-tendermint-program-update-client --locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features
         env:
           RUST_BACKTRACE: 1
       - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --workspace --exclude sp1-ics07-tendermint-program-update-client --locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features

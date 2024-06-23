@@ -55,6 +55,7 @@ async fn main() -> anyhow::Result<()> {
             .get_light_blocks(trusted_block_height, chain_latest_block_height)
             .await;
 
+        let chain_id = target_light_block.signed_header.header.chain_id.to_string();
         let proposed_header = Header {
             signed_header: target_light_block.signed_header,
             validator_set: target_light_block.validators,
@@ -64,8 +65,7 @@ async fn main() -> anyhow::Result<()> {
         };
 
         let contract_env = Env {
-            chain_id: target_light_block.signed_header.header.chain_id.to_string(),
-            client_id: String::new(),
+            chain_id,
             trust_threshold: contract_client_state.trust_level,
             trusting_period: contract_client_state.trusting_period,
             now: std::time::SystemTime::now()
@@ -83,11 +83,12 @@ async fn main() -> anyhow::Result<()> {
 
         // Construct the on-chain call and relay the proof to the contract.
         let proof_as_bytes = hex::decode(&proof_data.proof.encoded_proof).unwrap();
-        let verify_tendermint_proof_call_data = SP1ICS07Tendermint::verifyTendermintProofCall {
-            publicValues: proof_data.public_values.to_vec().into(),
-            proof: proof_as_bytes.into(),
-        }
-        .abi_encode();
+        let verify_tendermint_proof_call_data =
+            SP1ICS07Tendermint::verifyIcs07UpdateClientProofCall {
+                publicValues: proof_data.public_values.to_vec().into(),
+                proof: proof_as_bytes.into(),
+            }
+            .abi_encode();
         contract_client
             .send(verify_tendermint_proof_call_data)
             .await?;

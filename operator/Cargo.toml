@@ -28,6 +28,7 @@ tendermint = { workspace = true }
 tendermint-light-client-verifier = { workspace = true }
 ibc-client-tendermint = { workspace = true }
 ibc-core-client-types = { workspace = true }
+ibc-core-commitment-types = { workspace = true }
 alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 bincode = { workspace = true }

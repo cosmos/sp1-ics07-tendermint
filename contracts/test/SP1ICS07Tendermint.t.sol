@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/console.sol";
 import {Test} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
+import {stdError} from "forge-std/StdError.sol";
 import {ICS07Tendermint} from "ibc-lite-shared/ics07-tendermint/ICS07Tendermint.sol";
 import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
@@ -152,32 +153,15 @@ contract SP1ICS07TendermintTest is Test {
 
     // Confirm that submitting a non-empty proof with the mock verifier fails. This typically
     // indicates that the user has passed in a real proof to the mock verifier.
-    function testFail_Invalid_MockTendermint() public {
+    function test_Invalid_MockTendermint() public {
         SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
             "mock_fixture.json"
         );
 
+        vm.expectRevert();
         mockIcs07Tendermint.verifyIcs07UpdateClientProof(
             bytes("aa"),
             fixture.publicValues
         );
-
-        (
-            string memory chain_id,
-            ICS07Tendermint.TrustThreshold memory trust_level,
-            ICS07Tendermint.Height memory latest_height,
-            uint64 trusting_period,
-            uint64 unbonding_period,
-            bool is_frozen
-        ) = mockIcs07Tendermint.clientState();
-
-        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
-        assert(trust_level.numerator == 1);
-        assert(trust_level.denominator == 3);
-        assert(latest_height.revision_number == 4);
-        assert(latest_height.revision_height == 2110658);
-        assert(trusting_period == 1_209_600_000_000_000);
-        assert(unbonding_period == 1_209_600_000_000_000);
-        assert(is_frozen == false);
     }
 }

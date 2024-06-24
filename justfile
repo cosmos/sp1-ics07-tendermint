@@ -14,3 +14,7 @@ test-cargo:
 # Generate the `genesis.json` file for the Celestia Mocha testnet
 mocha-genesis:
    RUST_LOG=info TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin genesis --release
+
+# Generate the `mock_fixture.json` file for the Celestia Mocha testnet using the mock prover
+mock-fixtures:
+  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668

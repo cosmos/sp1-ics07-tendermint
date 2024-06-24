@@ -48,7 +48,7 @@ impl ClientValidationContext for ClientValidationCtx {
 
     fn consensus_state(
         &self,
-        _client_cons_state_path: &ibc_core_host::types::path::ClientConsensusStatePath,
+        _client_cons_state_path: &ibc_core_host_types::path::ClientConsensusStatePath,
     ) -> Result<Self::ConsensusStateRef, ContextError> {
         // This is the trusted consensus state, whether or not it corresponds to the
         // consensus state path will be checked in solidity.
@@ -57,7 +57,7 @@ impl ClientValidationContext for ClientValidationCtx {
 
     fn client_state(
         &self,
-        _client_id: &ibc_core_host::types::identifiers::ClientId,
+        _client_id: &ibc_core_host_types::identifiers::ClientId,
     ) -> Result<Self::ClientStateRef, ContextError> {
         // not needed by the `verify_header` function
         unimplemented!()
@@ -65,7 +65,7 @@ impl ClientValidationContext for ClientValidationCtx {
 
     fn client_update_meta(
         &self,
-        _client_id: &ibc_core_host::types::identifiers::ClientId,
+        _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
     ) -> Result<(Timestamp, ibc_core_client::types::Height), ContextError> {
         // not needed by the `verify_header` function
@@ -85,7 +85,7 @@ impl ExtClientValidationContext for ClientValidationCtx {
 
     fn consensus_state_heights(
         &self,
-        _client_id: &ibc_core_host::types::identifiers::ClientId,
+        _client_id: &ibc_core_host_types::identifiers::ClientId,
     ) -> Result<Vec<ibc_core_client::types::Height>, ContextError> {
         // not needed by the `verify_header` function
         unimplemented!()
@@ -93,7 +93,7 @@ impl ExtClientValidationContext for ClientValidationCtx {
 
     fn next_consensus_state(
         &self,
-        _client_id: &ibc_core_host::types::identifiers::ClientId,
+        _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
     ) -> Result<Option<Self::ConsensusStateRef>, ContextError> {
         // not needed by the `verify_header` function
@@ -102,7 +102,7 @@ impl ExtClientValidationContext for ClientValidationCtx {
 
     fn prev_consensus_state(
         &self,
-        _client_id: &ibc_core_host::types::identifiers::ClientId,
+        _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
     ) -> Result<Option<Self::ConsensusStateRef>, ContextError> {
         // not needed by the `verify_header` function

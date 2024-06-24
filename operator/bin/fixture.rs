@@ -3,6 +3,7 @@ use clap::Parser;
 use ibc_client_tendermint::types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
+use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
 use sp1_ics07_tendermint_shared::types::ics07_tendermint::{
@@ -12,7 +13,7 @@ use sp1_ics07_tendermint_update_client::types::{
     output::SP1ICS07TendermintOutput, validation::Env,
 };
 use sp1_sdk::{utils::setup_logger, HashableKey};
-use std::{env, path::PathBuf};
+use std::{env, path::PathBuf, str::FromStr};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -65,19 +66,16 @@ async fn main() -> anyhow::Result<()> {
     let (trusted_light_block, target_light_block) = tendermint_rpc_client
         .get_light_blocks(args.trusted_block, args.target_block)
         .await;
+    let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
 
     let trusted_client_state = ClientState {
-        chain_id: trusted_light_block
-            .signed_header
-            .header
-            .chain_id
-            .to_string(),
+        chain_id: chain_id.to_string(),
         trust_level: TrustThreshold {
             numerator: 1,
             denominator: 3,
         },
         latest_height: Height {
-            revision_number: 4,
+            revision_number: chain_id.revision_number(),
             revision_height: args.trusted_block,
         },
         is_frozen: false,
@@ -106,11 +104,7 @@ async fn main() -> anyhow::Result<()> {
         trusted_next_validator_set: trusted_light_block.next_validators,
     };
     let contract_env = Env {
-        chain_id: trusted_light_block
-            .signed_header
-            .header
-            .chain_id
-            .to_string(),
+        chain_id: chain_id.to_string(),
         trust_threshold: trusted_client_state.trust_level.clone(),
         trusting_period: trusted_client_state.trusting_period,
         now: std::time::SystemTime::now()

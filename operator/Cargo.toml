@@ -29,6 +29,7 @@ tendermint-light-client-verifier = { workspace = true }
 ibc-client-tendermint = { workspace = true }
 ibc-core-client-types = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
+ibc-core-host-types = { workspace = true, features = ["std"] }
 alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy = { workspace = true, features = ["full", "node-bindings"] }

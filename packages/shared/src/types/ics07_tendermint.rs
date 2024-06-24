@@ -55,15 +55,26 @@ alloy_sol_types::sol! {
 /// @title SP1ICS07Tendermint
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client.
+#[cfg(feature = "rpc")]
 #[allow(missing_docs, clippy::pub_underscore_fields)]
+#[sol(rpc)]
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the program.
-    bytes32 public ics07ProgramVkey;
+    bytes32 public ics07UpdateClientProgramVkey;
+    // @notice The SP1 verifier contract.
+    address public verifier;
 
     /// @notice The ICS07Tendermint client state
     ClientState public clientState;
     /// @notice The mapping from height to consensus state
     mapping(uint64 => ConsensusState) public consensusStates;
+
+    function getClientState() public view returns (ClientState memory);
+
+    function getConsensusState(uint64 revisionHeight)
+        public
+        view
+        returns (ConsensusState memory);
 
     /// @notice The entrypoint for verifying the proof.
     /// @param proof The encoded proof.

@@ -139,15 +139,12 @@ contract SP1ICS07TendermintTest is Test {
         assert(unbonding_period == 1_209_600_000_000_000);
         assert(is_frozen == false);
 
-        (
-            uint64 timestamp,
-            bytes memory root,
-            bytes memory next_validators_hash
-        ) = ics07Tendermint.consensusStates(2110668);
+        ICS07Tendermint.ConsensusState memory consensusState = ics07Tendermint
+            .getConsensusState(2110668);
 
-        assert(timestamp > 0);
-        assert(root.length > 0);
-        assert(next_validators_hash.length > 0);
+        assert(consensusState.timestamp > 0);
+        assert(consensusState.root.length > 0);
+        assert(consensusState.next_validators_hash.length > 0);
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
@@ -179,15 +176,14 @@ contract SP1ICS07TendermintTest is Test {
         assert(unbonding_period == 1_209_600_000_000_000);
         assert(is_frozen == false);
 
-        (
-            uint64 timestamp,
-            bytes memory root,
-            bytes memory next_validators_hash
-        ) = mockIcs07Tendermint.consensusStates(2110668);
+        ICS07Tendermint.ConsensusState
+            memory consensusState = mockIcs07Tendermint.getConsensusState(
+                2110668
+            );
 
-        assert(timestamp > 0);
-        assert(root.length > 0);
-        assert(next_validators_hash.length > 0);
+        assert(consensusState.timestamp > 0);
+        assert(consensusState.root.length > 0);
+        assert(consensusState.next_validators_hash.length > 0);
     }
 
     // Confirm that submitting a non-empty proof with the mock verifier fails.

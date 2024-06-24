@@ -55,7 +55,6 @@ bincode = "1.3.3"
 itertools = "0.12.1"
 dotenv = "0.15.0"
 subtle-encoding = "0.5.1"
-ethers = "2.0.14"
 anyhow = "1.0.82"
 clap = { version = "4.0", features = ["derive", "env"] }
 log = "0.4.21"

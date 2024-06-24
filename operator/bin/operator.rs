@@ -21,10 +21,6 @@ async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     setup_logger();
 
-    let _chain_id = env::var("CHAIN_ID")
-        .expect("CHAIN_ID not set")
-        .parse::<u64>()
-        .expect("CHAIN_ID not a valid u64");
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
     let mut private_key = env::var("PRIVATE_KEY").expect("PRIVATE_KEY not set");
     if let Some(stripped) = private_key.strip_prefix("0x") {
@@ -33,15 +29,16 @@ async fn main() -> anyhow::Result<()> {
     let contract_address = env::var("CONTRACT_ADDRESS").expect("CONTRACT_ADDRESS not set");
 
     // Instantiate a Tendermint prover based on the environment variable.
-    let tendermint_rpc_client = TendermintRPCClient::default();
-    let prover = SP1ICS07TendermintProver::new();
-
     let signer: PrivateKeySigner = private_key.parse()?;
     let wallet = EthereumWallet::from(signer);
     let provider = ProviderBuilder::new()
         .with_recommended_fillers()
         .wallet(wallet)
         .on_http(Url::parse(rpc_url.as_str())?);
+
+    let tendermint_rpc_client = TendermintRPCClient::default();
+    let prover = SP1ICS07TendermintProver::new();
+
     let contract = SP1ICS07Tendermint::new(contract_address.parse()?, provider);
 
     loop {

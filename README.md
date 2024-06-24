@@ -79,7 +79,7 @@ just build-program
 
 5. Run the Tendermint operator.
     ```sh
-    TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ CHAIN_ID=11155111 RPC_URL=https://ethereum-sepolia.publicnode.com/ CONTRACT_ADDRESS=<CONTRACT-ADDRESS> RUST_LOG=info cargo run --bin operator --release
+    TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ RPC_URL=https://ethereum-sepolia.publicnode.com/ CONTRACT_ADDRESS=<CONTRACT-ADDRESS> RUST_LOG=info cargo run --bin operator --release
     ```
 
 ## EVM-Compatible Proof Generation & Verification

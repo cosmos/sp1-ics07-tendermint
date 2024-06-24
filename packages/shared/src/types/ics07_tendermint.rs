@@ -56,9 +56,10 @@ alloy_sol_types::sol! {
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client.
 #[allow(missing_docs, clippy::pub_underscore_fields)]
+#[sol(rpc)]
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the program.
-    bytes32 public ics07ProgramVkey;
+    bytes32 public ics07UpdateClientProgramVkey;
 
     /// @notice The ICS07Tendermint client state
     ClientState public clientState;
@@ -115,5 +116,27 @@ impl From<ConsensusState> for ICS07TendermintConsensusState {
             )
             .unwrap(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use alloy_sol_types::SolType;
+
+    use super::*;
+
+    type TestTuple = alloy_sol_types::sol! {
+        tuple(string, TrustThreshold, Height, uint64, uint64, bool)
+    };
+
+    #[test]
+    fn test_client_state_deserialization() {
+        let client_state_hex =
+            "0000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000020446d00000000000000000000000000000000000000000000000000044c1ff252000000000000000000000000000000000000000000000000000000044c1ff2520000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000076d6f6368612d3400000000000000000000000000000000000000000000000000";
+
+        let client_state = hex::decode(client_state_hex).unwrap();
+        let client_state = TestTuple::abi_decode(&client_state, true).unwrap();
+
+        assert_eq!(client_state.0, "mocha-4");
     }
 }

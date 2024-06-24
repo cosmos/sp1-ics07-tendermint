@@ -31,6 +31,7 @@ ibc-core-client-types = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
+alloy = { workspace = true, features = ["full", "node-bindings"] }
 bincode = { workspace = true }
 itertools = { workspace = true }
 serde_cbor = { workspace = true }

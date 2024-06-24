@@ -8,9 +8,13 @@ license = { workspace = true }
 
 [dependencies]
 alloy-sol-types = { workspace = true }
+alloy-contract = { workspace = true }
 tendermint-light-client-verifier = { workspace = true }
 serde = { workspace = true }
 ibc-client-tendermint-types = { workspace = true }
 tendermint = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 time = { workspace = true }
+
+[dev-dependencies]
+hex = { workspace = true }

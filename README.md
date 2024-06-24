@@ -48,12 +48,38 @@ just build-program
 
     forge install
 
-    forge script script/SP1Tendermint.s.sol --rpc-url https://ethereum-sepolia.publicnode.com/ --private-key <PRIVATE_KEY> --broadcast
+    forge script script/SP1ICS07Tendermint.s.sol --rpc-url https://ethereum-sepolia.publicnode.com/ --private-key <PRIVATE_KEY> --broadcast
     ```
 
     If you see the following error, add `--legacy` to the command.
-    ```shell
+    ```text
     Error: Failed to get EIP-1559 fees    
+    ```
+
+3. Your deployed contract address will be printed to the terminal.
+
+    ```text
+    == Return ==
+    0: address <SP1_TENDERMINT_ADDRESS>
+    ```
+
+    This will be used when you run the operator in step 5.
+
+4. Export your SP1 Prover Network configuration
+    ```sh
+    # Export the PRIVATE_KEY you will use to deploy the contract & relay proofs.
+    export PRIVATE_KEY=<PRIVATE_KEY>
+
+    # Optional
+    # If you're using the Succinct network, set SP1_PROVER to "network". Otherwise, set it to "local" or "mock".
+    export SP1_PROVER={network|local|mock}
+    # Only required if SP1_PROVER is set to "network".
+    export SP1_PRIVATE_KEY=<SP1_PRIVATE_KEY>
+    ```
+
+5. Run the Tendermint operator.
+    ```sh
+    TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ CHAIN_ID=11155111 RPC_URL=https://ethereum-sepolia.publicnode.com/ CONTRACT_ADDRESS=<CONTRACT-ADDRESS> RUST_LOG=info cargo run --bin operator --release
     ```
 
 ## EVM-Compatible Proof Generation & Verification

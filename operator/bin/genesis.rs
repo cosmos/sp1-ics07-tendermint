@@ -2,12 +2,13 @@ use alloy_sol_types::SolValue;
 use clap::Parser;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
+use ibc_core_host_types::identifiers::ChainId;
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, TENDERMINT_ELF};
 use sp1_ics07_tendermint_shared::types::ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
 use sp1_sdk::{utils::setup_logger, HashableKey, MockProver, Prover};
-use std::{env, path::PathBuf};
+use std::{env, path::PathBuf, str::FromStr};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -63,19 +64,16 @@ async fn main() -> anyhow::Result<()> {
         .get_light_block(trusted_height)
         .await
         .unwrap();
+    let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
 
     let trusted_client_state = ClientState {
-        chain_id: trusted_light_block
-            .signed_header
-            .header
-            .chain_id
-            .to_string(),
+        chain_id: chain_id.to_string(),
         trust_level: TrustThreshold {
             numerator: 1,
             denominator: 3,
         },
         latest_height: Height {
-            revision_number: 4,
+            revision_number: chain_id.revision_number(),
             revision_height: trusted_height,
         },
         is_frozen: false,

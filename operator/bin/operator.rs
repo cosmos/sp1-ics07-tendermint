@@ -53,16 +53,12 @@ async fn main() -> anyhow::Result<()> {
             );
         }
 
-        debug!("debug: 1");
-
         // Get trusted consensus state from the contract.
         let trusted_consensus_state = contract
             .getConsensusState(trusted_block_height)
             .call()
             .await?
             ._0;
-
-        debug!("debug: 2");
 
         let chain_latest_block_height = tendermint_rpc_client.get_latest_block_height().await;
         let (trusted_light_block, target_light_block) = tendermint_rpc_client
@@ -76,8 +72,6 @@ async fn main() -> anyhow::Result<()> {
             trusted_height: IbcHeight::new(trusted_revision_number, trusted_block_height).unwrap(),
             trusted_next_validator_set: trusted_light_block.next_validators,
         };
-
-        debug!("debug: 3");
 
         let contract_env = Env {
             chain_id,
@@ -95,8 +89,6 @@ async fn main() -> anyhow::Result<()> {
             &proposed_header,
             &contract_env,
         );
-
-        debug!("debug: 4");
 
         // Construct the on-chain call and relay the proof to the contract.
         let proof_as_bytes = hex::decode(&proof_data.proof.encoded_proof).unwrap();

@@ -54,6 +54,9 @@ async fn main() -> anyhow::Result<()> {
         .header
         .height
         .into();
+    if args.trusted_block.is_none() {
+        log::info!("Latest block height: {}", latest_height);
+    }
     let trusted_height = args.trusted_block.unwrap_or(latest_height);
 
     let trusted_light_block = tendermint_rpc_client

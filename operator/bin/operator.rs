@@ -3,13 +3,12 @@ use std::env;
 use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
 };
-use alloy_sol_types::SolType;
 use ibc_client_tendermint::types::Header;
 use ibc_core_client_types::Height as IbcHeight;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::{ClientState, SP1ICS07Tendermint};
+use sp1_ics07_tendermint_shared::types::ics07_tendermint::SP1ICS07Tendermint;
 use sp1_ics07_tendermint_update_client::types::validation::Env;
 use sp1_sdk::utils::setup_logger;
 
@@ -46,11 +45,8 @@ async fn main() -> anyhow::Result<()> {
     let contract = SP1ICS07Tendermint::new(contract_address.parse()?, provider);
 
     loop {
-        debug!("Polling the contract for the latest block height.");
-        let contract_client_state_bz = contract.clientState().call_raw().await?;
-        debug!("LOL: {:?}", contract_client_state_bz);
-        let contract_client_state = ClientState::abi_decode(&contract_client_state_bz, true)?;
-        debug!("Contract client state");
+        let contract_client_state = contract.getClientState().call().await?._0;
+
         // Read the existing trusted header hash from the contract.
         let trusted_revision_number = contract_client_state.latest_height.revision_number;
         let trusted_block_height = contract_client_state.latest_height.revision_height;
@@ -60,12 +56,16 @@ async fn main() -> anyhow::Result<()> {
             );
         }
 
+        debug!("debug: 1");
+
         // Get trusted consensus state from the contract.
         let trusted_consensus_state = contract
-            .consensusStates(trusted_block_height)
+            .getConsensusState(trusted_block_height)
             .call()
             .await?
             ._0;
+
+        debug!("debug: 2");
 
         let chain_latest_block_height = tendermint_rpc_client.get_latest_block_height().await;
         let (trusted_light_block, target_light_block) = tendermint_rpc_client
@@ -76,10 +76,11 @@ async fn main() -> anyhow::Result<()> {
         let proposed_header = Header {
             signed_header: target_light_block.signed_header,
             validator_set: target_light_block.validators,
-            trusted_height: IbcHeight::new(trusted_revision_number, chain_latest_block_height)
-                .unwrap(),
+            trusted_height: IbcHeight::new(trusted_revision_number, trusted_block_height).unwrap(),
             trusted_next_validator_set: trusted_light_block.next_validators,
         };
+
+        debug!("debug: 3");
 
         let contract_env = Env {
             chain_id,
@@ -97,6 +98,8 @@ async fn main() -> anyhow::Result<()> {
             &proposed_header,
             &contract_env,
         );
+
+        debug!("debug: 4");
 
         // Construct the on-chain call and relay the proof to the contract.
         let proof_as_bytes = hex::decode(&proof_data.proof.encoded_proof).unwrap();

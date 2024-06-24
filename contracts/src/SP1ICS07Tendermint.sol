@@ -44,6 +44,20 @@ contract SP1ICS07Tendermint {
         ] = consensusState;
     }
 
+    function getClientState()
+        public
+        view
+        returns (ICS07Tendermint.ClientState memory)
+    {
+        return clientState;
+    }
+
+    function getConsensusState(
+        uint64 revisionHeight
+    ) public view returns (ICS07Tendermint.ConsensusState memory) {
+        return consensusStates[revisionHeight];
+    }
+
     /// @notice The entrypoint for verifying the proof.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.

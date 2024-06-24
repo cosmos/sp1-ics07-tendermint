@@ -60,11 +60,20 @@ alloy_sol_types::sol! {
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the program.
     bytes32 public ics07UpdateClientProgramVkey;
+    // @notice The SP1 verifier contract.
+    address public verifier;
 
     /// @notice The ICS07Tendermint client state
     ClientState public clientState;
     /// @notice The mapping from height to consensus state
     mapping(uint64 => ConsensusState) public consensusStates;
+
+    function getClientState() public view returns (ClientState memory);
+
+    function getConsensusState(uint64 revisionHeight)
+        public
+        view
+        returns (ConsensusState memory);
 
     /// @notice The entrypoint for verifying the proof.
     /// @param proof The encoded proof.
@@ -126,7 +135,7 @@ mod tests {
     use super::*;
 
     type TestTuple = alloy_sol_types::sol! {
-        tuple(string, TrustThreshold, Height, uint64, uint64, bool)
+        tuple(string, TrustThreshold, Height, uint, uint, bool)
     };
 
     #[test]

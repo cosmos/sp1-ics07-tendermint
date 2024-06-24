@@ -56,6 +56,13 @@ contract SP1TendermintScript is Script {
         assert(unbonding_period == 1_209_600_000_000_000);
         assert(is_frozen == false);
 
+        ICS07Tendermint.ConsensusState memory consensusState = ics07Tendermint
+            .getConsensusState(latest_height.revision_height);
+
+        assert(consensusState.timestamp > 0);
+        assert(consensusState.root.length > 0);
+        assert(consensusState.next_validators_hash.length > 0);
+
         vm.stopBroadcast();
 
         return address(ics07Tendermint);

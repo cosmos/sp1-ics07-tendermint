@@ -55,6 +55,7 @@ alloy_sol_types::sol! {
 /// @title SP1ICS07Tendermint
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client.
+#[cfg(feature = "rpc")]
 #[allow(missing_docs, clippy::pub_underscore_fields)]
 #[sol(rpc)]
 contract SP1ICS07Tendermint {

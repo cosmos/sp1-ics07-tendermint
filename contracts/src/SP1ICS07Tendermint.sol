@@ -20,7 +20,7 @@ contract SP1ICS07Tendermint {
     mapping(uint64 => ICS07Tendermint.ConsensusState) public consensusStates;
 
     /// Allowed clock drift in nanoseconds
-    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 6_000_000_000_000; // 6000 seconds
+    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
 
     // @notice The constructor sets the program verification key.
     // @param _ics07ProgramVkey The verification key for the program.

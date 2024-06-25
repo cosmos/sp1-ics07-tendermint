@@ -8,23 +8,26 @@ import "forge-std/console.sol";
 /// @title SP1ICS07Tendermint
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client.
+/// @custom:poc This is a proof of concept implementation.
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the program.
     bytes32 public ics07UpdateClientProgramVkey;
-    // @notice The SP1 verifier contract.
+    /// @notice The SP1 verifier contract.
     ISP1Verifier public verifier;
 
-    // @notice The ICS07Tendermint client state
+    /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState public clientState;
-    // @notice The mapping from height to consensus state
+    /// @notice The mapping from height to consensus state
     mapping(uint64 => ICS07Tendermint.ConsensusState) public consensusStates;
 
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
 
-    // @notice The constructor sets the program verification key.
-    // @param _ics07ProgramVkey The verification key for the program.
-    // @param _verifier The address of the SP1 verifier contract.
+    /// @notice The constructor sets the program verification key.
+    /// @param _ics07ProgramVkey The verification key for the program.
+    /// @param _verifier The address of the SP1 verifier contract.
+    /// @param _clientState The encoded initial client state.
+    /// @param _consensusState The encoded initial consensus state.
     constructor(
         bytes32 _ics07ProgramVkey,
         address _verifier,
@@ -44,6 +47,8 @@ contract SP1ICS07Tendermint {
         ] = consensusState;
     }
 
+    /// @notice Returns the client state.
+    /// @return The client state.
     function getClientState()
         public
         view
@@ -52,6 +57,9 @@ contract SP1ICS07Tendermint {
         return clientState;
     }
 
+    /// @notice Returns the consensus state at the given revision height.
+    /// @param revisionHeight The revision height.
+    /// @return The consensus state at the given revision height.
     function getConsensusState(
         uint64 revisionHeight
     ) public view returns (ICS07Tendermint.ConsensusState memory) {
@@ -59,6 +67,7 @@ contract SP1ICS07Tendermint {
     }
 
     /// @notice The entrypoint for verifying the proof.
+    /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     function verifyIcs07UpdateClientProof(
@@ -119,7 +128,7 @@ contract SP1ICS07Tendermint {
             .new_consensus_state;
     }
 
-    /// The public value output for the sp1 program.
+    /// @notice The public value output for the sp1 program.
     struct SP1ICS07TendermintOutput {
         /// The trusted consensus state.
         ICS07Tendermint.ConsensusState trusted_consensus_state;
@@ -133,7 +142,7 @@ contract SP1ICS07Tendermint {
         ICS07Tendermint.Height new_height;
     }
 
-    /// The environment output for the sp1 program.
+    /// @notice The environment output for the sp1 program.
     struct Env {
         /// The chain ID of the chain that the client is tracking.
         string chain_id;

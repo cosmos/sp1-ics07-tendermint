@@ -7,11 +7,11 @@ use ibc_client_tendermint::{
 use ibc_core_client::context::{ClientValidationContext, ExtClientValidationContext};
 use ibc_core_handler_types::error::ContextError;
 use ibc_primitives::Timestamp;
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::TrustThreshold;
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::TrustThreshold;
 
 alloy_sol_types::sol! {
     /// The environment output for the sp1 program.
-    #[derive(Debug, serde::Deserialize, serde::Serialize)]
+    #[derive(serde::Deserialize, serde::Serialize)]
     struct Env {
         /// The chain ID of the chain that the client is tracking.
         string chain_id;

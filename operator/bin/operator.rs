@@ -8,7 +8,7 @@ use ibc_core_client_types::Height as IbcHeight;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::SP1ICS07Tendermint;
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint;
 use sp1_ics07_tendermint_update_client::types::validation::Env;
 use sp1_sdk::utils::setup_logger;
 
@@ -39,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
     let tendermint_rpc_client = TendermintRPCClient::default();
     let prover = SP1ICS07TendermintProver::new();
 
-    let contract = SP1ICS07Tendermint::new(contract_address.parse()?, provider);
+    let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
 
     loop {
         let contract_client_state = contract.getClientState().call().await?._0;

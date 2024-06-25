@@ -4,7 +4,7 @@ use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, TENDERMINT_ELF};
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::{
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
 use sp1_sdk::{utils::setup_logger, HashableKey, MockProver, Prover};

@@ -1,7 +1,7 @@
 //! Contains the public value output for the sp1 program.
 
 use super::validation::Env;
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::{ConsensusState, Height};
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{ConsensusState, Height};
 
 alloy_sol_types::sol! {
     /// The public value output for the sp1 program.

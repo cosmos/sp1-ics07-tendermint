@@ -6,7 +6,7 @@ use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::{
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
 use sp1_ics07_tendermint_update_client::types::{

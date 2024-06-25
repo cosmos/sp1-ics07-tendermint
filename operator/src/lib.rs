@@ -1,6 +1,6 @@
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::Header;
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::ConsensusState;
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::ConsensusState;
 use sp1_ics07_tendermint_update_client::types::validation::Env;
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 

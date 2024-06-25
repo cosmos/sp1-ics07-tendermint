@@ -6,7 +6,7 @@ import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
-import {ICS07Tendermint} from "ibc-lite-shared/ics07-tendermint/ICS07Tendermint.sol";
+import {ICS07Tendermint} from "../src/ics07-tendermint/ICS07Tendermint.sol";
 
 struct SP1ICS07TendermintGenesisJson {
     bytes trustedClientState;

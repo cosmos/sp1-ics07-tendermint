@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {ICS07Tendermint} from "ibc-lite-shared/ics07-tendermint/ICS07Tendermint.sol";
+import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 import "forge-std/console.sol";
 
@@ -23,7 +23,7 @@ contract SP1ICS07Tendermint {
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
 
-    /// @notice The constructor sets the program verification key.
+    /// @notice The constructor sets the program verification key and the initial client and consensus states.
     /// @param _ics07ProgramVkey The verification key for the program.
     /// @param _verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.

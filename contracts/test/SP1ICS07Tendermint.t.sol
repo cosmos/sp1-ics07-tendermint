@@ -5,7 +5,7 @@ import "forge-std/console.sol";
 import {Test} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {stdError} from "forge-std/StdError.sol";
-import {ICS07Tendermint} from "ibc-lite-shared/ics07-tendermint/ICS07Tendermint.sol";
+import {ICS07Tendermint} from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
@@ -49,33 +49,29 @@ contract SP1ICS07TendermintTest is Test {
             mockFixture.trustedConsensusState
         );
 
-        (
-            string memory chain_id,
-            ICS07Tendermint.TrustThreshold memory trust_level,
-            ICS07Tendermint.Height memory latest_height,
-            uint64 trusting_period,
-            uint64 unbonding_period,
-            bool is_frozen
-        ) = mockIcs07Tendermint.clientState();
+        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
+            .getClientState();
 
-        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
-        assert(trust_level.numerator == 1);
-        assert(trust_level.denominator == 3);
-        assert(latest_height.revision_number == 4);
-        assert(latest_height.revision_height == 2110658);
-        assert(trusting_period == 1_209_600_000_000_000);
-        assert(unbonding_period == 1_209_600_000_000_000);
-        assert(is_frozen == false);
+        assert(
+            keccak256(bytes(clientState.chain_id)) ==
+                keccak256(bytes("mocha-4"))
+        );
+        assert(clientState.trust_level.numerator == 1);
+        assert(clientState.trust_level.denominator == 3);
+        assert(clientState.latest_height.revision_number == 4);
+        assert(clientState.latest_height.revision_height == 2110658);
+        assert(clientState.trusting_period == 1_209_600_000_000_000);
+        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.is_frozen == false);
 
-        (
-            uint64 timestamp,
-            bytes memory root,
-            bytes memory next_validators_hash
-        ) = mockIcs07Tendermint.consensusStates(2110658);
+        ICS07Tendermint.ConsensusState
+            memory consensusState = mockIcs07Tendermint.getConsensusState(
+                2110658
+            );
 
-        assert(timestamp > 0);
-        assert(root.length > 0);
-        assert(next_validators_hash.length > 0);
+        assert(consensusState.timestamp > 0);
+        assert(consensusState.root.length > 0);
+        assert(consensusState.next_validators_hash.length > 0);
     }
 
     function loadFixture(
@@ -121,23 +117,20 @@ contract SP1ICS07TendermintTest is Test {
             fixture.publicValues
         );
 
-        (
-            string memory chain_id,
-            ICS07Tendermint.TrustThreshold memory trust_level,
-            ICS07Tendermint.Height memory latest_height,
-            uint64 trusting_period,
-            uint64 unbonding_period,
-            bool is_frozen
-        ) = ics07Tendermint.clientState();
+        ICS07Tendermint.ClientState memory clientState = ics07Tendermint
+            .getClientState();
 
-        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
-        assert(trust_level.numerator == 1);
-        assert(trust_level.denominator == 3);
-        assert(latest_height.revision_number == 4);
-        assert(latest_height.revision_height == 2110668);
-        assert(trusting_period == 1_209_600_000_000_000);
-        assert(unbonding_period == 1_209_600_000_000_000);
-        assert(is_frozen == false);
+        assert(
+            keccak256(bytes(clientState.chain_id)) ==
+                keccak256(bytes("mocha-4"))
+        );
+        assert(clientState.trust_level.numerator == 1);
+        assert(clientState.trust_level.denominator == 3);
+        assert(clientState.latest_height.revision_number == 4);
+        assert(clientState.latest_height.revision_height == 2110668);
+        assert(clientState.trusting_period == 1_209_600_000_000_000);
+        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.is_frozen == false);
 
         ICS07Tendermint.ConsensusState memory consensusState = ics07Tendermint
             .getConsensusState(2110668);
@@ -158,23 +151,20 @@ contract SP1ICS07TendermintTest is Test {
             fixture.publicValues
         );
 
-        (
-            string memory chain_id,
-            ICS07Tendermint.TrustThreshold memory trust_level,
-            ICS07Tendermint.Height memory latest_height,
-            uint64 trusting_period,
-            uint64 unbonding_period,
-            bool is_frozen
-        ) = mockIcs07Tendermint.clientState();
+        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
+            .getClientState();
 
-        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
-        assert(trust_level.numerator == 1);
-        assert(trust_level.denominator == 3);
-        assert(latest_height.revision_number == 4);
-        assert(latest_height.revision_height == 2110668);
-        assert(trusting_period == 1_209_600_000_000_000);
-        assert(unbonding_period == 1_209_600_000_000_000);
-        assert(is_frozen == false);
+        assert(
+            keccak256(bytes(clientState.chain_id)) ==
+                keccak256(bytes("mocha-4"))
+        );
+        assert(clientState.trust_level.numerator == 1);
+        assert(clientState.trust_level.denominator == 3);
+        assert(clientState.latest_height.revision_number == 4);
+        assert(clientState.latest_height.revision_height == 2110668);
+        assert(clientState.trusting_period == 1_209_600_000_000_000);
+        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.is_frozen == false);
 
         ICS07Tendermint.ConsensusState
             memory consensusState = mockIcs07Tendermint.getConsensusState(

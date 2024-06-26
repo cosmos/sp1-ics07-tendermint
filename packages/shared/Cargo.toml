@@ -10,7 +10,7 @@ license = { workspace = true }
 rpc = ["dep:alloy-contract"]
 
 [dependencies]
-alloy-sol-types = { workspace = true }
+alloy-sol-types = { workspace = true, features = ["json"] }
 alloy-contract = { workspace = true, optional = true }
 tendermint-light-client-verifier = { workspace = true }
 serde = { workspace = true }

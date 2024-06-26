@@ -7,23 +7,7 @@ use ibc_client_tendermint::{
 use ibc_core_client::context::{ClientValidationContext, ExtClientValidationContext};
 use ibc_core_handler_types::error::ContextError;
 use ibc_primitives::Timestamp;
-use sp1_ics07_tendermint_shared::types::ics07_tendermint::TrustThreshold;
-
-alloy_sol_types::sol! {
-    /// The environment output for the sp1 program.
-    #[derive(Debug, serde::Deserialize, serde::Serialize)]
-    struct Env {
-        /// The chain ID of the chain that the client is tracking.
-        string chain_id;
-        /// Fraction of validator overlap needed to update header
-        TrustThreshold trust_threshold;
-        /// Duration of the period since the `LatestTimestamp` during which the
-        /// submitted headers are valid for upgrade
-        uint64 trusting_period;
-        /// Timestamp in nanoseconds
-        uint64 now;
-    }
-}
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::Env;
 
 /// The client validation context.
 pub struct ClientValidationCtx {

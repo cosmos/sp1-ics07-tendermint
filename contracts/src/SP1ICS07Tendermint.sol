@@ -23,6 +23,33 @@ contract SP1ICS07Tendermint {
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
 
+    /// @notice The public value output for the sp1 program.
+    struct SP1ICS07TendermintOutput {
+        /// The trusted consensus state.
+        ICS07Tendermint.ConsensusState trusted_consensus_state;
+        /// The new consensus state with the verified header.
+        ICS07Tendermint.ConsensusState new_consensus_state;
+        /// The validation environment.
+        Env env;
+        /// trusted height
+        ICS07Tendermint.Height trusted_height;
+        /// new height
+        ICS07Tendermint.Height new_height;
+    }
+
+    /// @notice The environment output for the sp1 program.
+    struct Env {
+        /// The chain ID of the chain that the client is tracking.
+        string chain_id;
+        /// Fraction of validator overlap needed to update header
+        ICS07Tendermint.TrustThreshold trust_threshold;
+        /// Duration of the period since the `LatestTimestamp` during which the
+        /// submitted headers are valid for upgrade
+        uint64 trusting_period;
+        /// Timestamp in nanoseconds
+        uint64 now;
+    }
+
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
     /// @param _ics07ProgramVkey The verification key for the program.
     /// @param _verifier The address of the SP1 verifier contract.
@@ -79,6 +106,23 @@ contract SP1ICS07Tendermint {
             (SP1ICS07TendermintOutput)
         );
 
+        validatePublicValues(output);
+
+        // TODO: Make sure that other checks have been made in the proof verification
+        // such as the consensus state not being outside the trusting period.
+        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
+
+        // adding the new consensus state to the mapping
+        clientState.latest_height = output.new_height;
+        consensusStates[output.new_height.revision_height] = output
+            .new_consensus_state;
+    }
+
+    /// @notice Validates the SP1ICS07TendermintOutput public values.
+    /// @param output The public values.
+    function validatePublicValues(
+        SP1ICS07TendermintOutput memory output
+    ) public view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
@@ -116,42 +160,6 @@ contract SP1ICS07Tendermint {
             ) == keccak256(abi.encode(output.trusted_consensus_state)),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );
-        // TODO: Make sure that we don't need more checks here.
-
-        // TODO: Make sure that other checks have been made in the proof verification
-        // such as the consensus state not being outside the trusting period.
-        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
-
-        // adding the new consensus state to the mapping
-        clientState.latest_height = output.new_height;
-        consensusStates[output.new_height.revision_height] = output
-            .new_consensus_state;
-    }
-
-    /// @notice The public value output for the sp1 program.
-    struct SP1ICS07TendermintOutput {
-        /// The trusted consensus state.
-        ICS07Tendermint.ConsensusState trusted_consensus_state;
-        /// The new consensus state with the verified header.
-        ICS07Tendermint.ConsensusState new_consensus_state;
-        /// The validation environment.
-        Env env;
-        /// trusted height
-        ICS07Tendermint.Height trusted_height;
-        /// new height
-        ICS07Tendermint.Height new_height;
-    }
-
-    /// @notice The environment output for the sp1 program.
-    struct Env {
-        /// The chain ID of the chain that the client is tracking.
-        string chain_id;
-        /// Fraction of validator overlap needed to update header
-        ICS07Tendermint.TrustThreshold trust_threshold;
-        /// Duration of the period since the `LatestTimestamp` during which the
-        /// submitted headers are valid for upgrade
-        uint64 trusting_period;
-        /// Timestamp in nanoseconds
-        uint64 now;
+        // TODO: Make sure that we don't need more checks.
     }
 }

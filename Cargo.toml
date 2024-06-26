@@ -44,9 +44,6 @@ tendermint = { version = "0.36.0", default-features = false }
 ibc-core-client-types = { version = "0.53.0", default-features = false }
 ibc-core-commitment-types = { version = "0.53.0", default-features = false }
 time = { version = "0.3", default-features = false, features = ["macros", "parsing"] }
-# tendermint-light-client-verifier = { version = "0.35.0", default-features = false, features = [
-#     "rust-crypto",
-# ] }
 alloy-primitives = "0.7.2"
 alloy-contract = "0.1.2"
 alloy-node-bindings = "0.1.2"

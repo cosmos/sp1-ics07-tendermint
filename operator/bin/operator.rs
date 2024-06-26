@@ -8,8 +8,7 @@ use ibc_core_client_types::Height as IbcHeight;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint;
-use sp1_ics07_tendermint_update_client::types::validation::Env;
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
 
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint

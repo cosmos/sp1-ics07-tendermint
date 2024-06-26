@@ -9,9 +9,7 @@ use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07Tendermin
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
-use sp1_ics07_tendermint_update_client::types::{
-    output::SP1ICS07TendermintOutput, validation::Env,
-};
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07TendermintOutput};
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf, str::FromStr};
 

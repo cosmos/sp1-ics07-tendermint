@@ -13,7 +13,7 @@ sol!(
     #[derive(serde::Deserialize, serde::Serialize)]
     #[allow(missing_docs, clippy::pedantic)]
     sp1_ics07_tendermint,
-    "../../contracts/out/SP1ICS07Tendermint.sol/SP1ICS07Tendermint.json"
+    "../../contracts/abi/SP1ICS07Tendermint.json"
 );
 
 #[cfg(not(feature = "rpc"))]
@@ -21,7 +21,7 @@ sol!(
     #[derive(serde::Deserialize, serde::Serialize)]
     #[allow(missing_docs, clippy::pedantic)]
     SP1ICS07Tendermint,
-    "../../contracts/out/SP1ICS07Tendermint.sol/SP1ICS07Tendermint.json"
+    "../../contracts/abi/SP1ICS07Tendermint.json"
 );
 
 #[allow(clippy::fallible_impl_from)]

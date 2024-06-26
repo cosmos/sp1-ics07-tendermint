@@ -33,25 +33,22 @@ just build-program
 
 ## Run ICS-07 Tendermint Light Client End to End
 
-1. Generate the initialization parameters for the contract.
+1. Set the environment variables by filling in the `.env` file with the following:
 
     ```sh
-    TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ cargo run --bin genesis --release
+    cp .env.example .env
     ```
 
-    This will generate the `contracts/script/genesis.json` file which contains the initialization parameters for the contract.
+    You need to fill in the `PRIVATE_KEY`, `SP1_PROVER`, `TENDERMINT_RPC_URL`, and `RPC_URL`. You also need the `SP1_PRIVATE_KEY` field if you are using the SP1 prover network.
 
-2. Deploy the `SP1ICS07Tendermint` contract with the initialization parameters:
+2. Deploy the `SP1ICS07Tendermint` contract:
 
     ```sh
-    cd ../contracts
-
-    forge install
-
-    forge script script/SP1ICS07Tendermint.s.sol --rpc-url https://ethereum-sepolia.publicnode.com/ --private-key <PRIVATE_KEY> --broadcast
+    just deploy-contracts
     ```
 
-    If you see the following error, add `--legacy` to the command.
+    This will generate the `contracts/script/genesis.json` file which contains the initialization parameters for the contract. And then deploy the contract using `contracts/script/SP1ICS07Tendermint.s.sol`.
+    If you see the following error, add `--legacy` to the command in the `justfile`:
     ```text
     Error: Failed to get EIP-1559 fees    
     ```
@@ -60,26 +57,15 @@ just build-program
 
     ```text
     == Return ==
-    0: address <SP1_TENDERMINT_ADDRESS>
+    0: address <CONTRACT_ADDRESS>
     ```
 
-    This will be used when you run the operator in step 5.
+    This will be used when you run the operator in step 5. So add this to your `.env` file.
 
-4. Export your SP1 Prover Network configuration
+4. Run the Tendermint operator.
+
     ```sh
-    # Export the PRIVATE_KEY you will use to deploy the contract & relay proofs.
-    export PRIVATE_KEY=<PRIVATE_KEY>
-
-    # Optional
-    # If you're using the Succinct network, set SP1_PROVER to "network". Otherwise, set it to "local" or "mock".
-    export SP1_PROVER={network|local|mock}
-    # Only required if SP1_PROVER is set to "network".
-    export SP1_PRIVATE_KEY=<SP1_PRIVATE_KEY>
-    ```
-
-5. Run the Tendermint operator.
-    ```sh
-    TENDERMINT_RPC_URL=https://rpc.celestia-mocha.com/ RPC_URL=https://ethereum-sepolia.publicnode.com/ CONTRACT_ADDRESS=<CONTRACT-ADDRESS> RUST_LOG=info cargo run --bin operator --release
+    just operator
     ```
 
 ## EVM-Compatible Proof Generation & Verification

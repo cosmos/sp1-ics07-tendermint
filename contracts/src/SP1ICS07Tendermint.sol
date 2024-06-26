@@ -106,6 +106,23 @@ contract SP1ICS07Tendermint {
             (SP1ICS07TendermintOutput)
         );
 
+        validatePublicValues(output);
+
+        // TODO: Make sure that other checks have been made in the proof verification
+        // such as the consensus state not being outside the trusting period.
+        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
+
+        // adding the new consensus state to the mapping
+        clientState.latest_height = output.new_height;
+        consensusStates[output.new_height.revision_height] = output
+            .new_consensus_state;
+    }
+
+    /// @notice Validates the SP1ICS07TendermintOutput public values.
+    /// @param output The public values.
+    function validatePublicValues(
+        SP1ICS07TendermintOutput memory output
+    ) public view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
@@ -143,15 +160,6 @@ contract SP1ICS07Tendermint {
             ) == keccak256(abi.encode(output.trusted_consensus_state)),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );
-        // TODO: Make sure that we don't need more checks here.
-
-        // TODO: Make sure that other checks have been made in the proof verification
-        // such as the consensus state not being outside the trusting period.
-        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
-
-        // adding the new consensus state to the mapping
-        clientState.latest_height = output.new_height;
-        consensusStates[output.new_height.revision_height] = output
-            .new_consensus_state;
+        // TODO: Make sure that we don't need more checks.
     }
 }

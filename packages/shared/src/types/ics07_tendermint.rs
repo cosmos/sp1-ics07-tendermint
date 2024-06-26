@@ -19,7 +19,7 @@ alloy_sol_types::sol!(
 alloy_sol_types::sol!(
     #[derive(serde::Deserialize, serde::Serialize)]
     #[allow(missing_docs, clippy::pedantic)]
-    SP1ICS07Tendermint,
+    sp1_ics07_tendermint,
     "../../contracts/abi/SP1ICS07Tendermint.json"
 );
 

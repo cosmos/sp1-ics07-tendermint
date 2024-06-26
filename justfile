@@ -13,11 +13,20 @@ test-cargo:
 
 # Generate the `genesis.json` file for the Celestia Mocha testnet
 mocha-genesis:
-   RUST_LOG=info TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin genesis --release
+  @echo "Generating the genesis file for the Celestia Mocha testnet"
+  @echo "Building the program..."
+  just build-program
+  @echo "Generating the genesis file..."
+  RUST_LOG=info TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin genesis --release
 
 # Generate the `mock_fixture.json` file for the Celestia Mocha testnet using the mock prover
 mock-fixtures:
+  @echo "Generating mock fixtures for the Celestia Mocha testnet"
+  @echo "Building the program..."
+  just build-program
+  @echo "Generating the mock fixtures..."
   RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
+  @echo "Mock fixtures generated at 'contracts/fixtures/mock_fixture.json'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
 generate-abi:

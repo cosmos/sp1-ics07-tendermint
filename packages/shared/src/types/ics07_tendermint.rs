@@ -1,6 +1,5 @@
 //! This module contains the shared types for `sp1-ics07-tendermint`.
 
-use alloy_sol_types::sol;
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use tendermint::{hash::Algorithm, Time};
@@ -8,7 +7,7 @@ use tendermint_light_client_verifier::types::{Hash, TrustThreshold as Tendermint
 use time::OffsetDateTime;
 
 #[cfg(feature = "rpc")]
-sol!(
+alloy_sol_types::sol!(
     #[sol(rpc)]
     #[derive(serde::Deserialize, serde::Serialize)]
     #[allow(missing_docs, clippy::pedantic)]
@@ -17,7 +16,7 @@ sol!(
 );
 
 #[cfg(not(feature = "rpc"))]
-sol!(
+alloy_sol_types::sol!(
     #[derive(serde::Deserialize, serde::Serialize)]
     #[allow(missing_docs, clippy::pedantic)]
     SP1ICS07Tendermint,

@@ -53,3 +53,8 @@ deploy-contracts:
   cd contracts && forge install
   @echo "Deploying the contract..."
   cd contracts && forge script script/SP1ICS07Tendermint.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+
+# Run the operator using the `cargo run --bin operator` command.
+# This command requires the `.env` file to be present in the root directory.
+operator:
+  RUST_LOG=info cargo run --bin operator --release

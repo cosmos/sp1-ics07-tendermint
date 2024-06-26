@@ -79,10 +79,10 @@ Here, I will show you how to generate a proof to be used in the fixtures for the
 RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="local" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
 ```
 
-To use the SP1 prover network, you will need to set the `SP1_PROVER` environment variable to `network` and provide your private key. You can do this by running the following command:
+To use the SP1 prover network, you will need to set the `SP1_PROVER` environment variable to `network` and provide your private key to `.env`. After this, you can run the following command:
 
 ```sh
-RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="network" SP1_PRIVATE_KEY="YOUR_PRIVATE_KEY" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
+just network-fixtures
 ```
 
 ### Solidity Proof Verification

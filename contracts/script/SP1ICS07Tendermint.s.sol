@@ -23,8 +23,6 @@ contract SP1TendermintScript is Script {
 
     // Deploy the SP1 Tendermint contract with the supplied initialization parameters.
     function run() public returns (address) {
-        vm.startBroadcast();
-
         // Read the initialization parameters for the SP1 Tendermint contract.
         SP1ICS07TendermintGenesisJson memory genesis = loadGenesis(
             "genesis.json"
@@ -40,6 +38,8 @@ contract SP1TendermintScript is Script {
             abi.encode(trustedConsensusState)
         );
 
+        vm.startBroadcast();
+
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesis.vkey,
@@ -47,6 +47,8 @@ contract SP1TendermintScript is Script {
             genesis.trustedClientState,
             trustedConsensusHash
         );
+
+        vm.stopBroadcast();
 
         (
             string memory chain_id,
@@ -72,8 +74,6 @@ contract SP1TendermintScript is Script {
             consensusHash ==
                 keccak256(abi.encode(genesis.trustedConsensusState))
         );
-
-        vm.stopBroadcast();
 
         return address(ics07Tendermint);
     }

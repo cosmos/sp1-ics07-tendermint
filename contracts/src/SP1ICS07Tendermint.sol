@@ -17,8 +17,8 @@ contract SP1ICS07Tendermint {
 
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState public clientState;
-    /// @notice The mapping from height to consensus state keccak256 hash.
-    mapping(uint64 => bytes32) public consensusStates;
+    /// @notice The mapping from height to consensus state keccak256 hashes.
+    mapping(uint64 => bytes32) public consensusStateHashes;
 
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
@@ -65,7 +65,7 @@ contract SP1ICS07Tendermint {
         verifier = ISP1Verifier(_verifier);
 
         clientState = abi.decode(_clientState, (ICS07Tendermint.ClientState));
-        consensusStates[
+        consensusStateHashes[
             clientState.latest_height.revision_height
         ] = _consensusState;
     }
@@ -86,7 +86,7 @@ contract SP1ICS07Tendermint {
     function getConsensusState(
         uint64 revisionHeight
     ) public view returns (bytes32) {
-        return consensusStates[revisionHeight];
+        return consensusStateHashes[revisionHeight];
     }
 
     /// @notice The entrypoint for verifying the proof.
@@ -110,7 +110,7 @@ contract SP1ICS07Tendermint {
 
         // adding the new consensus state to the mapping
         clientState.latest_height = output.new_height;
-        consensusStates[output.new_height.revision_height] = keccak256(
+        consensusStateHashes[output.new_height.revision_height] = keccak256(
             abi.encode(output.new_consensus_state)
         );
     }
@@ -150,7 +150,7 @@ contract SP1ICS07Tendermint {
             "SP1ICS07Tendermint: unbonding period mismatch"
         );
         require(
-            consensusStates[output.trusted_height.revision_height] ==
+            consensusStateHashes[output.trusted_height.revision_height] ==
                 keccak256(abi.encode(output.trusted_consensus_state)),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );

@@ -30,12 +30,22 @@ contract SP1TendermintScript is Script {
             "genesis.json"
         );
 
+        ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
+            .decode(
+                genesis.trustedConsensusState,
+                (ICS07Tendermint.ConsensusState)
+            );
+
+        bytes32 trustedConsensusHash = keccak256(
+            abi.encode(trustedConsensusState)
+        );
+
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesis.vkey,
             address(verifier),
             genesis.trustedClientState,
-            genesis.trustedConsensusState
+            trustedConsensusHash
         );
 
         (
@@ -46,7 +56,6 @@ contract SP1TendermintScript is Script {
             uint64 unbonding_period,
             bool is_frozen
         ) = ics07Tendermint.clientState();
-
         assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
         assert(trust_level.numerator == 1);
         assert(trust_level.denominator == 3);
@@ -56,12 +65,13 @@ contract SP1TendermintScript is Script {
         assert(unbonding_period == 1_209_600_000_000_000);
         assert(is_frozen == false);
 
-        ICS07Tendermint.ConsensusState memory consensusState = ics07Tendermint
-            .getConsensusState(latest_height.revision_height);
-
-        assert(consensusState.timestamp > 0);
-        assert(consensusState.root.length > 0);
-        assert(consensusState.next_validators_hash.length > 0);
+        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+            latest_height.revision_height
+        );
+        assert(
+            consensusHash ==
+                keccak256(abi.encode(genesis.trustedConsensusState))
+        );
 
         vm.stopBroadcast();
 

@@ -50,30 +50,24 @@ contract SP1TendermintScript is Script {
 
         vm.stopBroadcast();
 
-        (
-            string memory chain_id,
-            ICS07Tendermint.TrustThreshold memory trust_level,
-            ICS07Tendermint.Height memory latest_height,
-            uint64 trusting_period,
-            uint64 unbonding_period,
-            bool is_frozen
-        ) = ics07Tendermint.clientState();
-        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
-        assert(trust_level.numerator == 1);
-        assert(trust_level.denominator == 3);
-        assert(latest_height.revision_number == 4);
+        ICS07Tendermint.ClientState memory clientState = ics07Tendermint
+            .getClientState();
+        assert(
+            keccak256(bytes(clientState.chain_id)) ==
+                keccak256(bytes("mocha-4"))
+        );
+        assert(clientState.trust_level.numerator == 1);
+        assert(clientState.trust_level.denominator == 3);
+        assert(clientState.latest_height.revision_number == 4);
         // assert(latest_height.revision_height == 2110658);
-        assert(trusting_period == 1_209_600_000_000_000);
-        assert(unbonding_period == 1_209_600_000_000_000);
-        assert(is_frozen == false);
+        assert(clientState.trusting_period == 1_209_600_000_000_000);
+        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusState(
-            latest_height.revision_height
+            clientState.latest_height.revision_height
         );
-        assert(
-            consensusHash ==
-                keccak256(abi.encode(genesis.trustedConsensusState))
-        );
+        assert(consensusHash == keccak256(abi.encode(trustedConsensusState)));
 
         return address(ics07Tendermint);
     }

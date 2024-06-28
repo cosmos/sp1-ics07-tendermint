@@ -22,7 +22,7 @@ use ibc_core_host_types::identifiers::{ChainId, ClientId};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     self, ConsensusState as SolConsensusState, Env, SP1ICS07TendermintOutput,
 };
-use sp1_ics07_tendermint_update_client::types;
+use sp1_ics07_tendermint_verify_membership::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 
 /// The main function of the program.

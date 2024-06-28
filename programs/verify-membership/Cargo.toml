@@ -1,6 +1,6 @@
 [package]
-name = "sp1-ics07-tendermint-update-client"
-description = "IBC Lite Client Router for CosmWasm"
+name = "sp1-ics07-tendermint-verify-membership"
+description = "Verify membership program for sp1-ics07-tendermint"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

@@ -30,12 +30,23 @@ contract SP1ICS07TendermintTest is Test {
         SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
             "fixture.json"
         );
+
+        ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
+            .decode(
+                fixture.trustedConsensusState,
+                (ICS07Tendermint.ConsensusState)
+            );
+
+        bytes32 trustedConsensusHash = keccak256(
+            abi.encode(trustedConsensusState)
+        );
+
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             fixture.vkey,
             address(verifier),
             fixture.trustedClientState,
-            fixture.trustedConsensusState
+            trustedConsensusHash
         );
 
         SP1ICS07TendermintFixtureJson memory mockFixture = loadFixture(
@@ -46,12 +57,11 @@ contract SP1ICS07TendermintTest is Test {
             mockFixture.vkey,
             address(mockVerifier),
             mockFixture.trustedClientState,
-            mockFixture.trustedConsensusState
+            trustedConsensusHash
         );
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
             .getClientState();
-
         assert(
             keccak256(bytes(clientState.chain_id)) ==
                 keccak256(bytes("mocha-4"))
@@ -64,14 +74,8 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.unbonding_period == 1_209_600_000_000_000);
         assert(clientState.is_frozen == false);
 
-        ICS07Tendermint.ConsensusState
-            memory consensusState = mockIcs07Tendermint.getConsensusState(
-                2110658
-            );
-
-        assert(consensusState.timestamp > 0);
-        assert(consensusState.root.length > 0);
-        assert(consensusState.next_validators_hash.length > 0);
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110658);
+        assert(consensusHash == trustedConsensusHash);
     }
 
     function loadFixture(
@@ -119,7 +123,6 @@ contract SP1ICS07TendermintTest is Test {
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint
             .getClientState();
-
         assert(
             keccak256(bytes(clientState.chain_id)) ==
                 keccak256(bytes("mocha-4"))
@@ -132,12 +135,12 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.unbonding_period == 1_209_600_000_000_000);
         assert(clientState.is_frozen == false);
 
-        ICS07Tendermint.ConsensusState memory consensusState = ics07Tendermint
-            .getConsensusState(2110668);
-
-        assert(consensusState.timestamp > 0);
-        assert(consensusState.root.length > 0);
-        assert(consensusState.next_validators_hash.length > 0);
+        bytes32 consensusHash = ics07Tendermint.getConsensusState(2110668);
+        ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
+            fixture.targetConsensusState,
+            (ICS07Tendermint.ConsensusState)
+        );
+        assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
@@ -153,7 +156,6 @@ contract SP1ICS07TendermintTest is Test {
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
             .getClientState();
-
         assert(
             keccak256(bytes(clientState.chain_id)) ==
                 keccak256(bytes("mocha-4"))
@@ -166,14 +168,12 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.unbonding_period == 1_209_600_000_000_000);
         assert(clientState.is_frozen == false);
 
-        ICS07Tendermint.ConsensusState
-            memory consensusState = mockIcs07Tendermint.getConsensusState(
-                2110668
-            );
-
-        assert(consensusState.timestamp > 0);
-        assert(consensusState.root.length > 0);
-        assert(consensusState.next_validators_hash.length > 0);
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110668);
+        ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
+            fixture.targetConsensusState,
+            (ICS07Tendermint.ConsensusState)
+        );
+        assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     // Confirm that submitting a non-empty proof with the mock verifier fails.

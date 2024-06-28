@@ -3,8 +3,9 @@ use std::env;
 use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
 };
-use ibc_client_tendermint::types::Header;
+use ibc_client_tendermint::types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
+use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
@@ -52,17 +53,22 @@ async fn main() -> anyhow::Result<()> {
             );
         }
 
-        // Get trusted consensus state from the contract.
-        let trusted_consensus_state = contract
-            .getConsensusState(trusted_block_height)
-            .call()
-            .await?
-            ._0;
-
         let chain_latest_block_height = tendermint_rpc_client.get_latest_block_height().await;
         let (trusted_light_block, target_light_block) = tendermint_rpc_client
             .get_light_blocks(trusted_block_height, chain_latest_block_height)
             .await;
+
+        // Get trusted consensus state from the contract.
+        let trusted_consensus_state = ConsensusState {
+            timestamp: trusted_light_block.signed_header.header.time,
+            root: CommitmentRoot::from_bytes(
+                trusted_light_block.signed_header.header.app_hash.as_bytes(),
+            ),
+            next_validators_hash: trusted_light_block
+                .signed_header
+                .header
+                .next_validators_hash,
+        };
 
         let chain_id = target_light_block.signed_header.header.chain_id.to_string();
         let proposed_header = Header {
@@ -84,7 +90,7 @@ async fn main() -> anyhow::Result<()> {
 
         // Generate a proof of the transition from the trusted block to the target block.
         let proof_data = prover.generate_ics07_update_client_proof(
-            &trusted_consensus_state,
+            &trusted_consensus_state.into(),
             &proposed_header,
             &contract_env,
         );

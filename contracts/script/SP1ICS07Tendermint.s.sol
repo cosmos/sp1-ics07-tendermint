@@ -23,47 +23,51 @@ contract SP1TendermintScript is Script {
 
     // Deploy the SP1 Tendermint contract with the supplied initialization parameters.
     function run() public returns (address) {
-        vm.startBroadcast();
-
         // Read the initialization parameters for the SP1 Tendermint contract.
         SP1ICS07TendermintGenesisJson memory genesis = loadGenesis(
             "genesis.json"
         );
+
+        ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
+            .decode(
+                genesis.trustedConsensusState,
+                (ICS07Tendermint.ConsensusState)
+            );
+
+        bytes32 trustedConsensusHash = keccak256(
+            abi.encode(trustedConsensusState)
+        );
+
+        vm.startBroadcast();
 
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesis.vkey,
             address(verifier),
             genesis.trustedClientState,
-            genesis.trustedConsensusState
+            trustedConsensusHash
         );
 
-        (
-            string memory chain_id,
-            ICS07Tendermint.TrustThreshold memory trust_level,
-            ICS07Tendermint.Height memory latest_height,
-            uint64 trusting_period,
-            uint64 unbonding_period,
-            bool is_frozen
-        ) = ics07Tendermint.clientState();
-
-        assert(keccak256(bytes(chain_id)) == keccak256(bytes("mocha-4")));
-        assert(trust_level.numerator == 1);
-        assert(trust_level.denominator == 3);
-        assert(latest_height.revision_number == 4);
-        // assert(latest_height.revision_height == 2110658);
-        assert(trusting_period == 1_209_600_000_000_000);
-        assert(unbonding_period == 1_209_600_000_000_000);
-        assert(is_frozen == false);
-
-        ICS07Tendermint.ConsensusState memory consensusState = ics07Tendermint
-            .getConsensusState(latest_height.revision_height);
-
-        assert(consensusState.timestamp > 0);
-        assert(consensusState.root.length > 0);
-        assert(consensusState.next_validators_hash.length > 0);
-
         vm.stopBroadcast();
+
+        ICS07Tendermint.ClientState memory clientState = ics07Tendermint
+            .getClientState();
+        assert(
+            keccak256(bytes(clientState.chain_id)) ==
+                keccak256(bytes("mocha-4"))
+        );
+        assert(clientState.trust_level.numerator == 1);
+        assert(clientState.trust_level.denominator == 3);
+        assert(clientState.latest_height.revision_number == 4);
+        // assert(latest_height.revision_height == 2110658);
+        assert(clientState.trusting_period == 1_209_600_000_000_000);
+        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.is_frozen == false);
+
+        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+            clientState.latest_height.revision_height
+        );
+        assert(consensusHash == keccak256(abi.encode(trustedConsensusState)));
 
         return address(ics07Tendermint);
     }

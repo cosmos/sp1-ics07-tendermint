@@ -5,7 +5,8 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07UpdateClientProver};
+use sp1_ics07_tendermint_operator::UpdateClientProgram;
+use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
@@ -59,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
     let args = FixtureArgs::parse();
 
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = SP1ICS07UpdateClientProver::new();
+    let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     let (trusted_light_block, target_light_block) = tendermint_rpc_client
         .get_light_blocks(args.trusted_block, args.target_block)
@@ -112,7 +113,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // Generate a header update proof for the specified blocks.
-    let proof_data = tendermint_prover.generate_ics07_update_client_proof(
+    let proof_data = tendermint_prover.generate_proof(
         &trusted_consensus_state.clone().into(),
         &proposed_header,
         &contract_env,

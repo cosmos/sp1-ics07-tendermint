@@ -8,7 +8,9 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07UpdateClientProver};
+use sp1_ics07_tendermint_operator::{
+    util::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
+};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
 
@@ -37,7 +39,7 @@ async fn main() -> anyhow::Result<()> {
         .on_http(Url::parse(rpc_url.as_str())?);
 
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let prover = SP1ICS07UpdateClientProver::new();
+    let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
 
@@ -89,7 +91,7 @@ async fn main() -> anyhow::Result<()> {
         };
 
         // Generate a proof of the transition from the trusted block to the target block.
-        let proof_data = prover.generate_ics07_update_client_proof(
+        let proof_data = prover.generate_proof(
             &trusted_consensus_state.into(),
             &proposed_header,
             &contract_env,

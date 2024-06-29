@@ -10,8 +10,10 @@ import "forge-std/console.sol";
 /// @notice This contract implements an ICS07 IBC tendermint light client.
 /// @custom:poc This is a proof of concept implementation.
 contract SP1ICS07Tendermint {
-    /// @notice The verification key for the program.
-    bytes32 public ics07UpdateClientProgramVkey;
+    /// @notice The verification key for the update client program.
+    bytes32 public immutable ics07UpdateClientProgramVkey;
+    /// @notice The verification key for the verify membership program.
+    bytes32 public immutable ics07VerifyMembershipProgramVkey;
     /// @notice The SP1 verifier contract.
     ISP1Verifier public verifier;
 
@@ -21,10 +23,10 @@ contract SP1ICS07Tendermint {
     mapping(uint64 => bytes32) public consensusStateHashes;
 
     /// Allowed clock drift in nanoseconds
-    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
+    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3_000_000_000_000; // 3000 seconds
 
-    /// @notice The public value output for the sp1 program.
-    struct SP1ICS07TendermintOutput {
+    /// @notice The public value output for the sp1 update client program.
+    struct SP1ICS07UpdateClientOutput {
         /// The trusted consensus state.
         ICS07Tendermint.ConsensusState trusted_consensus_state;
         /// The new consensus state with the verified header.
@@ -51,17 +53,19 @@ contract SP1ICS07Tendermint {
     }
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
-    /// @param _ics07ProgramVkey The verification key for the program.
+    /// @param _ics07UpdateClientProgramVkey The verification key for the update client program.
     /// @param _verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
     constructor(
-        bytes32 _ics07ProgramVkey,
+        bytes32 _ics07UpdateClientProgramVkey,
+        bytes32 _ics07VerifyMembershipProgramVkey,
         address _verifier,
         bytes memory _clientState,
         bytes32 _consensusState
     ) {
-        ics07UpdateClientProgramVkey = _ics07ProgramVkey;
+        ics07UpdateClientProgramVkey = _ics07UpdateClientProgramVkey;
+        ics07VerifyMembershipProgramVkey = _ics07VerifyMembershipProgramVkey;
         verifier = ISP1Verifier(_verifier);
 
         clientState = abi.decode(_clientState, (ICS07Tendermint.ClientState));
@@ -97,12 +101,12 @@ contract SP1ICS07Tendermint {
         bytes memory proof,
         bytes memory publicValues
     ) public {
-        SP1ICS07TendermintOutput memory output = abi.decode(
+        SP1ICS07UpdateClientOutput memory output = abi.decode(
             publicValues,
-            (SP1ICS07TendermintOutput)
+            (SP1ICS07UpdateClientOutput)
         );
 
-        validatePublicValues(output);
+        validateUpdateClientPublicValues(output);
 
         // TODO: Make sure that other checks have been made in the proof verification
         // such as the consensus state not being outside the trusting period.
@@ -115,10 +119,10 @@ contract SP1ICS07Tendermint {
         );
     }
 
-    /// @notice Validates the SP1ICS07TendermintOutput public values.
+    /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
-    function validatePublicValues(
-        SP1ICS07TendermintOutput memory output
+    function validateUpdateClientPublicValues(
+        SP1ICS07UpdateClientOutput memory output
     ) public view {
         require(
             clientState.is_frozen == false,

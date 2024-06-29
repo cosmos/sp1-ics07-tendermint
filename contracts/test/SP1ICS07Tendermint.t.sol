@@ -15,7 +15,8 @@ struct SP1ICS07TendermintFixtureJson {
     bytes trustedConsensusState;
     bytes targetConsensusState;
     uint64 targetHeight;
-    bytes32 vkey;
+    bytes32 updateClientVkey;
+    bytes32 verifyMembershipVkey;
     bytes publicValues;
     bytes proof;
 }
@@ -43,7 +44,8 @@ contract SP1ICS07TendermintTest is Test {
 
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
-            fixture.vkey,
+            fixture.updateClientVkey,
+            fixture.verifyMembershipVkey,
             address(verifier),
             fixture.trustedClientState,
             trustedConsensusHash
@@ -54,7 +56,8 @@ contract SP1ICS07TendermintTest is Test {
         );
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
-            mockFixture.vkey,
+            mockFixture.updateClientVkey,
+            mockFixture.verifyMembershipVkey,
             address(mockVerifier),
             mockFixture.trustedClientState,
             trustedConsensusHash
@@ -92,7 +95,10 @@ contract SP1ICS07TendermintTest is Test {
             ".targetConsensusState"
         );
         uint64 targetHeight = uint64(json.readUint(".targetHeight"));
-        bytes32 vkey = json.readBytes32(".vkey");
+        bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
+        bytes32 verifyMembershipVkey = json.readBytes32(
+            ".verifyMembershipVkey"
+        );
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
 
@@ -102,7 +108,8 @@ contract SP1ICS07TendermintTest is Test {
                 trustedConsensusState: trustedConsensusState,
                 targetConsensusState: targetConsensusState,
                 targetHeight: targetHeight,
-                vkey: vkey,
+                updateClientVkey: updateClientVkey,
+                verifyMembershipVkey: verifyMembershipVkey,
                 publicValues: publicValues,
                 proof: proof
             });

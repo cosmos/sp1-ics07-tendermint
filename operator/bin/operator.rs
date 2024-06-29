@@ -18,7 +18,7 @@ use sp1_sdk::utils::setup_logger;
 /// the latest block hash and height.
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
+    dotenv::dotenv().expect("Failed to load .env file");
     setup_logger();
 
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");

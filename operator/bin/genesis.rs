@@ -38,7 +38,7 @@ struct SP1ICS07TendermintGenesis {
 /// ```
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
+    dotenv::dotenv().expect("Failed to load .env file");
     setup_logger();
 
     let args = GenesisArgs::parse();

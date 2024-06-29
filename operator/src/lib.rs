@@ -5,8 +5,6 @@ use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::Env;
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
 pub mod rpc;
-mod types;
-pub mod util;
 
 // The path to the ELF file for the Succinct zkVM program.
 pub const TENDERMINT_ELF: &[u8] = include_bytes!("../../elf/riscv32im-succinct-zkvm-elf");

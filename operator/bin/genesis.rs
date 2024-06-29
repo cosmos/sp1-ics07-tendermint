@@ -3,7 +3,7 @@ use clap::Parser;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
-use sp1_ics07_tendermint_operator::{util::LegacyTendermintRPCClient, TENDERMINT_ELF};
+use sp1_ics07_tendermint_operator::{rpc::TendermintRPCClient, TENDERMINT_ELF};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
@@ -15,7 +15,7 @@ use std::{env, path::PathBuf, str::FromStr};
 struct GenesisArgs {
     /// Trusted block.
     #[clap(long)]
-    trusted_block: Option<u64>,
+    trusted_block: Option<u32>,
     /// Genesis path.
     #[clap(long, default_value = "../contracts/script")]
     genesis_path: String,
@@ -43,29 +43,24 @@ async fn main() -> anyhow::Result<()> {
 
     let args = GenesisArgs::parse();
 
-    let tendermint_rpc_client = LegacyTendermintRPCClient::default();
+    let tendermint_rpc_client = TendermintRPCClient::default();
     let tendermint_prover = MockProver::new();
     let (_, vk) = tendermint_prover.setup(TENDERMINT_ELF);
 
-    let latest_height = tendermint_rpc_client
-        .get_latest_commit()
-        .await?
-        .result
-        .signed_header
-        .header
-        .height
-        .into();
+    let trusted_light_block = if let Some(trusted_block) = args.trusted_block {
+        tendermint_rpc_client
+            .get_light_block(Some(trusted_block))
+            .await?
+    } else {
+        tendermint_rpc_client.get_light_block(None).await?
+    };
+
+    let trusted_height = trusted_light_block.height().value();
     if args.trusted_block.is_none() {
-        log::info!("Latest block height: {}", latest_height);
+        log::info!("Latest block height: {}", trusted_height);
     }
-    let trusted_height = args.trusted_block.unwrap_or(latest_height);
 
-    let trusted_light_block = tendermint_rpc_client
-        .get_light_block(trusted_height)
-        .await
-        .unwrap();
     let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
-
     let trusted_client_state = ClientState {
         chain_id: chain_id.to_string(),
         trust_level: TrustThreshold {

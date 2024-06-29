@@ -14,6 +14,7 @@ use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07Tend
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf, str::FromStr};
 
+/// The arguments for the fixture executable.
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct FixtureArgs {
@@ -30,19 +31,23 @@ struct FixtureArgs {
     fixture_path: String,
 }
 
+/// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct SP1ICS07TendermintFixture {
-    // The encoded trusted client state.
+struct SP1ICS07UpdateClientFixture {
+    /// The encoded trusted client state.
     trusted_client_state: String,
-    // The encoded trusted consensus state.
+    /// The encoded trusted consensus state.
     trusted_consensus_state: String,
-    // The encoded target consensus state.
+    /// The encoded target consensus state.
     target_consensus_state: String,
-    // Target height.
+    /// Target height.
     target_height: u64,
-    vkey: String,
+    /// The encoded key for the [`UpdateClientProgram`].
+    update_client_vkey: String,
+    /// The encoded public values.
     public_values: String,
+    /// The encoded proof.
     proof: String,
 }
 
@@ -122,14 +127,14 @@ async fn main() -> anyhow::Result<()> {
     let bytes = proof_data.public_values.as_slice();
     let output = SP1ICS07TendermintOutput::abi_decode(bytes, false).unwrap();
 
-    let fixture = SP1ICS07TendermintFixture {
+    let fixture = SP1ICS07UpdateClientFixture {
         trusted_consensus_state: hex::encode(
             SolConsensusState::from(trusted_consensus_state).abi_encode(),
         ),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
-        vkey: tendermint_prover.vkey.bytes32(),
+        update_client_vkey: tendermint_prover.vkey.bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };
@@ -141,13 +146,13 @@ async fn main() -> anyhow::Result<()> {
     let sp1_prover_type = env::var("SP1_PROVER");
     if sp1_prover_type.as_deref() == Ok("mock") {
         std::fs::write(
-            fixture_path.join("mock_fixture.json"),
+            fixture_path.join("mock_update_client_fixture.json"),
             serde_json::to_string_pretty(&fixture).unwrap(),
         )
         .unwrap();
     } else {
         std::fs::write(
-            fixture_path.join("fixture.json"),
+            fixture_path.join("update_client_fixture.json"),
             serde_json::to_string_pretty(&fixture).unwrap(),
         )
         .unwrap();

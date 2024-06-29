@@ -5,6 +5,7 @@ use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use sp1_ics07_tendermint_operator::{
     util::TendermintRPCClient, SP1ICS07TendermintProgram, UpdateClientProgram,
+    VerifyMembershipProgram,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
@@ -23,14 +24,18 @@ struct GenesisArgs {
     genesis_path: String,
 }
 
+/// The genesis data for the SP1 ICS07 Tendermint contract.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SP1ICS07TendermintGenesis {
-    // The encoded trusted client state.
+    /// The encoded trusted client state.
     trusted_client_state: String,
-    // The encoded trusted consensus state.
+    /// The encoded trusted consensus state.
     trusted_consensus_state: String,
-    vkey: String,
+    /// The encoded key for [`UpdateClientProgram`].
+    update_client_vkey: String,
+    /// The encoded key for [`VerifyMembershipProgram`].
+    verify_membership_vkey: String,
 }
 
 /// Fetches the trusted header hash for the given block height. Defaults to the latest block height.
@@ -47,7 +52,8 @@ async fn main() -> anyhow::Result<()> {
 
     let tendermint_rpc_client = TendermintRPCClient::default();
     let tendermint_prover = MockProver::new();
-    let (_, vk) = tendermint_prover.setup(UpdateClientProgram::ELF);
+    let (_, update_client_vk) = tendermint_prover.setup(UpdateClientProgram::ELF);
+    let (_, verify_membership_vk) = tendermint_prover.setup(VerifyMembershipProgram::ELF);
 
     let latest_height = tendermint_rpc_client
         .get_latest_commit()
@@ -99,7 +105,8 @@ async fn main() -> anyhow::Result<()> {
             SolConsensusState::from(trusted_consensus_state).abi_encode(),
         ),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
-        vkey: vk.bytes32(),
+        update_client_vkey: update_client_vk.bytes32(),
+        verify_membership_vkey: verify_membership_vk.bytes32(),
     };
 
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.genesis_path);

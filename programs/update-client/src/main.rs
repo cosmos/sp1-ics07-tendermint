@@ -20,7 +20,7 @@ use ibc_client_tendermint::{
 };
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
-    self, ConsensusState as SolConsensusState, Env, SP1ICS07TendermintOutput,
+    self, ConsensusState as SolConsensusState, Env, SP1ICS07UpdateClientOutput,
 };
 use sp1_ics07_tendermint_update_client::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
@@ -73,7 +73,7 @@ pub fn main() {
     };
     let new_consensus_state = ConsensusState::from(proposed_header);
 
-    let output = SP1ICS07TendermintOutput {
+    let output = SP1ICS07UpdateClientOutput {
         trusted_consensus_state,
         new_consensus_state: new_consensus_state.into(),
         env,

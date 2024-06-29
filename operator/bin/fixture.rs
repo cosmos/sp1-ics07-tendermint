@@ -10,7 +10,7 @@ use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07Tendermin
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07TendermintOutput};
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07UpdateClientOutput};
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf, str::FromStr};
 
@@ -125,7 +125,7 @@ async fn main() -> anyhow::Result<()> {
     );
 
     let bytes = proof_data.public_values.as_slice();
-    let output = SP1ICS07TendermintOutput::abi_decode(bytes, false).unwrap();
+    let output = SP1ICS07UpdateClientOutput::abi_decode(bytes, false).unwrap();
 
     let fixture = SP1ICS07UpdateClientFixture {
         trusted_consensus_state: hex::encode(

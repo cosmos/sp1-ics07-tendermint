@@ -14,7 +14,7 @@ sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::{sol, SolType};
 
 /// The public values encoded as a tuple that can be easily deserialized inside Solidity.
-type PublicValuesTuple = sol! {
+type VerifyMembershipOutput = sol! {
     tuple(bytes32, string, bytes)
 };
 
@@ -31,8 +31,8 @@ use ibc_core_commitment_types::{
 /// Panics if the verification fails.
 pub fn main() {
     let encoded_1 = sp1_zkvm::io::read_vec();
-    let app_hash: [u8; 32] = encoded_1.clone().try_into().unwrap();
-    let commitment_root = CommitmentRoot::from(encoded_1);
+    let app_hash: [u8; 32] = encoded_1.try_into().unwrap();
+    let commitment_root = CommitmentRoot::from_bytes(&app_hash);
 
     let encoded_2 = sp1_zkvm::io::read_vec();
     let commitment_proof = CommitmentProofBytes::try_from(encoded_2).unwrap();
@@ -59,6 +59,6 @@ pub fn main() {
         )
         .unwrap();
 
-    let output = PublicValuesTuple::abi_encode(&(app_hash, path_str, value));
+    let output = VerifyMembershipOutput::abi_encode(&(app_hash, path_str, value));
     sp1_zkvm::io::commit_slice(&output);
 }

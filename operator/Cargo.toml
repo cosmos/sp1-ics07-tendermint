@@ -11,12 +11,16 @@ name = "operator"
 path = "bin/operator.rs"
 
 [[bin]]
+name = "genesis"
+path = "bin/genesis.rs"
+
+[[bin]]
 name = "update-client-fixture"
 path = "bin/uc_fixture.rs"
 
 [[bin]]
-name = "genesis"
-path = "bin/genesis.rs"
+name = "verify-membership-fixture"
+path = "bin/vm_fixture.rs"
 
 [dependencies]
 sp1-sdk = { workspace = true }

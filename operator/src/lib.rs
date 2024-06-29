@@ -89,3 +89,10 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
         proof
     }
 }
+
+impl SP1ICS07TendermintProver<VerifyMembershipProgram> {
+    /// Generate a proof of a verify membership from trusted_consensus_state to a proposed header.
+    pub fn generate_proof(&self, _root: &[u8], _path: &str) -> SP1PlonkBn254Proof {
+        todo!();
+    }
+}

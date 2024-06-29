@@ -29,7 +29,7 @@ contract SP1ICS07TendermintTest is Test {
 
     function setUp() public {
         SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
-            "fixture.json"
+            "update_client_fixture.json"
         );
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
@@ -52,7 +52,7 @@ contract SP1ICS07TendermintTest is Test {
         );
 
         SP1ICS07TendermintFixtureJson memory mockFixture = loadFixture(
-            "mock_fixture.json"
+            "mock_update_client_fixture.json"
         );
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(

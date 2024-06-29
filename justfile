@@ -21,7 +21,7 @@ test-cargo:
 genesis:
   @echo "Generating the genesis file for the Celestia Mocha testnet"
   @echo "Building the program..."
-  just build-program
+  just build-programs
   @echo "Generating the genesis file..."
   RUST_LOG=info cargo run --bin genesis --release
 
@@ -29,9 +29,9 @@ genesis:
 mock-fixtures:
   @echo "Generating mock fixtures for the Celestia Mocha testnet"
   @echo "Building the program..."
-  just build-program
+  just build-programs
   @echo "Generating the mock fixtures..."
-  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
+  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin update-client-fixture --release -- --trusted-block 2110658 --target-block 2110668
   @echo "Mock fixtures generated at 'contracts/fixtures/mock_fixture.json'"
 
 # Generate the `fixture.json` file for the Celestia Mocha testnet using the network prover.
@@ -39,9 +39,9 @@ mock-fixtures:
 network-fixtures:
   @echo "Generating fixtures for the Celestia Mocha testnet"
   @echo "Building the program..."
-  just build-program
+  just build-programs
   @echo "Generating fixtures... This may take a while (up to 20 minutes)"
-  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="network" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
+  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="network" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin update-client-fixture --release -- --trusted-block 2110658 --target-block 2110668
   @echo "Fixtures generated at 'contracts/fixtures/fixture.json'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract

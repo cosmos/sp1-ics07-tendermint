@@ -5,7 +5,7 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
+use sp1_ics07_tendermint_operator::{util::LegacyTendermintRPCClient, SP1ICS07TendermintProver};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
@@ -58,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
 
     let args = FixtureArgs::parse();
 
-    let tendermint_rpc_client = TendermintRPCClient::default();
+    let tendermint_rpc_client = LegacyTendermintRPCClient::default();
     let tendermint_prover = SP1ICS07TendermintProver::new();
 
     let (trusted_light_block, target_light_block) = tendermint_rpc_client
@@ -73,8 +73,8 @@ async fn main() -> anyhow::Result<()> {
             denominator: 3,
         },
         latest_height: Height {
-            revision_number: chain_id.revision_number(),
-            revision_height: args.trusted_block,
+            revision_number: chain_id.revision_number().try_into()?,
+            revision_height: args.trusted_block.try_into()?,
         },
         is_frozen: false,
         // 2 weeks in nanoseconds
@@ -95,8 +95,8 @@ async fn main() -> anyhow::Result<()> {
         signed_header: target_light_block.signed_header,
         validator_set: target_light_block.validators,
         trusted_height: IbcHeight::new(
-            trusted_client_state.latest_height.revision_number,
-            trusted_client_state.latest_height.revision_height,
+            trusted_client_state.latest_height.revision_number.into(),
+            trusted_client_state.latest_height.revision_height.into(),
         )
         .unwrap(),
         trusted_next_validator_set: trusted_light_block.next_validators,

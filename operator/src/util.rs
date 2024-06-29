@@ -11,20 +11,20 @@ use tendermint::{
 };
 use tendermint_light_client_verifier::types::{LightBlock, ValidatorSet};
 
-pub struct TendermintRPCClient {
+pub struct LegacyTendermintRPCClient {
     url: String,
     client: Client,
 }
 
-impl Default for TendermintRPCClient {
+impl Default for LegacyTendermintRPCClient {
     fn default() -> Self {
         Self::new(env::var("TENDERMINT_RPC_URL").expect("TENDERMINT_RPC_URL not set"))
     }
 }
 
-impl TendermintRPCClient {
+impl LegacyTendermintRPCClient {
     pub fn new(url: String) -> Self {
-        TendermintRPCClient {
+        LegacyTendermintRPCClient {
             url,
             client: Client::new(),
         }

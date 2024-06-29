@@ -8,7 +8,7 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
+use sp1_ics07_tendermint_operator::{rpc::TendermintRPCClient, SP1ICS07TendermintProver};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
 
@@ -53,10 +53,11 @@ async fn main() -> anyhow::Result<()> {
             );
         }
 
-        let chain_latest_block_height = tendermint_rpc_client.get_latest_block_height().await;
-        let (trusted_light_block, target_light_block) = tendermint_rpc_client
-            .get_light_blocks(trusted_block_height, chain_latest_block_height)
-            .await;
+        let trusted_light_block = tendermint_rpc_client
+            .get_light_block(Some(trusted_block_height as u32))
+            .await?;
+        let target_light_block = tendermint_rpc_client.get_light_block(None).await?;
+        let target_height = target_light_block.height().value();
 
         // Get trusted consensus state from the contract.
         let trusted_consensus_state = ConsensusState {
@@ -74,7 +75,11 @@ async fn main() -> anyhow::Result<()> {
         let proposed_header = Header {
             signed_header: target_light_block.signed_header,
             validator_set: target_light_block.validators,
-            trusted_height: IbcHeight::new(trusted_revision_number, trusted_block_height).unwrap(),
+            trusted_height: IbcHeight::new(
+                trusted_revision_number.into(),
+                trusted_block_height.into(),
+            )
+            .unwrap(),
             trusted_next_validator_set: trusted_light_block.next_validators,
         };
 
@@ -110,7 +115,7 @@ async fn main() -> anyhow::Result<()> {
 
         info!(
             "Updated the ICS-07 Tendermint light client at address {} from block {} to block {}.",
-            contract_address, trusted_block_height, chain_latest_block_height
+            contract_address, trusted_block_height, target_height
         );
 
         // Sleep for 60 seconds.

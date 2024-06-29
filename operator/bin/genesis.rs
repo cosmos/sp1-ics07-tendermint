@@ -3,7 +3,7 @@ use clap::Parser;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, TENDERMINT_ELF};
+use sp1_ics07_tendermint_operator::{util::LegacyTendermintRPCClient, TENDERMINT_ELF};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
@@ -43,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
 
     let args = GenesisArgs::parse();
 
-    let tendermint_rpc_client = TendermintRPCClient::default();
+    let tendermint_rpc_client = LegacyTendermintRPCClient::default();
     let tendermint_prover = MockProver::new();
     let (_, vk) = tendermint_prover.setup(TENDERMINT_ELF);
 
@@ -73,8 +73,8 @@ async fn main() -> anyhow::Result<()> {
             denominator: 3,
         },
         latest_height: Height {
-            revision_number: chain_id.revision_number(),
-            revision_height: trusted_height,
+            revision_number: chain_id.revision_number().try_into()?,
+            revision_height: trusted_height.try_into()?,
         },
         is_frozen: false,
         // 2 weeks in nanoseconds

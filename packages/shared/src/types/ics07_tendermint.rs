@@ -30,7 +30,11 @@ alloy_sol_types::sol!(
 #[allow(clippy::fallible_impl_from)]
 impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
     fn from(trust_threshold: sp1_ics07_tendermint::TrustThreshold) -> Self {
-        Self::new(trust_threshold.numerator, trust_threshold.denominator).unwrap()
+        Self::new(
+            trust_threshold.numerator.into(),
+            trust_threshold.denominator.into(),
+        )
+        .unwrap()
     }
 }
 

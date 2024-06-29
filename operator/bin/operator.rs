@@ -54,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         }
 
         let trusted_light_block = tendermint_rpc_client
-            .get_light_block(Some(trusted_block_height as u32))
+            .get_light_block(Some(trusted_block_height))
             .await?;
         let target_light_block = tendermint_rpc_client.get_light_block(None).await?;
         let target_height = target_light_block.height().value();

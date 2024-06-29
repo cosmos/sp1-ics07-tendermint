@@ -4,7 +4,7 @@ use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use sp1_ics07_tendermint_operator::{
-    util::TendermintRPCClient, SP1ICS07TendermintProgram, UpdateClientProgram,
+    rpc::TendermintRPCClient, SP1ICS07TendermintProgram, UpdateClientProgram,
     VerifyMembershipProgram,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
@@ -18,7 +18,7 @@ use std::{env, path::PathBuf, str::FromStr};
 struct GenesisArgs {
     /// Trusted block.
     #[clap(long)]
-    trusted_block: Option<u64>,
+    trusted_block: Option<u32>,
     /// Genesis path.
     #[clap(long, default_value = "../contracts/script")]
     genesis_path: String,
@@ -45,7 +45,7 @@ struct SP1ICS07TendermintGenesis {
 /// ```
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
+    dotenv::dotenv().expect("Failed to load .env file");
     setup_logger();
 
     let args = GenesisArgs::parse();
@@ -55,23 +55,19 @@ async fn main() -> anyhow::Result<()> {
     let (_, update_client_vk) = mock_prover.setup(UpdateClientProgram::ELF);
     let (_, verify_membership_vk) = mock_prover.setup(VerifyMembershipProgram::ELF);
 
-    let latest_height = tendermint_rpc_client
-        .get_latest_commit()
-        .await?
-        .result
-        .signed_header
-        .header
-        .height
-        .into();
-    if args.trusted_block.is_none() {
-        log::info!("Latest block height: {}", latest_height);
-    }
-    let trusted_height = args.trusted_block.unwrap_or(latest_height);
+    let trusted_light_block = if let Some(trusted_block) = args.trusted_block {
+        tendermint_rpc_client
+            .get_light_block(Some(trusted_block))
+            .await?
+    } else {
+        tendermint_rpc_client.get_light_block(None).await?
+    };
 
-    let trusted_light_block = tendermint_rpc_client
-        .get_light_block(trusted_height)
-        .await
-        .unwrap();
+    let trusted_height = trusted_light_block.height().value();
+    if args.trusted_block.is_none() {
+        log::info!("Latest block height: {}", trusted_height);
+    }
+
     let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
 
     let two_weeks_in_nanos = 14 * 24 * 60 * 60 * 1_000_000_000;
@@ -82,8 +78,8 @@ async fn main() -> anyhow::Result<()> {
             denominator: 3,
         },
         latest_height: Height {
-            revision_number: chain_id.revision_number(),
-            revision_height: trusted_height,
+            revision_number: chain_id.revision_number().try_into()?,
+            revision_height: trusted_height.try_into()?,
         },
         is_frozen: false,
         trusting_period: two_weeks_in_nanos,

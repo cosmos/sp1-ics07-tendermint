@@ -7,7 +7,7 @@ use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_operator::SP1ICS07TendermintProgram;
 use sp1_ics07_tendermint_operator::{
-    util::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
+    rpc::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
     VerifyMembershipProgram,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
@@ -24,11 +24,11 @@ use std::{env, path::PathBuf, str::FromStr};
 struct FixtureArgs {
     /// Trusted block.
     #[clap(long)]
-    trusted_block: u64,
+    trusted_block: u32,
 
     /// Target block.
     #[clap(long, env)]
-    target_block: u64,
+    target_block: u32,
 
     /// Fixture path.
     #[clap(long, default_value = "../contracts/fixtures")]
@@ -46,7 +46,7 @@ struct SP1ICS07UpdateClientFixture {
     /// The encoded target consensus state.
     target_consensus_state: String,
     /// Target height.
-    target_height: u64,
+    target_height: u32,
     /// The encoded key for the [`UpdateClientProgram`].
     update_client_vkey: String,
     /// The encoded key for the [`VerifyMembershipProgram`].
@@ -73,12 +73,15 @@ async fn main() -> anyhow::Result<()> {
     let tendermint_rpc_client = TendermintRPCClient::default();
     let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
-    let (trusted_light_block, target_light_block) = tendermint_rpc_client
-        .get_light_blocks(args.trusted_block, args.target_block)
-        .await;
-    let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
+    let trusted_light_block = tendermint_rpc_client
+        .get_light_block(Some(args.trusted_block))
+        .await?;
+    let target_light_block = tendermint_rpc_client
+        .get_light_block(Some(args.target_block))
+        .await?;
 
     let two_weeks_in_nanos = 14 * 24 * 60 * 60 * 1_000_000_000;
+    let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
     let trusted_client_state = ClientState {
         chain_id: chain_id.to_string(),
         trust_level: TrustThreshold {
@@ -86,7 +89,7 @@ async fn main() -> anyhow::Result<()> {
             denominator: 3,
         },
         latest_height: Height {
-            revision_number: chain_id.revision_number(),
+            revision_number: chain_id.revision_number().try_into()?,
             revision_height: args.trusted_block,
         },
         is_frozen: false,
@@ -108,8 +111,8 @@ async fn main() -> anyhow::Result<()> {
         signed_header: target_light_block.signed_header,
         validator_set: target_light_block.validators,
         trusted_height: IbcHeight::new(
-            trusted_client_state.latest_height.revision_number,
-            trusted_client_state.latest_height.revision_height,
+            trusted_client_state.latest_height.revision_number.into(),
+            trusted_client_state.latest_height.revision_height.into(),
         )
         .unwrap(),
         trusted_next_validator_set: trusted_light_block.next_validators,

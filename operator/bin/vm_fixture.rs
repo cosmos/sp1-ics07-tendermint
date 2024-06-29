@@ -6,7 +6,7 @@ use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_operator::SP1ICS07TendermintProgram;
 use sp1_ics07_tendermint_operator::{
-    util::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
+    rpc::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
     VerifyMembershipProgram,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
@@ -65,6 +65,8 @@ type VerifyMembershipOutput = alloy_sol_types::sol! {
 /// The fixture will be written to the path: ./contracts/fixtures/fixture.json
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    todo!()
+    /*
     dotenv::dotenv().ok();
     setup_logger();
 
@@ -160,4 +162,5 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
+    */
 }

@@ -42,6 +42,7 @@ sp1-sdk = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.5-testn
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
 tendermint = { version = "0.36.0", default-features = false }
+tendermint-rpc = { version = "0.36.0", features = ["http-client"] }
 ibc-core-client-types = { version = "0.53.0", default-features = false }
 time = { version = "0.3", default-features = false, features = ["macros", "parsing"] }
 alloy-primitives = "0.7.2"

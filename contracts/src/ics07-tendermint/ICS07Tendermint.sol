@@ -8,17 +8,17 @@ contract ICS07Tendermint {
     /// @notice Height of the counterparty chain
     struct Height {
         /// Previously known as "epoch"
-        uint64 revision_number;
+        uint32 revision_number;
         /// The height of a block
-        uint64 revision_height;
+        uint32 revision_height;
     }
 
     /// Fraction of validator overlap needed to update header
     struct TrustThreshold {
         /// Numerator of the fraction
-        uint64 numerator;
+        uint8 numerator;
         /// Denominator of the fraction
-        uint64 denominator;
+        uint8 denominator;
     }
 
     /// @notice Defines the ICS07Tendermint ClientState for ibc-lite

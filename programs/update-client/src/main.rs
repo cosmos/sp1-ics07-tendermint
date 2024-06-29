@@ -64,12 +64,28 @@ pub fn main() {
     .unwrap();
 
     let trusted_height = sp1_ics07_tendermint::Height {
-        revision_number: proposed_header.trusted_height.revision_number(),
-        revision_height: proposed_header.trusted_height.revision_height(),
+        revision_number: proposed_header
+            .trusted_height
+            .revision_number()
+            .try_into()
+            .unwrap(),
+        revision_height: proposed_header
+            .trusted_height
+            .revision_height()
+            .try_into()
+            .unwrap(),
     };
     let new_height = sp1_ics07_tendermint::Height {
-        revision_number: proposed_header.height().revision_number(),
-        revision_height: proposed_header.height().revision_height(),
+        revision_number: proposed_header
+            .height()
+            .revision_number()
+            .try_into()
+            .unwrap(),
+        revision_height: proposed_header
+            .height()
+            .revision_height()
+            .try_into()
+            .unwrap(),
     };
     let new_consensus_state = ConsensusState::from(proposed_header);
 

@@ -29,6 +29,7 @@ tokio = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
 tendermint = { workspace = true }
+tendermint-rpc = { workspace = true }
 tendermint-light-client-verifier = { workspace = true }
 ibc-client-tendermint = { workspace = true }
 ibc-core-client-types = { workspace = true }

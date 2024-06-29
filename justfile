@@ -1,9 +1,13 @@
 set dotenv-load
 
 # Build riscv elf file using `cargo prove build` command
-build-program:
+build-programs:
   cd programs/update-client && cargo prove build
-  @echo "ELF created at 'program/elf/riscv32im-succinct-zkvm-elf'"
+  mv elf/riscv32im-succinct-zkvm-elf elf/update-client-riscv32im-succinct-zkvm-elf
+  @echo "ELF created at 'elf/update-client-riscv32im-succinct-zkvm-elf'"
+  cd programs/verify-membership && cargo prove build
+  mv elf/riscv32im-succinct-zkvm-elf elf/verify-membership-riscv32im-succinct-zkvm-elf
+  @echo "ELF created at 'elf/verify-membership-riscv32im-succinct-zkvm-elf'"
 
 # Run the Solidity tests using `forge test` command
 test-foundry:

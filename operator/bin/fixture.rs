@@ -5,7 +5,7 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
+use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07UpdateClientProver};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
@@ -59,7 +59,7 @@ async fn main() -> anyhow::Result<()> {
     let args = FixtureArgs::parse();
 
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = SP1ICS07TendermintProver::new();
+    let tendermint_prover = SP1ICS07UpdateClientProver::new();
 
     let (trusted_light_block, target_light_block) = tendermint_rpc_client
         .get_light_blocks(args.trusted_block, args.target_block)

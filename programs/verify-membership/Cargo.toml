@@ -9,15 +9,5 @@ license = { workspace = true }
 
 [dependencies]
 sp1-zkvm = { workspace = true }
-sp1-ics07-tendermint-shared = { workspace = true }
-tendermint-light-client-verifier = { workspace = true }
-ibc-client-tendermint = { workspace = true }
-ibc-core-host-types = { workspace = true }
-ibc-core-client = { workspace = true }
-ibc-primitives = { workspace = true }
-ibc-core-handler-types = { workspace = true }
-serde = { workspace = true }
-sha2 = { workspace = true }
+ibc-core-commitment-types = { workspace = true }
 alloy-sol-types = { workspace = true }
-serde_cbor = { workspace = true }
-serde_json = { workspace = true }

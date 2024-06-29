@@ -8,25 +8,26 @@ mod types;
 pub mod util;
 
 // The path to the ELF file for the Succinct zkVM program.
-pub const TENDERMINT_ELF: &[u8] = include_bytes!("../../elf/riscv32im-succinct-zkvm-elf");
+pub const UPDATE_CLIENT_ELF: &[u8] =
+    include_bytes!("../../elf/update-client-riscv32im-succinct-zkvm-elf");
 
-pub struct SP1ICS07TendermintProver {
+pub struct SP1ICS07UpdateClientProver {
     pub prover_client: ProverClient,
     pub pkey: SP1ProvingKey,
     pub vkey: SP1VerifyingKey,
 }
 
-impl Default for SP1ICS07TendermintProver {
+impl Default for SP1ICS07UpdateClientProver {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl SP1ICS07TendermintProver {
+impl SP1ICS07UpdateClientProver {
     pub fn new() -> Self {
         log::info!("Initializing SP1 ProverClient...");
         let prover_client = ProverClient::new();
-        let (pkey, vkey) = prover_client.setup(TENDERMINT_ELF);
+        let (pkey, vkey) = prover_client.setup(UPDATE_CLIENT_ELF);
         log::info!("SP1 ProverClient initialized");
         Self {
             prover_client,

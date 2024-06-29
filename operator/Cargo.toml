@@ -11,8 +11,8 @@ name = "operator"
 path = "bin/operator.rs"
 
 [[bin]]
-name = "fixture"
-path = "bin/fixture.rs"
+name = "update-client-fixture"
+path = "bin/uc_fixture.rs"
 
 [[bin]]
 name = "genesis"

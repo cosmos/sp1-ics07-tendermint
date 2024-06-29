@@ -51,9 +51,9 @@ async fn main() -> anyhow::Result<()> {
     let args = GenesisArgs::parse();
 
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = MockProver::new();
-    let (_, update_client_vk) = tendermint_prover.setup(UpdateClientProgram::ELF);
-    let (_, verify_membership_vk) = tendermint_prover.setup(VerifyMembershipProgram::ELF);
+    let mock_prover = MockProver::new();
+    let (_, update_client_vk) = mock_prover.setup(UpdateClientProgram::ELF);
+    let (_, verify_membership_vk) = mock_prover.setup(VerifyMembershipProgram::ELF);
 
     let latest_height = tendermint_rpc_client
         .get_latest_commit()
@@ -74,6 +74,7 @@ async fn main() -> anyhow::Result<()> {
         .unwrap();
     let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
 
+    let two_weeks_in_nanos = 14 * 24 * 60 * 60 * 1_000_000_000;
     let trusted_client_state = ClientState {
         chain_id: chain_id.to_string(),
         trust_level: TrustThreshold {
@@ -85,9 +86,8 @@ async fn main() -> anyhow::Result<()> {
             revision_height: trusted_height,
         },
         is_frozen: false,
-        // 2 weeks in nanoseconds
-        trusting_period: 14 * 24 * 60 * 60 * 1_000_000_000,
-        unbonding_period: 14 * 24 * 60 * 60 * 1_000_000_000,
+        trusting_period: two_weeks_in_nanos,
+        unbonding_period: two_weeks_in_nanos,
     };
     let trusted_consensus_state = ConsensusState {
         timestamp: trusted_light_block.signed_header.header.time,

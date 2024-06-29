@@ -5,13 +5,17 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::UpdateClientProgram;
-use sp1_ics07_tendermint_operator::{util::TendermintRPCClient, SP1ICS07TendermintProver};
+use sp1_ics07_tendermint_operator::SP1ICS07TendermintProgram;
+use sp1_ics07_tendermint_operator::{
+    util::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
+    VerifyMembershipProgram,
+};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07UpdateClientOutput};
 use sp1_sdk::{utils::setup_logger, HashableKey};
+use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};
 
 /// The arguments for the fixture executable.
@@ -45,6 +49,8 @@ struct SP1ICS07UpdateClientFixture {
     target_height: u64,
     /// The encoded key for the [`UpdateClientProgram`].
     update_client_vkey: String,
+    /// The encoded key for the [`VerifyMembershipProgram`].
+    verify_membership_vkey: String,
     /// The encoded public values.
     public_values: String,
     /// The encoded proof.
@@ -135,6 +141,10 @@ async fn main() -> anyhow::Result<()> {
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
         update_client_vkey: tendermint_prover.vkey.bytes32(),
+        verify_membership_vkey: MockProver::new()
+            .setup(VerifyMembershipProgram::ELF)
+            .1
+            .bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };
@@ -142,7 +152,6 @@ async fn main() -> anyhow::Result<()> {
     // Save the proof data to the file path.
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.fixture_path);
 
-    // TODO: Change to prover.id
     let sp1_prover_type = env::var("SP1_PROVER");
     if sp1_prover_type.as_deref() == Ok("mock") {
         std::fs::write(

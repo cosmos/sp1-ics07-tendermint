@@ -10,6 +10,7 @@ on:
       - '**.lock'
       - '**.mod'
       - '**.sum'
+      - '**.sol'
       - '.github/workflows/e2e.yml'
 permissions:
   contents: read
@@ -70,10 +71,3 @@ jobs:
         run: |
           cd e2e/interchaintestv8
           go test -v -mod=readonly . -run=${{ matrix.test }}
-      - name: Upload Diagnostics on Failure
-        uses: actions/upload-artifact@v4
-        if: ${{ failure() }}
-        continue-on-error: true
-        with:
-          path: e2e/interchaintestv8/diagnostics
-          retention-days: 5

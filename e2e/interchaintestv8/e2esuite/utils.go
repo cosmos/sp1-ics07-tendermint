@@ -14,12 +14,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 )
 
-// FundAddressChainA sends funds to the given address on Chain A.
-// The amount sent is 1,000,000,000 of the chain's denom.
-func (s *TestSuite) FundAddressChainA(ctx context.Context, address string) {
-	s.fundAddress(ctx, s.ChainA, s.UserA.KeyName(), address)
-}
-
 // FundAddressChainB sends funds to the given address on Chain B.
 // The amount sent is 1,000,000,000 of the chain's denom.
 func (s *TestSuite) FundAddressChainB(ctx context.Context, address string) {

@@ -15,6 +15,9 @@ import (
 // and can provide additional functionality
 type SP1ICS07TendermintTestSuite struct {
 	e2esuite.TestSuite
+
+	// Address of the SP1ICS07Tendermint contract
+	contractAddress string
 }
 
 // SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
@@ -35,7 +38,7 @@ func (s *SP1ICS07TendermintTestSuite) TestBasic() {
 
 	eth, _ := s.ChainA, s.ChainB
 
-	s.Require().True(s.Run("Check faucet balance", func() {
+	s.Require().True(s.Run("Deploy contract", func() {
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
 			ContractRootDir:  "../../contracts",
 			SolidityContract: "script/SP1ICS07Tendermint.s.sol",
@@ -43,10 +46,8 @@ func (s *SP1ICS07TendermintTestSuite) TestBasic() {
 		})
 		s.Require().NoError(err)
 
-		contractAddr := s.GetEthAddressFromStdout(string(stdout))
-		s.Require().NotEmpty(contractAddr)
-		s.Require().Len(contractAddr, 42)
-
-		s.T().Logf("contract address: %s", contractAddr)
+		s.contractAddress = s.GetEthAddressFromStdout(string(stdout))
+		s.Require().NotEmpty(s.contractAddress)
+		s.Require().Len(s.contractAddress, 42)
 	}))
 }

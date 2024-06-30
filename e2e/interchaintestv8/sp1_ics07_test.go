@@ -11,24 +11,24 @@ import (
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 )
 
-// BasicTestSuite is a suite of tests that wraps the TestSuite
+// SP1ICS07TendermintTestSuite is a suite of tests that wraps the TestSuite
 // and can provide additional functionality
-type BasicTestSuite struct {
+type SP1ICS07TendermintTestSuite struct {
 	e2esuite.TestSuite
 }
 
-// SetupSuite calls the underlying BasicTestSuite's SetupSuite method
-func (s *BasicTestSuite) SetupSuite(ctx context.Context) {
+// SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
+func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 	s.TestSuite.SetupSuite(ctx)
 }
 
-// TestWithBasicTestSuite is the boilerplate code that allows the test suite to be run
-func TestWithBasicTestSuite(t *testing.T) {
-	suite.Run(t, new(BasicTestSuite))
+// TestWithSP1ICS07TendermintTestSuite is the boilerplate code that allows the test suite to be run
+func TestWithSP1ICS07TendermintTestSuite(t *testing.T) {
+	suite.Run(t, new(SP1ICS07TendermintTestSuite))
 }
 
 // TestBasic is an example test function that will be run by the test suite
-func (s *BasicTestSuite) TestBasic() {
+func (s *SP1ICS07TendermintTestSuite) TestBasic() {
 	ctx := context.Background()
 
 	s.SetupSuite(ctx)

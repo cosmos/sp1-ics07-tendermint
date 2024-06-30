@@ -91,7 +91,32 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
 
 impl SP1ICS07TendermintProver<VerifyMembershipProgram> {
     /// Generate a proof of a verify membership from trusted_consensus_state to a proposed header.
-    pub fn generate_proof(&self, _root: &[u8], _path: &str) -> SP1PlonkBn254Proof {
-        todo!();
+    pub fn generate_proof(
+        &self,
+        root: &[u8],
+        path: &str,
+        proof: Vec<u8>,
+        value: &[u8],
+    ) -> SP1PlonkBn254Proof {
+        let mut stdin = SP1Stdin::new();
+        stdin.write_slice(root);
+        stdin.write_slice(path.as_bytes());
+        stdin.write_vec(proof);
+        stdin.write_slice(value);
+
+        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
+        // network proof.
+        let proof = self
+            .prover_client
+            .prove_plonk(&self.pkey, stdin)
+            .expect("proving failed");
+
+        // Verify proof.
+        self.prover_client
+            .verify_plonk(&proof, &self.vkey)
+            .expect("Verification failed");
+
+        // Return the proof.
+        proof
     }
 }

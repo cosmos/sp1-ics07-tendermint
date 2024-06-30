@@ -58,3 +58,8 @@ deploy-contracts:
 # This command requires the `.env` file to be present in the root directory.
 operator:
   RUST_LOG=info cargo run --bin operator --release
+
+# Run the e2e tests
+e2e-test testname:
+  echo "Running {{testname}} test..."
+  cd e2e/interchaintestv8 && go test -v -run={{testname}}

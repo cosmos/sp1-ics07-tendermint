@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
+
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 )
 
@@ -33,10 +35,14 @@ func (s *BasicTestSuite) TestBasic() {
 
 	eth, _ := s.ChainA, s.ChainB
 
-	s.Require().True(s.Run("Check faucet balance", func() {
-		faucetAddr := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-		balance, err := eth.GetBalance(ctx, faucetAddr, "")
+	s.Require().True(s.Run("Deploy the contracts", func() {
+		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
+			ContractRootDir:  "../../contracts",
+			SolidityContract: "script/SP1ICS07Tendermint.s.sol",
+			RawOptions:       []string{"--legacy"},
+		})
 		s.Require().NoError(err)
-		s.Require().True(balance.IsPositive())
+
+		s.T().Logf("stdout: %s", stdout)
 	}))
 }

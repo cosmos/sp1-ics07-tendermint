@@ -70,11 +70,12 @@ func (s *TestSuite) SetupSuite(ctx context.Context) {
 	// map all query request types to their gRPC method paths for cosmos chains
 	s.Require().NoError(populateQueryReqToPath(ctx, s.ChainB))
 
-	// Fund a user accounts
-	userFunds := sdkmath.NewInt(testvalues.StartingTokenAmount)
-	users := interchaintest.GetAndFundTestUsers(t, ctx, t.Name(), userFunds, s.ChainA, s.ChainB)
-	s.UserA = users[0]
-	s.UserB = users[1]
+	// Fund user accounts
+	cosmosUserFunds := sdkmath.NewInt(testvalues.StartingTokenAmount)
+	cosmosUsers := interchaintest.GetAndFundTestUsers(t, ctx, t.Name(), cosmosUserFunds, s.ChainB)
+	s.UserB = cosmosUsers[0]
+	ethUsers := interchaintest.GetAndFundTestUsers(t, ctx, t.Name(), testvalues.StartingEthBalance, s.ChainA)
+	s.UserA = ethUsers[0]
 
 	t.Cleanup(
 		func() {

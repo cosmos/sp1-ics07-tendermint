@@ -35,14 +35,18 @@ func (s *BasicTestSuite) TestBasic() {
 
 	eth, _ := s.ChainA, s.ChainB
 
-	s.Require().True(s.Run("Deploy the contracts", func() {
+	s.Require().True(s.Run("Check faucet balance", func() {
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
 			ContractRootDir:  "../../contracts",
 			SolidityContract: "script/SP1ICS07Tendermint.s.sol",
-			RawOptions:       []string{"--legacy"},
+			RawOptions:       []string{"--legacy", "--json"},
 		})
 		s.Require().NoError(err)
 
-		s.T().Logf("stdout: %s", stdout)
+		contractAddr := s.GetEthAddressFromStdout(string(stdout))
+		s.Require().NotEmpty(contractAddr)
+		s.Require().Len(contractAddr, 42)
+
+		s.T().Logf("contract address: %s", contractAddr)
 	}))
 }

@@ -2,6 +2,8 @@ package e2esuite
 
 import (
 	"context"
+	"fmt"
+	"regexp"
 
 	"cosmossdk.io/math"
 
@@ -65,4 +67,17 @@ func (s *TestSuite) fundAddress(ctx context.Context, chain *cosmos.CosmosChain, 
 	// wait for 2 blocks for the funds to be received
 	err = testutil.WaitForBlocks(ctx, 2, chain)
 	s.Require().NoError(err)
+}
+
+func (s *TestSuite) GetEthAddressFromStdout(stdout string) string {
+	// Define the regular expression pattern
+	re := regexp.MustCompile(`"value":"(0x[0-9a-fA-F]+)"`)
+
+	// Find the first match
+	matches := re.FindStringSubmatch(stdout)
+	if len(matches) <= 1 {
+		s.FailNow(fmt.Sprintf("no match found in stdout: %s", stdout))
+	}
+	// Extract the value
+	return matches[1]
 }

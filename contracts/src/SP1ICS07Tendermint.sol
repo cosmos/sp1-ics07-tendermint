@@ -18,7 +18,7 @@ contract SP1ICS07Tendermint {
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState public clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
-    mapping(uint64 => bytes32) public consensusStateHashes;
+    mapping(uint32 => bytes32) public consensusStateHashes;
 
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 30_000_000_000_000; // 30000 seconds
@@ -84,7 +84,7 @@ contract SP1ICS07Tendermint {
     /// @param revisionHeight The revision height.
     /// @return The consensus state at the given revision height.
     function getConsensusState(
-        uint64 revisionHeight
+        uint32 revisionHeight
     ) public view returns (bytes32) {
         return consensusStateHashes[revisionHeight];
     }

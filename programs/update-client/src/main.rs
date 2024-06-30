@@ -20,7 +20,7 @@ use ibc_client_tendermint::{
 };
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
-    self, ConsensusState as SolConsensusState, Env, SP1ICS07TendermintOutput,
+    self, Env, SP1ICS07TendermintOutput,
 };
 use sp1_ics07_tendermint_update_client::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
@@ -39,7 +39,7 @@ pub fn main() {
     // input 2: the proposed header
     let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
     // input 1: the trusted consensus state
-    let trusted_consensus_state = SolConsensusState::abi_decode(&encoded_1, true).unwrap();
+    let trusted_consensus_state = serde_cbor::from_slice::<ConsensusState>(&encoded_1).unwrap();
 
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();
@@ -48,10 +48,8 @@ pub fn main() {
         trusting_period: Duration::from_nanos(env.trusting_period),
         clock_drift: Duration::default(),
     };
-    let ctx = types::validation::ClientValidationCtx::new(
-        env.clone(),
-        trusted_consensus_state.clone().into(),
-    );
+
+    let ctx = types::validation::ClientValidationCtx::new(&env, &trusted_consensus_state);
 
     verify_header::<_, sha2::Sha256>(
         &ctx,
@@ -90,7 +88,7 @@ pub fn main() {
     let new_consensus_state = ConsensusState::from(proposed_header);
 
     let output = SP1ICS07TendermintOutput {
-        trusted_consensus_state,
+        trusted_consensus_state: trusted_consensus_state.into(),
         new_consensus_state: new_consensus_state.into(),
         env,
         trusted_height,

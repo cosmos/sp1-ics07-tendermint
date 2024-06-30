@@ -1,6 +1,4 @@
-use alloy_sol_types::SolValue;
-use ibc_client_tendermint::types::Header;
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::ConsensusState;
+use ibc_client_tendermint::types::{ConsensusState, Header};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::Env;
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
@@ -43,8 +41,7 @@ impl SP1ICS07TendermintProver {
         contract_env: &Env,
     ) -> SP1PlonkBn254Proof {
         // Encode the light blocks to be input into our program.
-        // TODO: make sure the encoding is correct.
-        let encoded_1 = trusted_consensus_state.abi_encode();
+        let encoded_1 = serde_cbor::to_vec(trusted_consensus_state).unwrap();
         let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
         let encoded_3 = serde_cbor::to_vec(contract_env).unwrap();
 

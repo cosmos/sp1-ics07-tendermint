@@ -116,7 +116,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Generate a header update proof for the specified blocks.
     let proof_data = tendermint_prover.generate_ics07_update_client_proof(
-        &trusted_consensus_state.clone().into(),
+        &trusted_consensus_state,
         &proposed_header,
         &contract_env,
     );

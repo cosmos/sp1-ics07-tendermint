@@ -41,9 +41,10 @@ impl SP1ICS07TendermintProver {
         contract_env: &Env,
     ) -> SP1PlonkBn254Proof {
         // Encode the light blocks to be input into our program.
-        let encoded_1 = serde_cbor::to_vec(trusted_consensus_state).unwrap();
+        let encoded_1 = bincode::serialize(trusted_consensus_state).unwrap();
+        // NOTE: The Header struct is not serializable by bincode, so we use CBOR instead.
         let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
-        let encoded_3 = serde_cbor::to_vec(contract_env).unwrap();
+        let encoded_3 = bincode::serialize(contract_env).unwrap();
 
         // Write the encoded light blocks to stdin.
         let mut stdin = SP1Stdin::new();

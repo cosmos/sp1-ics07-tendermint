@@ -34,12 +34,13 @@ pub fn main() {
     let encoded_2 = sp1_zkvm::io::read_vec();
     let encoded_3 = sp1_zkvm::io::read_vec();
 
-    // input 3: environment
-    let env = serde_cbor::from_slice::<Env>(&encoded_3).unwrap();
-    // input 2: the proposed header
-    let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
     // input 1: the trusted consensus state
-    let trusted_consensus_state = serde_cbor::from_slice::<ConsensusState>(&encoded_1).unwrap();
+    let trusted_consensus_state = bincode::deserialize::<ConsensusState>(&encoded_1).unwrap();
+    // input 2: the proposed header
+    // NOTE: The Header struct is not serializable by bincode, so we use CBOR instead.
+    let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
+    // input 3: environment
+    let env = bincode::deserialize::<Env>(&encoded_3).unwrap();
 
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();

@@ -20,7 +20,7 @@ use ibc_client_tendermint::{
 };
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
-    self, Env, SP1ICS07TendermintOutput,
+    self, ConsensusState as SolConsensusState, Env, SP1ICS07TendermintOutput,
 };
 use sp1_ics07_tendermint_update_client::types;
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
@@ -35,12 +35,14 @@ pub fn main() {
     let encoded_3 = sp1_zkvm::io::read_vec();
 
     // input 1: the trusted consensus state
-    let trusted_consensus_state = bincode::deserialize::<ConsensusState>(&encoded_1).unwrap();
+    let trusted_consensus_state = bincode::deserialize::<SolConsensusState>(&encoded_1)
+        .unwrap()
+        .into();
     // input 2: the proposed header
-    // NOTE: The Header struct is not serializable by bincode, so we use CBOR instead.
     let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
     // input 3: environment
     let env = bincode::deserialize::<Env>(&encoded_3).unwrap();
+    // TODO: find an encoding that works for all the structs above.
 
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();

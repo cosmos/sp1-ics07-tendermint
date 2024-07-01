@@ -1,4 +1,4 @@
-use ibc_client_tendermint::types::{ConsensusState, Header};
+use ibc_client_tendermint::types::Header;
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, Env,
 };
@@ -38,15 +38,14 @@ impl SP1ICS07TendermintProver {
     /// SP1Groth16Proof.
     pub fn generate_ics07_update_client_proof(
         &self,
-        trusted_consensus_state: &ConsensusState,
+        trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
         contract_env: &Env,
     ) -> SP1PlonkBn254Proof {
         // Encode the inputs into our program.
-        // NOTE: We are converting ConsensusState to SolConsensusState because I'm failing
-        // to serialize the ConsensusState struct properly. It always seems modified when deserialized.
-        let encoded_1 =
-            bincode::serialize(&SolConsensusState::from(trusted_consensus_state.clone())).unwrap();
+        // NOTE: We are using SolConsensusState because I'm failing to serialize the
+        // ConsensusState struct properly. It always seems modified when deserialized.
+        let encoded_1 = bincode::serialize(&trusted_consensus_state).unwrap();
         // NOTE: The Header struct is not deserializable by bincode, so we use CBOR instead.
         let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
         let encoded_3 = bincode::serialize(contract_env).unwrap();

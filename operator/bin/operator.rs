@@ -69,7 +69,8 @@ async fn main() -> anyhow::Result<()> {
                 .signed_header
                 .header
                 .next_validators_hash,
-        };
+        }
+        .into();
 
         let chain_id = target_light_block.signed_header.header.chain_id.to_string();
         let proposed_header = Header {

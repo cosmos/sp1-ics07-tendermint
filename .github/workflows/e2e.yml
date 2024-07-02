@@ -59,7 +59,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features --release
       - name: Run Tests
         run: |
           cd e2e/interchaintestv8

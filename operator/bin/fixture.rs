@@ -53,8 +53,10 @@ struct SP1ICS07TendermintFixture {
 /// The fixture will be written to the path: ./contracts/fixtures/fixture.json
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
     setup_logger();
+    if dotenv::dotenv().is_err() {
+        log::warn!("No .env file found");
+    }
 
     let args = FixtureArgs::parse();
 

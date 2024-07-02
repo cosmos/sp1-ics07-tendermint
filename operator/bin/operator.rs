@@ -28,9 +28,11 @@ struct OperatorArgs {
 /// the latest block hash and height.
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().expect("Failed to load .env file");
-    let args = OperatorArgs::parse();
     setup_logger();
+    if dotenv::dotenv().is_err() {
+        log::warn!("No .env file found");
+    }
+    let args = OperatorArgs::parse();
 
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
     let mut private_key = env::var("PRIVATE_KEY").expect("PRIVATE_KEY not set");

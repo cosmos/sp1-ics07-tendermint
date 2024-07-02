@@ -82,3 +82,10 @@ func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
 
 	s.SetupSuite(ctx)
 }
+
+// TestUpdateClient tests the update client functionality
+func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+}

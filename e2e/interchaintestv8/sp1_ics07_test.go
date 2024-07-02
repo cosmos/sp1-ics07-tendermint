@@ -8,10 +8,19 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
+	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
+)
+
+const (
+	// Private key of an Ethereum account, we use this account to submit transactions
+	// through the operator.
+	somePrivateKey = "0x5a535512e4b3b9618004a8b47c62191eaa95cca6220452dc612168a4f4f13a75"
+	// The public address of the private key above
+	someAddress = "0xf4154E9FA98F7d37064F0Cb2cd7934183c2aCCDd"
 )
 
 // SP1ICS07TendermintTestSuite is a suite of tests that wraps TestSuite
@@ -30,19 +39,27 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 
 	eth, simd := s.ChainA, s.ChainB
 
-	s.Require().True(s.Run("Deploy contract", func() {
+	s.Require().True(s.Run("Set up environment", func() {
 		s.Require().NoError(os.Chdir("../.."))
 
 		os.Setenv(testvalues.EnvKeyEthRPC, eth.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeyTendermintRPC, simd.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeySp1Prover, "network")
+		os.Setenv(testvalues.EnvKeyPrivateKey, somePrivateKey)
 
+		s.Require().NoError(eth.SendFunds(ctx, "faucet", ibc.WalletAmount{
+			Amount:  testvalues.StartingEthBalance,
+			Address: someAddress,
+		}))
+	}))
+
+	s.Require().True(s.Run("Deploy contracts", func() {
 		s.Require().NoError(operator.RunGenesis())
 
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
 			ContractRootDir:  "contracts",
 			SolidityContract: "script/SP1ICS07Tendermint.s.sol",
-			RawOptions:       []string{"--legacy", "--json"},
+			RawOptions:       []string{"--json"},
 		})
 		s.Require().NoError(err)
 

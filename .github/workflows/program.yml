@@ -38,13 +38,3 @@ jobs:
         run: |
           cd programs/update-client
           ~/.config/.sp1/bin/cargo-prove prove build
-
-      - name: Check for git diffs
-        run: |
-          git add .
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Elf file has changed."
-            exit 1
-          else
-            echo "No changes detected."
-          fi

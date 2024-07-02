@@ -55,11 +55,6 @@ jobs:
           toolchain: 1.79.0
           override: true
           components: rustfmt, clippy
-      - name: Install SP1 toolchain
-        run: |
-          curl -L https://sp1.succinct.xyz | bash
-          ~/.config/.sp1/bin/sp1up 
-          ~/.config/.sp1/bin/cargo-prove prove --version
       - name: Build executables
         uses: actions-rs/cargo@v1
         with:

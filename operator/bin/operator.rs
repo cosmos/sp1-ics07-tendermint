@@ -3,6 +3,7 @@ use std::env;
 use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
 };
+use clap::Parser;
 use ibc_client_tendermint::types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
@@ -12,6 +13,15 @@ use sp1_ics07_tendermint_operator::{rpc::TendermintRPCClient, SP1ICS07Tendermint
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
 
+/// Command line arguments for the operator.
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct OperatorArgs {
+    /// Run update-client only once and then exit.
+    #[clap(long)]
+    only_once: bool,
+}
+
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint
 /// light client and generate a proof of the transition from the latest block in the contract to the
 /// latest block on the chain. Then, submits the proof to the contract and updates the contract with
@@ -19,6 +29,7 @@ use sp1_sdk::utils::setup_logger;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().expect("Failed to load .env file");
+    let args = OperatorArgs::parse();
     setup_logger();
 
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
@@ -117,6 +128,11 @@ async fn main() -> anyhow::Result<()> {
             "Updated the ICS-07 Tendermint light client at address {} from block {} to block {}.",
             contract_address, trusted_block_height, target_height
         );
+
+        if args.only_once {
+            info!("Exiting because '--only-once' flag is set.");
+            return Ok(());
+        }
 
         // Sleep for 60 seconds.
         debug!("sleeping for 60 seconds");

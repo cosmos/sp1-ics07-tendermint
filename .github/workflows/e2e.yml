@@ -35,31 +35,12 @@ jobs:
       matrix:
         test:
           # List your tests here
-          - TestWithBasicTestSuite/TestBasic
+          - TestWithSP1ICS07TendermintTestSuite/TestDeploy
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
-      # You can build your contract here, you can either use docker or a custom cargo script:
-      # We've provided examples for both below:
-      # 
-      # - name: Build Contracts with Docker
-      #   run: |
-      #     docker run --rm -v "$(pwd)":/code \
-      #     --mount type=volume,source="$(basename "$(pwd)")_cache",target=/code/target \
-      #     --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
-      #     cosmwasm/optimizer:0.15.1
-      # - name: Install cargo-run-script
-      #   uses: actions-rs/cargo@v1
-      #   with:
-      #     command: install
-      #     args: cargo-run-script
-      # - name: Build Optimized Contract
-      #   uses: actions-rs/cargo@v1
-      #   with:
-      #     command: run-script
-      #     args: optimize
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -67,6 +48,18 @@ jobs:
           check-latest: true
           cache-dependency-path: |
              e2e/interchaintestv8/go.sum
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: 1.79.0
+          override: true
+          components: rustfmt, clippy
+      - name: Build executables
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features
       - name: Run Tests
         run: |
           cd e2e/interchaintestv8

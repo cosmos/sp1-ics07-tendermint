@@ -43,9 +43,9 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 )
 
-// WasmEncodingConfig returns the global E2E encoding config for Wasm.
-func WasmEncodingConfig() *sdktestutil.TestEncodingConfig {
-	return encodingConfig("wasm")
+// CosmosEncodingConfig returns the global E2E encoding config for simd.
+func CosmosEncodingConfig() *sdktestutil.TestEncodingConfig {
+	return encodingConfig("cosmos")
 }
 
 // EncodingConfig returns the global E2E encoding config.

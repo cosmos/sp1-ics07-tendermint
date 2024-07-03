@@ -64,6 +64,8 @@ jobs:
           command: build
           args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features --release
       - name: Run Tests
+        env:
+          SP1_PRIVATE_KEY: ${{ secrets.SP1_PRIVATE_KEY }}
         run: |
           cd e2e/interchaintestv8
           go test -v -mod=readonly . -run=${{ matrix.test }}

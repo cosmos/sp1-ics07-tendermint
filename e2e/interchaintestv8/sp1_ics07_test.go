@@ -57,6 +57,8 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		os.Setenv(testvalues.EnvKeyTendermintRPC, simd.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeySp1Prover, "network")
 		os.Setenv(testvalues.EnvKeyPrivateKey, hexPrivateKey)
+		// make sure that the SP1_PRIVATE_KEY is set.
+		s.Require().NotEmpty(os.Getenv(testvalues.EnvKeySp1PrivateKey))
 
 		s.Require().NoError(eth.SendFunds(ctx, "faucet", ibc.WalletAmount{
 			Amount:  testvalues.StartingEthBalance,

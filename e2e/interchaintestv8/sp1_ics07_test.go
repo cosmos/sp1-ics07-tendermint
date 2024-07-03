@@ -138,7 +138,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
-		s.Require().Equal(clientState.LatestHeight.RevisionHeight, s.latestHeight)
+		s.Require().Greater(clientState.LatestHeight.RevisionHeight, s.latestHeight)
 
 		s.latestHeight = clientState.LatestHeight.RevisionHeight
 	}))

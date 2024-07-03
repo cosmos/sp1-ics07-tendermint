@@ -36,6 +36,7 @@ jobs:
         test:
           # List your tests here
           - TestWithSP1ICS07TendermintTestSuite/TestDeploy
+          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:

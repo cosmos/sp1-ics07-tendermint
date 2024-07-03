@@ -5,6 +5,11 @@ build-program:
   cd programs/update-client && cargo prove build
   @echo "ELF created at 'program/elf/riscv32im-succinct-zkvm-elf'"
 
+# Build the Rust executables using `cargo build` command
+build-executables:
+  cargo build --bins --workspace --exclude sp1-ics07-tendermint-update-client --locked --release
+  @echo "Executables built"
+
 # Run the Solidity tests using `forge test` command
 test-foundry:
   cd contracts && forge test -vvv

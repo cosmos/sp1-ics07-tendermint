@@ -31,6 +31,9 @@ type SP1ICS07TendermintTestSuite struct {
 	key *ecdsa.PrivateKey
 	// The SP1ICS07Tendermint contract
 	contract *sp1ics07tendermint.Contract
+
+	// The latest height of client state
+	latestHeight uint32
 }
 
 // SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
@@ -95,6 +98,10 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.TrustingPeriod)
 		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
+		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
+		s.Require().Greater(clientState.LatestHeight.RevisionHeight, uint32(0))
+
+		s.latestHeight = clientState.LatestHeight.RevisionHeight
 	}))
 }
 
@@ -116,7 +123,23 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 
 	s.SetupSuite(ctx)
 
+	_, simd := s.ChainA, s.ChainB
+
 	s.Require().True(s.Run("Update client", func() {
 		s.Require().NoError(operator.RunOperator("--only-once"))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
+		s.Require().Equal(uint8(1), clientState.TrustLevel.Numerator)
+		s.Require().Equal(uint8(3), clientState.TrustLevel.Denominator)
+		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.TrustingPeriod)
+		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.UnbondingPeriod)
+		s.Require().False(clientState.IsFrozen)
+		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
+		s.Require().Equal(clientState.LatestHeight.RevisionHeight, s.latestHeight)
+
+		s.latestHeight = clientState.LatestHeight.RevisionHeight
 	}))
 }

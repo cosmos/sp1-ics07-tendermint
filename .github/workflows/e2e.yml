@@ -29,7 +29,7 @@ jobs:
           version: v1.59
           args: --timeout 5m
           working-directory: e2e/interchaintestv8
-  build:
+  e2e:
     strategy:
       fail-fast: false
       matrix:
@@ -39,6 +39,7 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
+    environment: sp1-network
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4

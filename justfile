@@ -9,6 +9,11 @@ build-programs:
   mv elf/riscv32im-succinct-zkvm-elf elf/verify-membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/verify-membership-riscv32im-succinct-zkvm-elf'"
 
+# Build the Rust executables using `cargo build` command
+build-executables:
+  cargo build --bins --workspace --exclude sp1-ics07-tendermint-update-client --locked --release
+  @echo "Executables built"
+
 # Run the Solidity tests using `forge test` command
 test-foundry:
   cd contracts && forge test -vvv
@@ -45,9 +50,10 @@ network-fixtures:
   @echo "Fixtures generated at 'contracts/fixtures/fixture.json'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
+# Requires `jq` to be installed on the system
 generate-abi:
   cd contracts && forge install && forge build
-  cp contracts/out/SP1ICS07Tendermint.sol/SP1ICS07Tendermint.json contracts/abi/
+  jq '.abi' contracts/out/SP1ICS07Tendermint.sol/SP1ICS07Tendermint.json > contracts/abi/SP1ICS07Tendermint.json
   @echo "ABI file created at 'contracts/abi/SP1ICS07Tendermint.json'"
 
 # Deploy the SP1ICS07Tendermint contract to the Eth Sepolia testnet if the `.env` file is present
@@ -62,3 +68,8 @@ deploy-contracts:
 # This command requires the `.env` file to be present in the root directory.
 operator:
   RUST_LOG=info cargo run --bin operator --release
+
+# Run the e2e tests
+e2e-test testname:
+  echo "Running {{testname}} test..."
+  cd e2e/interchaintestv8 && go test -v -run={{testname}} -timeout 40m

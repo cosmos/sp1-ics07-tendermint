@@ -1,7 +1,7 @@
-use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::Header;
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::ConsensusState;
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::Env;
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
+    ConsensusState as SolConsensusState, Env,
+};
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
 pub mod rpc;
@@ -58,14 +58,18 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
     /// Generate a proof of an update from trusted_consensus_state to a proposed header.
     pub fn generate_proof(
         &self,
-        trusted_consensus_state: &ConsensusState,
+        trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
         contract_env: &Env,
     ) -> SP1PlonkBn254Proof {
-        // Encode the light blocks to be input into our program.
-        let encoded_1 = trusted_consensus_state.abi_encode();
+        // Encode the inputs into our program.
+        // NOTE: We are using SolConsensusState because I'm failing to serialize the
+        // ConsensusState struct properly. It always seems modified when deserialized.
+        let encoded_1 = bincode::serialize(&trusted_consensus_state).unwrap();
+        // NOTE: The Header struct is not deserializable by bincode, so we use CBOR instead.
         let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
-        let encoded_3 = serde_cbor::to_vec(contract_env).unwrap();
+        let encoded_3 = bincode::serialize(contract_env).unwrap();
+        // TODO: find an encoding that works for all the structs above.
 
         // Write the encoded light blocks to stdin.
         let mut stdin = SP1Stdin::new();

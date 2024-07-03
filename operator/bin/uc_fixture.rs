@@ -11,7 +11,7 @@ use sp1_ics07_tendermint_operator::{
     VerifyMembershipProgram,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
-    ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
+    ClientState, Height, TrustThreshold,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07UpdateClientOutput};
 use sp1_sdk::{utils::setup_logger, HashableKey};
@@ -65,8 +65,10 @@ struct SP1ICS07UpdateClientFixture {
 /// The fixture will be written to the path: ./contracts/fixtures/fixture.json
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
     setup_logger();
+    if dotenv::dotenv().is_err() {
+        log::warn!("No .env file found");
+    }
 
     let args = FixtureArgs::parse();
 
@@ -106,7 +108,8 @@ async fn main() -> anyhow::Result<()> {
             .signed_header
             .header
             .next_validators_hash,
-    };
+    }
+    .into();
     let proposed_header = Header {
         signed_header: target_light_block.signed_header,
         validator_set: target_light_block.validators,
@@ -128,19 +131,14 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // Generate a header update proof for the specified blocks.
-    let proof_data = tendermint_prover.generate_proof(
-        &trusted_consensus_state.clone().into(),
-        &proposed_header,
-        &contract_env,
-    );
+    let proof_data =
+        tendermint_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
     let bytes = proof_data.public_values.as_slice();
     let output = SP1ICS07UpdateClientOutput::abi_decode(bytes, false).unwrap();
 
     let fixture = SP1ICS07UpdateClientFixture {
-        trusted_consensus_state: hex::encode(
-            SolConsensusState::from(trusted_consensus_state).abi_encode(),
-        ),
+        trusted_consensus_state: hex::encode(trusted_consensus_state.abi_encode()),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,

@@ -32,7 +32,6 @@ contract SP1ICS07TendermintTest is Test {
 
     function setUp() public {
         fixture = loadFixture("update_client_fixture.json");
-        mockFixture = loadFixture("mock_update_client_fixture.json");
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
             .decode(
@@ -53,13 +52,25 @@ contract SP1ICS07TendermintTest is Test {
             trustedConsensusHash
         );
 
+        mockFixture = loadFixture("mock_update_client_fixture.json");
+
+        ICS07Tendermint.ConsensusState memory mockTrustedConsensusState = abi
+            .decode(
+                mockFixture.trustedConsensusState,
+                (ICS07Tendermint.ConsensusState)
+            );
+
+        bytes32 mockTrustedConsensusHash = keccak256(
+            abi.encode(mockTrustedConsensusState)
+        );
+
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
             mockFixture.updateClientVkey,
             mockFixture.verifyMembershipVkey,
             address(mockVerifier),
             mockFixture.trustedClientState,
-            trustedConsensusHash
+            mockTrustedConsensusHash
         );
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint

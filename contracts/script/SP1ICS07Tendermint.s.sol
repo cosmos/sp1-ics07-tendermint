@@ -54,14 +54,8 @@ contract SP1TendermintScript is Script {
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint
             .getClientState();
-        assert(
-            keccak256(bytes(clientState.chain_id)) ==
-                keccak256(bytes("mocha-4"))
-        );
         assert(clientState.trust_level.numerator == 1);
         assert(clientState.trust_level.denominator == 3);
-        assert(clientState.latest_height.revision_number == 4);
-        // assert(latest_height.revision_height == 2110658);
         assert(clientState.trusting_period == 1_209_600_000_000_000);
         assert(clientState.unbonding_period == 1_209_600_000_000_000);
         assert(clientState.is_frozen == false);

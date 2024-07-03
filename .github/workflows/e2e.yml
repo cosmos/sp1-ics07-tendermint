@@ -1,0 +1,71 @@
+name: e2e
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - '**.rs'
+      - '**.go'
+      - '**.toml'
+      - '**.lock'
+      - '**.mod'
+      - '**.sum'
+      - '**.sol'
+      - '.github/workflows/e2e.yml'
+permissions:
+  contents: read
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+      - uses: actions/checkout@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3.7.0
+        with:
+          version: v1.59
+          args: --timeout 5m
+          working-directory: e2e/interchaintestv8
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          # List your tests here
+          - TestWithSP1ICS07TendermintTestSuite/TestDeploy
+          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
+    name: ${{ matrix.test }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22"
+          check-latest: true
+          cache-dependency-path: |
+             e2e/interchaintestv8/go.sum
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: 1.79.0
+          override: true
+          components: rustfmt, clippy
+      - name: Build executables
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features --release
+      - name: Run Tests
+        env:
+          SP1_PRIVATE_KEY: ${{ secrets.SP1_PRIVATE_KEY }}
+        run: |
+          cd e2e/interchaintestv8
+          go test -v -mod=readonly . -run=${{ matrix.test }} -timeout 40m

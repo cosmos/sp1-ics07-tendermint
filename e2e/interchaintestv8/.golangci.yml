@@ -57,6 +57,7 @@ linters-settings:
       - default # Default section: contains all imports that could not be matched to another section type.
       - blank # blank imports
       - dot # dot imports
+      - prefix(github.com/ethereum/go-ethereum)
       - prefix(cosmossdk.io)
       - prefix(github.com/cosmos/cosmos-sdk)
       - prefix(github.com/cometbft/cometbft)

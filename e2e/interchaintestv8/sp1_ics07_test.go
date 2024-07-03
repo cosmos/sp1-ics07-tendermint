@@ -2,10 +2,16 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"encoding/hex"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
@@ -13,14 +19,7 @@ import (
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
-)
-
-const (
-	// Private key of an Ethereum account, we use this account to submit transactions
-	// through the operator.
-	somePrivateKey = "0x5a535512e4b3b9618004a8b47c62191eaa95cca6220452dc612168a4f4f13a75"
-	// The public address of the private key above
-	someAddress = "0xf4154E9FA98F7d37064F0Cb2cd7934183c2aCCDd"
+	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
 )
 
 // SP1ICS07TendermintTestSuite is a suite of tests that wraps TestSuite
@@ -28,8 +27,10 @@ const (
 type SP1ICS07TendermintTestSuite struct {
 	e2esuite.TestSuite
 
-	// Address of the SP1ICS07Tendermint contract
-	contractAddress string
+	// The private key of a test account
+	key *ecdsa.PrivateKey
+	// The SP1ICS07Tendermint contract
+	contract *sp1ics07tendermint.Contract
 }
 
 // SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
@@ -40,16 +41,23 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 	eth, simd := s.ChainA, s.ChainB
 
 	s.Require().True(s.Run("Set up environment", func() {
-		s.Require().NoError(os.Chdir("../.."))
+		err := os.Chdir("../..")
+		s.Require().NoError(err)
+
+		s.key, err = crypto.GenerateKey()
+		s.Require().NoError(err)
+		hexPrivateKey := hex.EncodeToString(crypto.FromECDSA(s.key))
+		address := crypto.PubkeyToAddress(s.key.PublicKey).Hex()
+		s.T().Logf("Generated key: %s", address)
 
 		os.Setenv(testvalues.EnvKeyEthRPC, eth.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeyTendermintRPC, simd.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeySp1Prover, "network")
-		os.Setenv(testvalues.EnvKeyPrivateKey, somePrivateKey)
+		os.Setenv(testvalues.EnvKeyPrivateKey, hexPrivateKey)
 
 		s.Require().NoError(eth.SendFunds(ctx, "faucet", ibc.WalletAmount{
 			Amount:  testvalues.StartingEthBalance,
-			Address: someAddress,
+			Address: address,
 		}))
 	}))
 
@@ -63,11 +71,30 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		})
 		s.Require().NoError(err)
 
-		s.contractAddress = s.GetEthAddressFromStdout(string(stdout))
-		s.Require().NotEmpty(s.contractAddress)
-		s.Require().Len(s.contractAddress, 42)
+		contractAddress := s.GetEthAddressFromStdout(string(stdout))
+		s.Require().NotEmpty(contractAddress)
+		s.Require().Len(contractAddress, 42)
+		s.Require().True(ethcommon.IsHexAddress(contractAddress))
 
-		os.Setenv(testvalues.EnvKeyContractAddress, s.contractAddress)
+		os.Setenv(testvalues.EnvKeyContractAddress, contractAddress)
+
+		client, err := ethclient.Dial(eth.GetHostRPCAddress())
+		s.Require().NoError(err)
+
+		s.contract, err = sp1ics07tendermint.NewContract(ethcommon.HexToAddress(contractAddress), client)
+		s.Require().NoError(err)
+	}))
+
+	s.Require().True(s.Run("Verify deployment", func() {
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
+		s.Require().Equal(uint8(1), clientState.TrustLevel.Numerator)
+		s.Require().Equal(uint8(3), clientState.TrustLevel.Denominator)
+		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.TrustingPeriod)
+		s.Require().Equal(uint64(1_209_600_000_000_000), clientState.UnbondingPeriod)
+		s.Require().False(clientState.IsFrozen)
 	}))
 }
 
@@ -88,4 +115,8 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	ctx := context.Background()
 
 	s.SetupSuite(ctx)
+
+	s.Require().True(s.Run("Update client", func() {
+		s.Require().NoError(operator.RunOperator("--only-once"))
+	}))
 }

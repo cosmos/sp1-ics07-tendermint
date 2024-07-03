@@ -38,9 +38,10 @@ struct SP1ICS07TendermintGenesis {
 /// ```
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().expect("Failed to load .env file");
     setup_logger();
-
+    if dotenv::dotenv().is_err() {
+        log::warn!("No .env file found");
+    }
     let args = GenesisArgs::parse();
 
     let tendermint_rpc_client = TendermintRPCClient::default();

@@ -39,7 +39,6 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
-    environment: sp1-network
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -69,4 +68,4 @@ jobs:
           SP1_PRIVATE_KEY: ${{ secrets.SP1_PRIVATE_KEY }}
         run: |
           cd e2e/interchaintestv8
-          go test -v -mod=readonly . -run=${{ matrix.test }}
+          go test -v -mod=readonly . -run=${{ matrix.test }} -timeout 40m

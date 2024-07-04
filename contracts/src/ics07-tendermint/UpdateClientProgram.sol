@@ -8,7 +8,7 @@ import {ICS07Tendermint} from "./ICS07Tendermint.sol";
 /// @notice Defines shared types for the update client program.
 contract UpdateClientProgram {
     /// @notice The public value output for the sp1 update client program.
-    struct Output {
+    struct UpdateClientOutput {
         /// The trusted consensus state.
         ICS07Tendermint.ConsensusState trusted_consensus_state;
         /// The new consensus state with the verified header.

@@ -159,6 +159,201 @@
   },
   {
     "type": "function",
+    "name": "validateUpdateClientPublicValues",
+    "inputs": [
+      {
+        "name": "output",
+        "type": "tuple",
+        "internalType": "struct UpdateClientProgram.UpdateClientOutput",
+        "components": [
+          {
+            "name": "trusted_consensus_state",
+            "type": "tuple",
+            "internalType": "struct ICS07Tendermint.ConsensusState",
+            "components": [
+              {
+                "name": "timestamp",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "root",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "next_validators_hash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          },
+          {
+            "name": "new_consensus_state",
+            "type": "tuple",
+            "internalType": "struct ICS07Tendermint.ConsensusState",
+            "components": [
+              {
+                "name": "timestamp",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "root",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "next_validators_hash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          },
+          {
+            "name": "env",
+            "type": "tuple",
+            "internalType": "struct UpdateClientProgram.Env",
+            "components": [
+              {
+                "name": "chain_id",
+                "type": "string",
+                "internalType": "string"
+              },
+              {
+                "name": "trust_threshold",
+                "type": "tuple",
+                "internalType": "struct ICS07Tendermint.TrustThreshold",
+                "components": [
+                  {
+                    "name": "numerator",
+                    "type": "uint8",
+                    "internalType": "uint8"
+                  },
+                  {
+                    "name": "denominator",
+                    "type": "uint8",
+                    "internalType": "uint8"
+                  }
+                ]
+              },
+              {
+                "name": "trusting_period",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "now",
+                "type": "uint64",
+                "internalType": "uint64"
+              }
+            ]
+          },
+          {
+            "name": "trusted_height",
+            "type": "tuple",
+            "internalType": "struct ICS07Tendermint.Height",
+            "components": [
+              {
+                "name": "revision_number",
+                "type": "uint32",
+                "internalType": "uint32"
+              },
+              {
+                "name": "revision_height",
+                "type": "uint32",
+                "internalType": "uint32"
+              }
+            ]
+          },
+          {
+            "name": "new_height",
+            "type": "tuple",
+            "internalType": "struct ICS07Tendermint.Height",
+            "components": [
+              {
+                "name": "revision_number",
+                "type": "uint32",
+                "internalType": "uint32"
+              },
+              {
+                "name": "revision_height",
+                "type": "uint32",
+                "internalType": "uint32"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "validateVerifyMembershipOutput",
+    "inputs": [
+      {
+        "name": "output",
+        "type": "tuple",
+        "internalType": "struct VerifyMembershipProgram.VerifyMembershipOutput",
+        "components": [
+          {
+            "name": "commitment_root",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "key_path",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "value",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "proofHeight",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "trustedConsensusStateBz",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct ICS07Tendermint.ConsensusState",
+        "components": [
+          {
+            "name": "timestamp",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "root",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "next_validators_hash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "verifier",
     "inputs": [],
     "outputs": [

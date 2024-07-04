@@ -67,6 +67,7 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
     /// # Panics
     /// Panics if the inputs cannot be encoded, the proof cannot be generated or the proof is
     /// invalid.
+    #[must_use]
     pub fn generate_proof(
         &self,
         trusted_consensus_state: &SolConsensusState,

@@ -76,9 +76,9 @@ contract SP1ICS07Tendermint {
         bytes memory proof,
         bytes memory publicValues
     ) public {
-        UpdateClientProgram.Output memory output = abi.decode(
+        UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
             publicValues,
-            (UpdateClientProgram.Output)
+            (UpdateClientProgram.UpdateClientOutput)
         );
 
         validateUpdateClientPublicValues(output);
@@ -106,10 +106,11 @@ contract SP1ICS07Tendermint {
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
     ) public view {
-        VerifyMembershipProgram.Output memory output = abi.decode(
-            publicValues,
-            (VerifyMembershipProgram.Output)
-        );
+        VerifyMembershipProgram.VerifyMembershipOutput memory output = abi
+            .decode(
+                publicValues,
+                (VerifyMembershipProgram.VerifyMembershipOutput)
+            );
 
         validateVerifyMembershipOutput(
             output,
@@ -130,10 +131,10 @@ contract SP1ICS07Tendermint {
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
     /// @return The decoded trusted consensus state.
     function validateVerifyMembershipOutput(
-        VerifyMembershipProgram.Output memory output,
+        VerifyMembershipProgram.VerifyMembershipOutput memory output,
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
-    ) private view returns (ICS07Tendermint.ConsensusState memory) {
+    ) public view returns (ICS07Tendermint.ConsensusState memory) {
         require(
             consensusStateHashes[proofHeight] ==
                 keccak256(trustedConsensusStateBz),
@@ -154,8 +155,8 @@ contract SP1ICS07Tendermint {
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
     function validateUpdateClientPublicValues(
-        UpdateClientProgram.Output memory output
-    ) private view {
+        UpdateClientProgram.UpdateClientOutput memory output
+    ) public view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"

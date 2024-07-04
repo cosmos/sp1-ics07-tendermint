@@ -8,7 +8,7 @@ import {ICS07Tendermint} from "./ICS07Tendermint.sol";
 /// @notice Defines shared types for the verify membership program.
 contract VerifyMembershipProgram {
     /// @notice The public value output for the sp1 update client program.
-    struct Output {
+    struct VerifyMembershipOutput {
         bytes32 commitment_root;
         string key_path;
         bytes value;

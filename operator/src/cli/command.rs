@@ -78,15 +78,15 @@ pub mod fixtures {
     pub struct UpdateClientCmd {
         /// Trusted block.
         #[clap(long)]
-        trusted_block: u32,
+        pub trusted_block: u32,
 
         /// Target block.
         #[clap(long, env)]
-        target_block: u32,
+        pub target_block: u32,
 
         /// Fixture path.
         #[clap(long, default_value = "../contracts/fixtures")]
-        fixture_path: String,
+        pub fixture_path: String,
     }
 
     /// The arguments for the `VerifyMembership` fixture executable.

@@ -1,17 +1,19 @@
-use alloy_sol_types::SolValue;
-use clap::Parser;
-use ibc_client_tendermint::types::{ConsensusState, Header};
-use ibc_core_client_types::Height as IbcHeight;
-use ibc_core_commitment_types::commitment::CommitmentRoot;
-use ibc_core_host_types::identifiers::ChainId;
-use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::{
+//! Runner for generating `update_client` fixtures
+
+use crate::{
+    cli::command::fixtures::UpdateClientCmd,
     prover::{
         SP1ICS07TendermintProgram, SP1ICS07TendermintProver, UpdateClientProgram,
         VerifyMembershipProgram,
     },
     rpc::TendermintRPCClient,
 };
+use alloy_sol_types::SolValue;
+use ibc_client_tendermint::types::{ConsensusState, Header};
+use ibc_core_client_types::Height as IbcHeight;
+use ibc_core_commitment_types::commitment::CommitmentRoot;
+use ibc_core_host_types::identifiers::ChainId;
+use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, Height, TrustThreshold,
 };
@@ -19,23 +21,6 @@ use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07Upda
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};
-
-/// The arguments for the fixture executable.
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct FixtureArgs {
-    /// Trusted block.
-    #[clap(long)]
-    trusted_block: u32,
-
-    /// Target block.
-    #[clap(long, env)]
-    target_block: u32,
-
-    /// Fixture path.
-    #[clap(long, default_value = "../contracts/fixtures")]
-    fixture_path: String,
-}
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -60,19 +45,12 @@ struct SP1ICS07UpdateClientFixture {
 }
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
-/// Example:
-/// ```
-/// RUST_LOG=info cargo run --bin fixture --release -- --trusted-block=1 --target-block=5
-/// ```
-/// The fixture will be written to the path: ./contracts/fixtures/fixture.json
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+#[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
+pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     setup_logger();
     if dotenv::dotenv().is_err() {
         log::warn!("No .env file found");
     }
-
-    let args = FixtureArgs::parse();
 
     let tendermint_rpc_client = TendermintRPCClient::default();
     let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
@@ -127,9 +105,9 @@ async fn main() -> anyhow::Result<()> {
         trust_threshold: trusted_client_state.trust_level.clone(),
         trusting_period: trusted_client_state.trusting_period,
         now: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos() as u64,
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_nanos()
+            .try_into()?,
     };
 
     // Generate a header update proof for the specified blocks.

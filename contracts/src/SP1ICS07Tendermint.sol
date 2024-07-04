@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
 import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
+import {VerifyMembershipProgram} from "./ics07-tendermint/VerifyMembershipProgram.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 import "forge-std/console.sol";
 
@@ -19,9 +20,9 @@ contract SP1ICS07Tendermint {
     ISP1Verifier public verifier;
 
     /// @notice The ICS07Tendermint client state
-    ICS07Tendermint.ClientState public clientState;
+    ICS07Tendermint.ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
-    mapping(uint32 => bytes32) public consensusStateHashes;
+    mapping(uint32 => bytes32) private consensusStateHashes;
 
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3_000_000_000_000; // 3000 seconds
@@ -67,7 +68,7 @@ contract SP1ICS07Tendermint {
         return consensusStateHashes[revisionHeight];
     }
 
-    /// @notice The entrypoint for verifying the proof.
+    /// @notice The entrypoint for updating the client.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
@@ -93,11 +94,68 @@ contract SP1ICS07Tendermint {
         );
     }
 
+    /// @notice The entrypoint for verifying membership proof.
+    /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
+    /// @param proof The encoded proof.
+    /// @param publicValues The encoded public values.
+    /// @param proofHeight The height of the proof.
+    /// @param trustedConsensusStateBz The encoded trusted consensus state.
+    function verifyIcs07VerifyMembershipProof(
+        bytes memory proof,
+        bytes memory publicValues,
+        uint32 proofHeight,
+        bytes memory trustedConsensusStateBz
+    ) public view {
+        VerifyMembershipProgram.Output memory output = abi.decode(
+            publicValues,
+            (VerifyMembershipProgram.Output)
+        );
+
+        validateVerifyMembershipOutput(
+            output,
+            proofHeight,
+            trustedConsensusStateBz
+        );
+
+        verifier.verifyProof(
+            ics07VerifyMembershipProgramVkey,
+            publicValues,
+            proof
+        );
+    }
+
+    /// @notice Validates the SP1ICS07VerifyMembershipOutput public values and decodes the trusted consensus state.
+    /// @param output The public values.
+    /// @param proofHeight The height of the proof.
+    /// @param trustedConsensusStateBz The encoded trusted consensus state.
+    /// @return The decoded trusted consensus state.
+    function validateVerifyMembershipOutput(
+        VerifyMembershipProgram.Output memory output,
+        uint32 proofHeight,
+        bytes memory trustedConsensusStateBz
+    ) private view returns (ICS07Tendermint.ConsensusState memory) {
+        require(
+            consensusStateHashes[proofHeight] ==
+                keccak256(trustedConsensusStateBz),
+            "SP1ICS07Tendermint: trusted consensus state mismatch"
+        );
+
+        ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
+            .decode(trustedConsensusStateBz, (ICS07Tendermint.ConsensusState));
+
+        require(
+            output.commitment_root == trustedConsensusState.root,
+            "SP1ICS07Tendermint: invalid commitment root"
+        );
+
+        return trustedConsensusState;
+    }
+
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
     function validateUpdateClientPublicValues(
         UpdateClientProgram.Output memory output
-    ) public view {
+    ) private view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"

@@ -5,7 +5,7 @@ import {ICS07Tendermint} from "./ICS07Tendermint.sol";
 
 /// @title UpdateClientProgram
 /// @author srdtrk
-/// @notice Defines shared types for ICS07Tendermint implementations.
+/// @notice Defines shared types for the update client program.
 contract UpdateClientProgram {
     /// @notice The public value output for the sp1 update client program.
     struct Output {

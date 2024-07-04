@@ -44,8 +44,8 @@ contract ICS07Tendermint {
         /// was stored.
         uint64 timestamp;
         /// commitment root (i.e app hash)
-        bytes root;
+        bytes32 root;
         /// next validators hash
-        bytes next_validators_hash;
+        bytes32 next_validators_hash;
     }
 }

@@ -60,14 +60,18 @@ network-fixtures:
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
 # Requires `jq` to be installed on the system
+# Requires `abigen` to be installed on the system to generate the go bindings for e2e tests
 generate-abi:
   cd contracts && forge install && forge build
   jq '.abi' contracts/out/SP1ICS07Tendermint.sol/SP1ICS07Tendermint.json > contracts/abi/SP1ICS07Tendermint.json
   @echo "ABI file created at 'contracts/abi/SP1ICS07Tendermint.json'"
+  @echo "Generating go bindings for the end-to-end tests..."
+  abigen --abi contracts/abi/SP1ICS07Tendermint.json --pkg sp1ics07tendermint --type Contract --out e2e/interchaintestv8/types/sp1ics07tendermint/contract.go
+  @echo "Done."
 
 # Deploy the SP1ICS07Tendermint contract to the Eth Sepolia testnet if the `.env` file is present
 deploy-contracts:
-  @echo "Deploying the SP1ICS07Tendermint contract to the Sepolia testnet"
+  @echo "Deploying the SP1ICS07Tendermint contract"
   just genesis
   cd contracts && forge install
   @echo "Deploying the contract..."

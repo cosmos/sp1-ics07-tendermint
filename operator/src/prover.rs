@@ -1,6 +1,8 @@
 //! Prover for SP1 ICS07 Tendermint programs.
 
 use ibc_client_tendermint::types::Header;
+use ibc_core_commitment_types::merkle::MerkleProof;
+use ibc_proto::Protobuf;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, Env,
 };
@@ -115,13 +117,13 @@ impl SP1ICS07TendermintProver<VerifyMembershipProgram> {
         &self,
         root: &[u8],
         path: &str,
-        proof: Vec<u8>,
+        proof: MerkleProof,
         value: &[u8],
     ) -> SP1PlonkBn254Proof {
         let mut stdin = SP1Stdin::new();
         stdin.write_slice(root);
         stdin.write_slice(path.as_bytes());
-        stdin.write_vec(proof);
+        stdin.write_vec(proof.encode_vec());
         stdin.write_slice(value);
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or

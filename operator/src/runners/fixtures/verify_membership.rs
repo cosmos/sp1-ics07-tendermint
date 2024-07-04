@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, VerifyMembershipOutput,
 };
+use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
 use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf};
@@ -77,17 +78,21 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
 
     assert_eq!(u32::try_from(res.height.value())?, args.trusted_block);
     assert_eq!(res.key.as_slice(), args.key_path.as_bytes());
-    let vm_proof = res.proof.unwrap();
-    let vm_proof_bytes = serde_cbor::to_vec(&vm_proof).unwrap();
+    let vm_proof = res
+        .proof
+        .as_ref()
+        .map(convert_tm_to_ics_merkle_proof)
+        .unwrap()
+        .unwrap();
     let value = res.value;
     assert!(!value.is_empty());
-    assert!(!vm_proof_bytes.is_empty());
+    assert!(!vm_proof.proofs.is_empty());
 
     // Generate a header update proof for the specified blocks.
     let proof_data = tendermint_prover.generate_proof(
         commitment_root.as_bytes(),
         &args.key_path,
-        vm_proof_bytes,
+        vm_proof,
         &value,
     );
 

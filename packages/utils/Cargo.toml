@@ -1,0 +1,19 @@
+[package]
+name = "sp1-ics07-tendermint-utils"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+tendermint-light-client-verifier = { workspace = true }
+serde = { workspace = true }
+ibc-client-tendermint-types = { workspace = true }
+tendermint = { workspace = true }
+ibc-core-commitment-types = { workspace = true }
+time = { workspace = true }
+prost = { workspace = true }
+
+[dev-dependencies]
+hex = { workspace = true }

@@ -12,10 +12,11 @@ sp1_zkvm::entrypoint!(main);
 
 use alloy_sol_types::SolValue;
 
+use ibc_proto::Protobuf;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::VerifyMembershipOutput;
 
 use ibc_core_commitment_types::{
-    commitment::{CommitmentProofBytes, CommitmentRoot},
+    commitment::CommitmentRoot,
     merkle::MerkleProof,
     proto::{ics23::HostFunctionsManager, v1::MerklePath},
     specs::ProofSpecs,
@@ -31,16 +32,15 @@ pub fn main() {
     let commitment_root = CommitmentRoot::from_bytes(&app_hash);
 
     let encoded_2 = sp1_zkvm::io::read_vec();
-    let commitment_proof = CommitmentProofBytes::try_from(encoded_2).unwrap();
-    let merkle_proof = MerkleProof::try_from(&commitment_proof).unwrap();
-
-    let encoded_3 = sp1_zkvm::io::read_vec();
-    let path_str = String::from_utf8(encoded_3).unwrap();
+    let path_str = String::from_utf8(encoded_2).unwrap();
     let key_path = path_str
         .split('/')
         .map(std::string::ToString::to_string)
         .collect::<Vec<String>>();
     let path = MerklePath { key_path };
+
+    let encoded_3 = sp1_zkvm::io::read_vec();
+    let merkle_proof = MerkleProof::decode_vec(&encoded_3).unwrap();
 
     // encoded_4 is the value we want to prove the membership of
     let value = sp1_zkvm::io::read_vec();

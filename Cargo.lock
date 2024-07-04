@@ -5598,6 +5598,7 @@ dependencies = [
  "ibc-core-client-types",
  "ibc-core-commitment-types",
  "ibc-core-host-types",
+ "ibc-proto",
  "itertools 0.12.1",
  "log",
  "reqwest 0.11.27",
@@ -5607,6 +5608,7 @@ dependencies = [
  "sha2 0.10.8",
  "sp1-ics07-tendermint-solidity",
  "sp1-ics07-tendermint-update-client",
+ "sp1-ics07-tendermint-utils",
  "sp1-sdk",
  "subtle-encoding",
  "tendermint",
@@ -5650,11 +5652,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-ics07-tendermint-utils"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "ibc-client-tendermint-types",
+ "ibc-core-commitment-types",
+ "prost",
+ "serde",
+ "tendermint",
+ "tendermint-light-client-verifier",
+ "time",
+]
+
+[[package]]
 name = "sp1-ics07-tendermint-verify-membership"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "ibc-core-commitment-types",
+ "ibc-proto",
  "sp1-ics07-tendermint-solidity",
  "sp1-zkvm",
 ]

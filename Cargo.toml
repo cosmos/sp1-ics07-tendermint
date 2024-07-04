@@ -30,6 +30,7 @@ ibc-primitives = { version = "0.53.0", default-features = false }
 ibc-core-handler-types = { version = "0.53.0", default-features = false }
 ibc-client-tendermint-types = { version = "0.53.0", default-features = false }
 ibc-core-commitment-types = { version = "0.53.0", default-features = false }
+ibc-proto = { version = "0.44.0", default-features = false }
 
 serde = { version = "1.0", default-features = false }
 sha2 = { version = "0.10.8", default-features = false }
@@ -39,11 +40,15 @@ serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 
 # Used by the operator
 sp1-sdk = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.5-testnet", features = ["plonk"] }
-reqwest = { version = "0.11", features = ["json"] }
-tokio = { version = "1", features = ["full"] }
+
+sp1-ics07-tendermint-utils = { path = "./packages/utils/" }
+
 tendermint = { version = "0.36.0", default-features = false }
 tendermint-rpc = { version = "0.36.0", features = ["http-client"] }
 ibc-core-client-types = { version = "0.53.0", default-features = false }
+
+reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
 time = { version = "0.3", default-features = false, features = ["macros", "parsing"] }
 alloy-primitives = "0.7.2"
 alloy-contract = "0.1.2"
@@ -58,6 +63,7 @@ clap = { version = "4.0", features = ["derive", "env"] }
 log = "0.4.21"
 async-trait = "0.1.80"
 hex = "0.4.3"
+prost = { version = "0.12", default-features = false }
 
 [patch.crates-io]
 sha2-v0-10-8 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", branch = "patch-v0.10.8" }

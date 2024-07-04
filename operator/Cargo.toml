@@ -35,3 +35,5 @@ async-trait = { workspace = true }
 hex = { workspace = true }
 sp1-ics07-tendermint-update-client = { workspace = true }
 sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }
+sp1-ics07-tendermint-utils = { workspace = true }
+ibc-proto = { workspace = true }

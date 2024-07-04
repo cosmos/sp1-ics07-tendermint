@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
+import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 import "forge-std/console.sol";
 
@@ -24,33 +25,6 @@ contract SP1ICS07Tendermint {
 
     /// Allowed clock drift in nanoseconds
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3_000_000_000_000; // 3000 seconds
-
-    /// @notice The public value output for the sp1 update client program.
-    struct SP1ICS07UpdateClientOutput {
-        /// The trusted consensus state.
-        ICS07Tendermint.ConsensusState trusted_consensus_state;
-        /// The new consensus state with the verified header.
-        ICS07Tendermint.ConsensusState new_consensus_state;
-        /// The validation environment.
-        Env env;
-        /// trusted height
-        ICS07Tendermint.Height trusted_height;
-        /// new height
-        ICS07Tendermint.Height new_height;
-    }
-
-    /// @notice The environment output for the sp1 program.
-    struct Env {
-        /// The chain ID of the chain that the client is tracking.
-        string chain_id;
-        /// Fraction of validator overlap needed to update header
-        ICS07Tendermint.TrustThreshold trust_threshold;
-        /// Duration of the period since the `LatestTimestamp` during which the
-        /// submitted headers are valid for upgrade
-        uint64 trusting_period;
-        /// Timestamp in nanoseconds
-        uint64 now;
-    }
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
     /// @param _ics07UpdateClientProgramVkey The verification key for the update client program.
@@ -101,9 +75,9 @@ contract SP1ICS07Tendermint {
         bytes memory proof,
         bytes memory publicValues
     ) public {
-        SP1ICS07UpdateClientOutput memory output = abi.decode(
+        UpdateClientProgram.Output memory output = abi.decode(
             publicValues,
-            (SP1ICS07UpdateClientOutput)
+            (UpdateClientProgram.Output)
         );
 
         validateUpdateClientPublicValues(output);
@@ -122,7 +96,7 @@ contract SP1ICS07Tendermint {
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
     function validateUpdateClientPublicValues(
-        SP1ICS07UpdateClientOutput memory output
+        UpdateClientProgram.Output memory output
     ) public view {
         require(
             clientState.is_frozen == false,

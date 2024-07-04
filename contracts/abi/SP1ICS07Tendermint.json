@@ -245,7 +245,7 @@
       {
         "name": "output",
         "type": "tuple",
-        "internalType": "struct SP1ICS07Tendermint.SP1ICS07UpdateClientOutput",
+        "internalType": "struct UpdateClientProgram.Output",
         "components": [
           {
             "name": "trusted_consensus_state",
@@ -294,7 +294,7 @@
           {
             "name": "env",
             "type": "tuple",
-            "internalType": "struct SP1ICS07Tendermint.Env",
+            "internalType": "struct UpdateClientProgram.Env",
             "components": [
               {
                 "name": "chain_id",

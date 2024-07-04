@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, Height, TrustThreshold,
 };
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07UpdateClientOutput};
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, Output};
 use sp1_sdk::HashableKey;
 use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};
@@ -110,7 +110,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         tendermint_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
     let bytes = proof_data.public_values.as_slice();
-    let output = SP1ICS07UpdateClientOutput::abi_decode(bytes, false).unwrap();
+    let output = Output::abi_decode(bytes, false).unwrap();
 
     let fixture = SP1ICS07UpdateClientFixture {
         trusted_consensus_state: hex::encode(trusted_consensus_state.abi_encode()),

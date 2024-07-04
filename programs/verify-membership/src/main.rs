@@ -33,11 +33,9 @@ pub fn main() {
 
     let encoded_2 = sp1_zkvm::io::read_vec();
     let path_str = String::from_utf8(encoded_2).unwrap();
-    let key_path = path_str
-        .split('/')
-        .map(std::string::ToString::to_string)
-        .collect::<Vec<String>>();
-    let path = MerklePath { key_path };
+    let path = MerklePath {
+        key_path: vec!["ibc".to_string(), path_str.clone()],
+    };
 
     let encoded_3 = sp1_zkvm::io::read_vec();
     let merkle_proof = MerkleProof::decode_vec(&encoded_3).unwrap();

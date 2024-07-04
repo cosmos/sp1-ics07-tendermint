@@ -71,12 +71,13 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
         .abci_query(
             Some("store/ibc/key".to_string()),
             args.key_path.as_bytes(),
-            Some(args.trusted_block.into()),
+            // Proof height should be the block before the target block.
+            Some((args.trusted_block - 1).into()),
             true,
         )
         .await?;
 
-    assert_eq!(u32::try_from(res.height.value())?, args.trusted_block);
+    assert_eq!(u32::try_from(res.height.value())? + 1, args.trusted_block);
     assert_eq!(res.key.as_slice(), args.key_path.as_bytes());
     let vm_proof = res
         .proof

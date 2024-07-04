@@ -99,6 +99,7 @@ pub mod fixtures {
 
         /// Key path to prove membership.
         // TODO: Add default value.
+        #[clap(long)]
         pub key_path: String,
 
         /// Fixture path.

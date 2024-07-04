@@ -1,8 +1,7 @@
 //! A program that verifies the next block header of a blockchain using an IBC tendermint light
 //! client.
 
-#![deny(missing_docs)]
-#![deny(clippy::nursery, clippy::pedantic, warnings)]
+#![deny(missing_docs, clippy::nursery, clippy::pedantic, warnings)]
 #![allow(clippy::no_mangle_with_rust_abi)]
 // These two lines are necessary for the program to properly compile.
 //

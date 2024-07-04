@@ -1,3 +1,5 @@
+//! Prover for SP1 ICS07 Tendermint programs.
+
 use ibc_client_tendermint::types::Header;
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, Env,
@@ -5,15 +7,20 @@ use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
 /// A prover for for [`SP1ICS07TendermintProgram`] programs.
+#[allow(clippy::module_name_repetitions)]
 pub struct SP1ICS07TendermintProver<T: SP1ICS07TendermintProgram> {
+    /// [`sp1_sdk::ProverClient`] for generating proofs.
     pub prover_client: ProverClient,
+    /// The proving key.
     pub pkey: SP1ProvingKey,
+    /// The verifying key.
     pub vkey: SP1VerifyingKey,
     _phantom: std::marker::PhantomData<T>,
 }
 
 /// Trait for SP1 ICS07 Tendermint programs.
 pub trait SP1ICS07TendermintProgram {
+    /// The ELF file for the program.
     const ELF: &'static [u8];
 }
 
@@ -38,6 +45,8 @@ impl<T: SP1ICS07TendermintProgram> Default for SP1ICS07TendermintProver<T> {
 }
 
 impl<T: SP1ICS07TendermintProgram> SP1ICS07TendermintProver<T> {
+    /// Create a new prover.
+    #[must_use]
     pub fn new() -> Self {
         log::info!("Initializing SP1 ProverClient...");
         let prover_client = ProverClient::new();
@@ -53,7 +62,11 @@ impl<T: SP1ICS07TendermintProgram> SP1ICS07TendermintProver<T> {
 }
 
 impl SP1ICS07TendermintProver<UpdateClientProgram> {
-    /// Generate a proof of an update from trusted_consensus_state to a proposed header.
+    /// Generate a proof of an update from `trusted_consensus_state` to a proposed header.
+    ///
+    /// # Panics
+    /// Panics if the inputs cannot be encoded, the proof cannot be generated or the proof is
+    /// invalid.
     pub fn generate_proof(
         &self,
         trusted_consensus_state: &SolConsensusState,
@@ -92,7 +105,11 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
 }
 
 impl SP1ICS07TendermintProver<VerifyMembershipProgram> {
-    /// Generate a proof of a verify membership from trusted_consensus_state to a proposed header.
+    /// Generate a proof of a verify membership from `trusted_consensus_state` to a proposed header.
+    ///
+    /// # Panics
+    /// Panics if the proof cannot be generated or the proof is invalid.
+    #[must_use]
     pub fn generate_proof(
         &self,
         root: &[u8],

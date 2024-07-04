@@ -95,14 +95,14 @@ pub mod fixtures {
     pub struct VerifyMembershipCmd {
         /// Trusted block.
         #[clap(long)]
-        trusted_block: u32,
+        pub trusted_block: u32,
 
         /// Key path to prove membership.
         // TODO: Add default value.
-        key_path: String,
+        pub key_path: String,
 
         /// Fixture path.
         #[clap(long, default_value = "../contracts/fixtures")]
-        fixture_path: String,
+        pub fixture_path: String,
     }
 }

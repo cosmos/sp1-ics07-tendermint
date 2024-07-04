@@ -1,7 +1,10 @@
 use clap::Parser;
 use sp1_ics07_tendermint_operator::{
     cli::command::{fixtures, Commands, OperatorCli},
-    runners,
+    runners::{
+        self,
+        fixtures::{update_client, verify_membership},
+    },
 };
 use sp1_sdk::utils::setup_logger;
 
@@ -21,8 +24,8 @@ async fn main() -> anyhow::Result<()> {
         Commands::Run(args) => runners::operator::run(args).await,
         Commands::Genesis(args) => runners::genesis::run(args).await,
         Commands::Fixtures(cmd) => match cmd.command {
-            fixtures::Cmds::UpdateClient(args) => runners::fixtures::update_client::run(args).await,
-            fixtures::Cmds::VerifyMembership(_) => todo!(),
+            fixtures::Cmds::UpdateClient(args) => update_client::run(args).await,
+            fixtures::Cmds::VerifyMembership(args) => verify_membership::run(args).await,
         },
     }
 }

@@ -18,7 +18,7 @@ use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, Height, TrustThreshold,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07UpdateClientOutput};
-use sp1_sdk::{utils::setup_logger, HashableKey};
+use sp1_sdk::HashableKey;
 use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};
 
@@ -47,11 +47,6 @@ struct SP1ICS07UpdateClientFixture {
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
-    setup_logger();
-    if dotenv::dotenv().is_err() {
-        log::warn!("No .env file found");
-    }
-
     let tendermint_rpc_client = TendermintRPCClient::default();
     let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 

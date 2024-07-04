@@ -9,10 +9,10 @@ build-programs:
   mv elf/riscv32im-succinct-zkvm-elf elf/verify-membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/verify-membership-riscv32im-succinct-zkvm-elf'"
 
-# Build the Rust executables using `cargo build` command
-build-executables:
-  cargo build --bins --workspace --exclude sp1-ics07-tendermint-update-client --locked --release
-  @echo "Executables built"
+# Build the operator executable using `cargo build` command
+build-operator:
+  cargo build --bin operator --locked --release
+  @echo "Built the operator executable"
 
 # Run the Solidity tests using `forge test` command
 test-foundry:
@@ -20,7 +20,7 @@ test-foundry:
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:
-  cargo test --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features
+  cargo test --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-verify-membership --locked --all-features
 
 # Generate the `genesis.json` file using $TENDERMINT_RPC_URL in the `.env` file
 genesis:
@@ -28,7 +28,7 @@ genesis:
   @echo "Building the program..."
   just build-programs
   @echo "Generating the genesis file..."
-  RUST_LOG=info cargo run --bin genesis --release
+  RUST_LOG=info cargo run --bin operator --release -- genesis
 
 # Generate the `mock_fixture.json` file for the Celestia Mocha testnet using the mock prover
 mock-fixtures:
@@ -36,8 +36,8 @@ mock-fixtures:
   @echo "Building the program..."
   just build-programs
   @echo "Generating the mock fixtures..."
-  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin update-client-fixture --release -- --trusted-block 2110658 --target-block 2110668
-  @echo "Mock fixtures generated at 'contracts/fixtures/mock_fixture.json'"
+  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin operator --release -- fixtures update-client --trusted-block 2110658 --target-block 2110668
+  @echo "Mock fixtures generated at 'contracts/fixtures/mock_update_client_fixture.json'"
 
 # Generate the `fixture.json` file for the Celestia Mocha testnet using the network prover.
 # This command requires the `.env` file to be present in the root directory.
@@ -46,8 +46,8 @@ network-fixtures:
   @echo "Building the program..."
   just build-programs
   @echo "Generating fixtures... This may take a while (up to 20 minutes)"
-  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="network" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin update-client-fixture --release -- --trusted-block 2110658 --target-block 2110668
-  @echo "Fixtures generated at 'contracts/fixtures/fixture.json'"
+  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="network" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin operator --release -- fixtures update-client --trusted-block 2110658 --target-block 2110668
+  @echo "Fixtures generated at 'contracts/fixtures/update_client_fixture.json'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
 # Requires `jq` to be installed on the system
@@ -67,7 +67,7 @@ deploy-contracts:
 # Run the operator using the `cargo run --bin operator` command.
 # This command requires the `.env` file to be present in the root directory.
 operator:
-  RUST_LOG=info cargo run --bin operator --release
+  RUST_LOG=info cargo run --bin operator --release -- start
 
 # Run the e2e tests
 e2e-test testname:

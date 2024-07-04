@@ -15,7 +15,7 @@ pub struct OperatorCli {
 #[derive(Clone, Debug, Parser)]
 pub enum Commands {
     /// The subcommand to run the operator.
-    Run(operator::Args),
+    Start(operator::Args),
     /// The subcommand to produce the `genesis.json` file.
     Genesis(genesis::Args),
     /// The subcommand to produce the fixtures for testing.

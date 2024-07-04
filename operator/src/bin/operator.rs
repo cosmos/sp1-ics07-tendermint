@@ -21,7 +21,7 @@ async fn main() -> anyhow::Result<()> {
 
     let cli = OperatorCli::parse();
     match cli.command {
-        Commands::Run(args) => runners::operator::run(args).await,
+        Commands::Start(args) => runners::operator::run(args).await,
         Commands::Genesis(args) => runners::genesis::run(args).await,
         Commands::Fixtures(cmd) => match cmd.command {
             fixtures::Cmds::UpdateClient(args) => update_client::run(args).await,

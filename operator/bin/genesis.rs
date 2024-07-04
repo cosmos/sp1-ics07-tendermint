@@ -4,8 +4,8 @@ use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use sp1_ics07_tendermint_operator::{
-    rpc::TendermintRPCClient, SP1ICS07TendermintProgram, UpdateClientProgram,
-    VerifyMembershipProgram,
+    prover::{SP1ICS07TendermintProgram, UpdateClientProgram, VerifyMembershipProgram},
+    rpc::TendermintRPCClient,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,

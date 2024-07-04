@@ -10,7 +10,8 @@ use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_operator::{
-    rpc::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
+    prover::{SP1ICS07TendermintProver, UpdateClientProgram},
+    rpc::TendermintRPCClient,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;

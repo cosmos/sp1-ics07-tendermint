@@ -3,10 +3,12 @@ use clap::Parser;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::SP1ICS07TendermintProgram;
 use sp1_ics07_tendermint_operator::{
-    rpc::TendermintRPCClient, SP1ICS07TendermintProver, UpdateClientProgram,
-    VerifyMembershipProgram,
+    prover::{
+        SP1ICS07TendermintProgram, SP1ICS07TendermintProver, UpdateClientProgram,
+        VerifyMembershipProgram,
+    },
+    rpc::TendermintRPCClient,
 };
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};

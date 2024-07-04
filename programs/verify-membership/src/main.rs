@@ -10,12 +10,9 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 
-use alloy_sol_types::{sol, SolType};
+use alloy_sol_types::SolValue;
 
-/// The public values encoded as a tuple that can be easily deserialized inside Solidity.
-type VerifyMembershipOutput = sol! {
-    tuple(bytes32, string, bytes)
-};
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::VerifyMembershipOutput;
 
 use ibc_core_commitment_types::{
     commitment::{CommitmentProofBytes, CommitmentRoot},
@@ -58,6 +55,11 @@ pub fn main() {
         )
         .unwrap();
 
-    let output = VerifyMembershipOutput::abi_encode(&(app_hash, path_str, value));
+    let output = VerifyMembershipOutput {
+        commitment_root: app_hash.into(),
+        key_path: path_str,
+        value: value.into(),
+    }
+    .abi_encode();
     sp1_zkvm::io::commit_slice(&output);
 }

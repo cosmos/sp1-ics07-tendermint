@@ -8,11 +8,13 @@ use crate::{
     },
     rpc::TendermintRPCClient,
 };
-use alloy_sol_types::{SolType, SolValue};
+use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
+use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
+    ConsensusState as SolConsensusState, VerifyMembershipOutput,
+};
 use sp1_sdk::HashableKey;
 use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf};
@@ -39,11 +41,6 @@ struct SP1ICS07VerifyMembershipFixture {
     /// Hex-encoded value.
     value: String,
 }
-
-/// The public values encoded as a tuple that can be easily deserialized inside Solidity.
-type VerifyMembershipOutput = alloy_sol_types::sol! {
-    tuple(bytes32, string, bytes)
-};
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
@@ -93,11 +90,13 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     );
 
     let bytes = proof_data.public_values.as_slice();
-    let (app_hash, output_path, output_val) =
-        VerifyMembershipOutput::abi_decode(bytes, false).unwrap();
-    assert_eq!(output_path, args.key_path);
-    assert_eq!(output_val, value);
-    assert_eq!(app_hash.as_slice(), commitment_root.as_bytes());
+    let output = VerifyMembershipOutput::abi_decode(bytes, true).unwrap();
+    assert_eq!(output.key_path, args.key_path);
+    assert_eq!(output.value.to_vec(), value);
+    assert_eq!(
+        output.commitment_root.as_slice(),
+        commitment_root.as_bytes()
+    );
 
     let fixture = SP1ICS07VerifyMembershipFixture {
         proof_height: args.trusted_block,

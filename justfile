@@ -39,6 +39,15 @@ mock-fixtures:
   RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin operator --release -- fixtures update-client --trusted-block 2110658 --target-block 2110668
   @echo "Mock fixtures generated at 'contracts/fixtures/mock_update_client_fixture.json'"
 
+# Generate the `mock_fixture.json` file for the Celestia Mocha testnet using the mock prover
+mock-fixtures-vm:
+  @echo "Generating mock fixtures for the Celestia Mocha testnet"
+  @echo "Building the program..."
+  just build-programs
+  @echo "Generating the mock fixtures..."
+  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin operator --release -- fixtures verify-membership --key-path "clients/07-tendermint-0/clientState" --trusted-block 2110658
+  @echo "Mock fixtures generated at 'contracts/fixtures/mock_update_client_fixture.json'"
+
 # Generate the `fixture.json` file for the Celestia Mocha testnet using the network prover.
 # This command requires the `.env` file to be present in the root directory.
 network-fixtures:

@@ -15,7 +15,7 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
 
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint

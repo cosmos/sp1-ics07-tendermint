@@ -1,7 +1,7 @@
 //! Prover for SP1 ICS07 Tendermint programs.
 
 use ibc_client_tendermint::types::Header;
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, Env,
 };
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};

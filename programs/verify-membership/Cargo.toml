@@ -11,4 +11,4 @@ license = { workspace = true }
 sp1-zkvm = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 alloy-sol-types = { workspace = true }
-sp1-ics07-tendermint-shared = { workspace = true }
+sp1-ics07-tendermint-solidity = { workspace = true }

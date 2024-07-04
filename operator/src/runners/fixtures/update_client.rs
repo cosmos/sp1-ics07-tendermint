@@ -14,10 +14,9 @@ use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
-    ClientState, Height, TrustThreshold,
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
+    ClientState, Env, Height, TrustThreshold, UpdateClientOutput,
 };
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, UpdateClientOutput};
 use sp1_sdk::HashableKey;
 use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};

@@ -19,7 +19,7 @@ use ibc_client_tendermint::{
     types::{ConsensusState, Header, TENDERMINT_CLIENT_TYPE},
 };
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     self, ConsensusState as SolConsensusState, Env, UpdateClientOutput,
 };
 use sp1_ics07_tendermint_update_client::types;

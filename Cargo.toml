@@ -19,7 +19,7 @@ authors       = ["srdtrk <srdtrk@hotmail.com>"]
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.5-testnet" }
 sp1-helper = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.5-testnet" }
 
-sp1-ics07-tendermint-shared = { path = "./packages/shared/" }
+sp1-ics07-tendermint-solidity = { path = "./packages/solidity/" }
 sp1-ics07-tendermint-update-client = { path = "./programs/update-client/" }
 
 tendermint-light-client-verifier = { version = "0.36.0", default-features = false }

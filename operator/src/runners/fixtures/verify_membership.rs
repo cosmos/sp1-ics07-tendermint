@@ -12,7 +12,7 @@ use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, VerifyMembershipOutput,
 };
 use sp1_sdk::HashableKey;

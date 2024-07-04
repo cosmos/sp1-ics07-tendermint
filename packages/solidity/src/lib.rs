@@ -1,4 +1,6 @@
-//! This module contains the shared types for `sp1-ics07-tendermint`.
+#![doc = include_str!("../README.md")]
+#![deny(missing_docs)]
+#![deny(clippy::nursery, clippy::pedantic, warnings)]
 
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;

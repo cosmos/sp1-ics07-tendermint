@@ -12,7 +12,7 @@ sp1_zkvm::entrypoint!(main);
 
 use alloy_sol_types::SolValue;
 
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::VerifyMembershipOutput;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::VerifyMembershipOutput;
 
 use ibc_core_commitment_types::{
     commitment::{CommitmentProofBytes, CommitmentRoot},

@@ -10,15 +10,16 @@ import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
 
-struct SP1ICS07UpdateClientFixtureJson {
+struct SP1ICS07VerifyMembershipFixtureJson {
+    uint32 proofHeight;
     bytes trustedClientState;
     bytes trustedConsensusState;
-    bytes targetConsensusState;
-    uint32 targetHeight;
     bytes32 updateClientVkey;
     bytes32 verifyMembershipVkey;
+    bytes32 commitmentRoot;
     bytes publicValues;
     bytes proof;
+    bytes value;
 }
 
 contract SP1ICS07TendermintTest is Test {
@@ -27,11 +28,11 @@ contract SP1ICS07TendermintTest is Test {
     SP1ICS07Tendermint public ics07Tendermint;
     SP1ICS07Tendermint public mockIcs07Tendermint;
 
-    SP1ICS07UpdateClientFixtureJson public fixture;
-    SP1ICS07UpdateClientFixtureJson public mockFixture;
+    SP1ICS07VerifyMembershipFixtureJson public fixture;
+    SP1ICS07VerifyMembershipFixtureJson public mockFixture;
 
     function setUp() public {
-        fixture = loadFixture("update_client_fixture.json");
+        fixture = loadFixture("verify_membership_fixture.json");
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
             .decode(
@@ -52,7 +53,7 @@ contract SP1ICS07TendermintTest is Test {
             trustedConsensusHash
         );
 
-        mockFixture = loadFixture("mock_update_client_fixture.json");
+        mockFixture = loadFixture("mock_verify_membership_fixture.json");
 
         ICS07Tendermint.ConsensusState memory mockTrustedConsensusState = abi
             .decode(
@@ -93,7 +94,7 @@ contract SP1ICS07TendermintTest is Test {
 
     function loadFixture(
         string memory fileName
-    ) public view returns (SP1ICS07UpdateClientFixtureJson memory) {
+    ) public view returns (SP1ICS07VerifyMembershipFixtureJson memory) {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/fixtures/", fileName);
         string memory json = vm.readFile(path);
@@ -101,105 +102,90 @@ contract SP1ICS07TendermintTest is Test {
         bytes memory trustedConsensusState = json.readBytes(
             ".trustedConsensusState"
         );
-        bytes memory targetConsensusState = json.readBytes(
-            ".targetConsensusState"
-        );
-        uint32 targetHeight = uint32(json.readUint(".targetHeight"));
+        uint32 proofHeight = uint32(json.readUint(".proofHeight"));
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
         bytes32 verifyMembershipVkey = json.readBytes32(
             ".verifyMembershipVkey"
         );
+        bytes32 commitmentRoot = json.readBytes32(".commitmentRoot");
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
+        bytes memory value = json.readBytes(".value");
 
-        SP1ICS07UpdateClientFixtureJson
-            memory fix = SP1ICS07UpdateClientFixtureJson({
+        SP1ICS07VerifyMembershipFixtureJson
+            memory fix = SP1ICS07VerifyMembershipFixtureJson({
+                commitmentRoot: commitmentRoot,
                 trustedClientState: trustedClientState,
                 trustedConsensusState: trustedConsensusState,
-                targetConsensusState: targetConsensusState,
-                targetHeight: targetHeight,
+                proofHeight: proofHeight,
                 updateClientVkey: updateClientVkey,
                 verifyMembershipVkey: verifyMembershipVkey,
                 publicValues: publicValues,
-                proof: proof
+                proof: proof,
+                value: value
             });
 
         return fix;
     }
 
     // Confirm that submitting a real proof passes the verifier.
-    function test_ValidUpdateClient() public {
-        ics07Tendermint.verifyIcs07UpdateClientProof(
+    function test_ValidSP1ICS07VerifyMembership() public view {
+        ics07Tendermint.verifyIcs07VerifyMembershipProof(
             fixture.proof,
-            fixture.publicValues
+            fixture.publicValues,
+            fixture.proofHeight,
+            fixture.trustedConsensusState
         );
-
-        ICS07Tendermint.ClientState memory clientState = ics07Tendermint
-            .getClientState();
-        assert(
-            keccak256(bytes(clientState.chain_id)) ==
-                keccak256(bytes("mocha-4"))
-        );
-        assert(clientState.trust_level.numerator == 1);
-        assert(clientState.trust_level.denominator == 3);
-        assert(clientState.latest_height.revision_number == 4);
-        assert(clientState.latest_height.revision_height == 2110668);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
-        assert(clientState.is_frozen == false);
-
-        bytes32 consensusHash = ics07Tendermint.getConsensusState(2110668);
-        ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
-            fixture.targetConsensusState,
-            (ICS07Tendermint.ConsensusState)
-        );
-        assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
-    function test_ValidMockUpdateClient() public {
-        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
-            bytes(""),
-            mockFixture.publicValues
+    function test_ValidMockVerifyMembership() public view {
+        mockIcs07Tendermint.verifyIcs07VerifyMembershipProof(
+            mockFixture.proof,
+            mockFixture.publicValues,
+            mockFixture.proofHeight,
+            mockFixture.trustedConsensusState
         );
-
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
-            .getClientState();
-        assert(
-            keccak256(bytes(clientState.chain_id)) ==
-                keccak256(bytes("mocha-4"))
-        );
-        assert(clientState.trust_level.numerator == 1);
-        assert(clientState.trust_level.denominator == 3);
-        assert(clientState.latest_height.revision_number == 4);
-        assert(clientState.latest_height.revision_height == 2110668);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
-        assert(clientState.is_frozen == false);
-
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110668);
-        ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
-            fixture.targetConsensusState,
-            (ICS07Tendermint.ConsensusState)
-        );
-        assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     // Confirm that submitting a non-empty proof with the mock verifier fails.
-    function test_Invalid_MockUpdateClient() public {
+    function test_Invalid_MockVerifyMembership() public {
+        // Invalid proof
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
+        mockIcs07Tendermint.verifyIcs07VerifyMembershipProof(
             bytes("invalid"),
-            mockFixture.publicValues
+            mockFixture.publicValues,
+            mockFixture.proofHeight,
+            mockFixture.trustedConsensusState
+        );
+
+        // Invalid proof height
+        vm.expectRevert();
+        mockIcs07Tendermint.verifyIcs07VerifyMembershipProof(
+            bytes(""),
+            mockFixture.publicValues,
+            1,
+            mockFixture.trustedConsensusState
+        );
+
+        // Invalid trusted consensus state
+        vm.expectRevert();
+        mockIcs07Tendermint.verifyIcs07VerifyMembershipProof(
+            bytes(""),
+            mockFixture.publicValues,
+            mockFixture.proofHeight,
+            bytes("invalid")
         );
     }
 
     // Confirm that submitting a random proof with the real verifier fails.
-    function test_Invalid_UpdateClient() public {
+    function test_Invalid_VerifyMembership() public {
         vm.expectRevert();
-        ics07Tendermint.verifyIcs07UpdateClientProof(
+        ics07Tendermint.verifyIcs07VerifyMembershipProof(
             bytes("invalid"),
-            fixture.publicValues
+            fixture.publicValues,
+            fixture.proofHeight,
+            fixture.trustedConsensusState
         );
     }
 }

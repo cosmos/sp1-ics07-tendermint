@@ -35,12 +35,13 @@ mock-fixtures:
   @echo "Generating mock fixtures for the Celestia Mocha testnet"
   @echo "Building the program..."
   just build-programs
-  @echo "Generating the mock fixtures for update-client..."
-  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin operator --release -- fixtures update-client --trusted-block 2110658 --target-block 2110668
-  @echo "Mock fixtures generated at 'contracts/fixtures/mock_update_client_fixture.json'"
-  @echo "Generating the mock fixtures for verify-membership..."
-  RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="mock" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin operator --release -- fixtures verify-membership --key-path "clients/07-tendermint-0/clientState" --trusted-block 2110658
-  @echo "Mock fixtures generated at 'contracts/fixtures/mock_verify_membership_fixture.json'"
+  @echo "Building the operator..."
+  just build-operator
+  @echo "Generating the mock fixtures..."
+  parallel --progress --shebang --ungroup -j 2 ::: \
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER='mock' TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2110658 --target-block 2110668" \
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER='mock' TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-0/clientState' --trusted-block 2110658"
+  @echo "Fixtures generated at 'contracts/fixtures/update_client_fixture.json' and 'contracts/fixtures/verify_membership_fixture.json'"
 
 # Generate the `fixture.json` file for the Celestia Mocha testnet using the network prover.
 # This command requires the `.env` file to be present in the root directory.

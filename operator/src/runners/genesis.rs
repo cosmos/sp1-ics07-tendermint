@@ -1,29 +1,20 @@
-use alloy_sol_types::SolValue;
-use clap::Parser;
-use ibc_client_tendermint::types::ConsensusState;
-use ibc_core_commitment_types::commitment::CommitmentRoot;
-use ibc_core_host_types::identifiers::ChainId;
-use sp1_ics07_tendermint_operator::{
+//! Contains the runner for the genesis command.
+
+use crate::{
+    cli::command::genesis::Args,
     prover::{SP1ICS07TendermintProgram, UpdateClientProgram, VerifyMembershipProgram},
     rpc::TendermintRPCClient,
 };
+use alloy_sol_types::SolValue;
+use ibc_client_tendermint::types::ConsensusState;
+use ibc_core_commitment_types::commitment::CommitmentRoot;
+use ibc_core_host_types::identifiers::ChainId;
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Height, TrustThreshold,
 };
+
 use sp1_sdk::{utils::setup_logger, HashableKey, MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};
-
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct GenesisArgs {
-    /// Trusted block.
-    #[clap(long)]
-    trusted_block: Option<u32>,
-    /// Genesis path.
-    #[clap(long, default_value = "../contracts/script")]
-    genesis_path: String,
-}
-
 /// The genesis data for the SP1 ICS07 Tendermint contract.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,32 +29,22 @@ struct SP1ICS07TendermintGenesis {
     verify_membership_vkey: String,
 }
 
-/// Fetches the trusted header hash for the given block height. Defaults to the latest block height.
-/// Example:
-/// ```sh
-/// RUST_LOG=info TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin genesis --release
-/// ```
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+/// Creates the `genesis.json` file for the `SP1ICS07Tendermint` contract.
+#[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
+pub async fn run(args: Args) -> anyhow::Result<()> {
     setup_logger();
     if dotenv::dotenv().is_err() {
         log::warn!("No .env file found");
     }
-    let args = GenesisArgs::parse();
 
     let tendermint_rpc_client = TendermintRPCClient::default();
     let mock_prover = MockProver::new();
     let (_, update_client_vk) = mock_prover.setup(UpdateClientProgram::ELF);
     let (_, verify_membership_vk) = mock_prover.setup(VerifyMembershipProgram::ELF);
 
-    let trusted_light_block = if let Some(trusted_block) = args.trusted_block {
-        tendermint_rpc_client
-            .get_light_block(Some(trusted_block))
-            .await?
-    } else {
-        tendermint_rpc_client.get_light_block(None).await?
-    };
-
+    let trusted_light_block = tendermint_rpc_client
+        .get_light_block(args.trusted_block)
+        .await?;
     let trusted_height = trusted_light_block.height().value();
     if args.trusted_block.is_none() {
         log::info!("Latest block height: {}", trusted_height);

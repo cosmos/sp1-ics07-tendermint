@@ -6,22 +6,6 @@ edition = { workspace = true }
 repository = { workspace = true }
 license = { workspace = true }
 
-[[bin]]
-name = "operator"
-path = "bin/operator.rs"
-
-[[bin]]
-name = "genesis"
-path = "bin/genesis.rs"
-
-[[bin]]
-name = "update-client-fixture"
-path = "bin/uc_fixture.rs"
-
-[[bin]]
-name = "verify-membership-fixture"
-path = "bin/vm_fixture.rs"
-
 [dependencies]
 sp1-sdk = { workspace = true }
 reqwest = { workspace = true }

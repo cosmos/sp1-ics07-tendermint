@@ -1,41 +1,33 @@
+//! Contains the runner for the `operator run` command.
+
 use std::env;
 
+use crate::{
+    cli::command::operator::Args,
+    prover::{SP1ICS07TendermintProver, UpdateClientProgram},
+    rpc::TendermintRPCClient,
+};
 use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
 };
-use clap::Parser;
 use ibc_client_tendermint::types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
-use sp1_ics07_tendermint_operator::{
-    prover::{SP1ICS07TendermintProver, UpdateClientProgram},
-    rpc::TendermintRPCClient,
-};
 use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
-
-/// Command line arguments for the operator.
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct OperatorArgs {
-    /// Run update-client only once and then exit.
-    #[clap(long)]
-    only_once: bool,
-}
 
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint
 /// light client and generate a proof of the transition from the latest block in the contract to the
 /// latest block on the chain. Then, submits the proof to the contract and updates the contract with
 /// the latest block hash and height.
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+#[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
+pub async fn run(args: Args) -> anyhow::Result<()> {
     setup_logger();
     if dotenv::dotenv().is_err() {
         log::warn!("No .env file found");
     }
-    let args = OperatorArgs::parse();
 
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
     let mut private_key = env::var("PRIVATE_KEY").expect("PRIVATE_KEY not set");
@@ -63,11 +55,10 @@ async fn main() -> anyhow::Result<()> {
         // Read the existing trusted header hash from the contract.
         let trusted_revision_number = contract_client_state.latest_height.revision_number;
         let trusted_block_height = contract_client_state.latest_height.revision_height;
-        if trusted_block_height == 0 {
-            panic!(
-                "No trusted height found on the contract. Something is wrong with the contract."
-            );
-        }
+        assert!(
+            trusted_block_height != 0,
+            "No trusted height found on the contract. Something is wrong with the contract."
+        );
 
         let trusted_light_block = tendermint_rpc_client
             .get_light_block(Some(trusted_block_height))
@@ -105,9 +96,9 @@ async fn main() -> anyhow::Result<()> {
             trust_threshold: contract_client_state.trust_level,
             trusting_period: contract_client_state.trusting_period,
             now: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_nanos() as u64,
+                .duration_since(std::time::UNIX_EPOCH)?
+                .as_nanos()
+                .try_into()?,
         };
 
         // Generate a proof of the transition from the trusted block to the target block.

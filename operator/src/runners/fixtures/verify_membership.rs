@@ -80,6 +80,8 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     let vm_proof = res.proof.unwrap();
     let vm_proof_bytes = serde_cbor::to_vec(&vm_proof).unwrap();
     let value = res.value;
+    assert!(!value.is_empty());
+    assert!(!vm_proof_bytes.is_empty());
 
     // Generate a header update proof for the specified blocks.
     let proof_data = tendermint_prover.generate_proof(

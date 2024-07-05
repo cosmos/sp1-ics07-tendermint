@@ -1,14 +1,32 @@
 # SP1 ICS07-Tendermint IBC Light Client
 
-This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum for powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
+This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
+
+![Light Mode Diagram](./sp1-ics07-tendermint-light.svg#gh-light-mode-only)![Dark Mode Diagram](./sp1-ics07-tendermint-dark.svg#gh-dark-mode-only)
+
+## Table of Contents
+
+<!-- TOC -->
+
+- [SP1 ICS07-Tendermint IBC Light Client](#sp1-ics07-tendermint-ibc-light-client)
+    - [Table of Contents](#table-of-contents)
+    - [Overview](#overview)
+    - [Requirements](#requirements)
+    - [Build the programs](#build-the-programs)
+    - [Run ICS-07 Tendermint Light Client End to End](#run-ics-07-tendermint-light-client-end-to-end)
+    - [EVM-Compatible Proof Generation & Verification](#evm-compatible-proof-generation--verification)
+        - [Solidity Proof Verification](#solidity-proof-verification)
+    - [End to End Testing](#end-to-end-testing)
+
+<!-- /TOC -->
 
 ## Overview
 
 This, `sp1-ics07-tendermint`, is an example of a ZK IBC tendermint light client on Ethereum. It's goal is to demonstrate how to use SP1 to generate proofs for:
 - Updating the light client state (including historical headers) - implemented
+- Verify membership (for IBC packets) - implemented
+- Verify non-membership (for IBC packets) - not implemented yet
 - Misbehaviour detection (freezing the light client) - not implemented yet
-- Verify membership proofs (for IBC packets) - not implemented yet
-- Verify non-membership proofs (for IBC packets) - not implemented yet
 
 This project is structured as a cargo workspace with the following directories:
 * The `contracts` directory contains a Solidity contract that implements the ICS-07 Tendermint light client which can verify SP1 proofs. This is a [`foundry`](https://github.com/foundry-rs/foundry) project, and not a part of the cargo workspace.
@@ -76,13 +94,13 @@ just build-programs
 Here, I will show you how to generate a proof to be used in the fixtures for the foundry tests. You can do this locally or by using the SP1 prover network. To do this on your local machine, run the following command:
 
 ```sh
-RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER="local" TENDERMINT_RPC_URL="https://rpc.celestia-mocha.com/" cargo run --bin fixture --release -- --trusted-block 2110658 --target-block 2110668
+just fixtures local
 ```
 
-To use the SP1 prover network, you will need to set the `SP1_PROVER` environment variable to `network` and provide your private key to `.env`. After this, you can run the following command:
+To use the SP1 prover network, provide your SP1 network private key to `.env`. After this, you can run the following command:
 
 ```sh
-just network-fixtures
+just fixtures network
 ```
 
 ### Solidity Proof Verification
@@ -93,3 +111,18 @@ After generating the verify the proof with the SP1 EVM verifier.
 just test-foundry
 ```
 
+## End to End Testing
+
+There are several end-to-end tests in the `e2e/interchaintestv8` directory. These tests are written in Go and use the [`interchaintest`](https://github.com/strangelove-ventures/interchaintest) library. It spins up a local Ethereum and a Tendermint network and runs the tests found in [`e2e/interchaintestv8/sp1_ics07_test.go`](e2e/interchaintestv8/sp1_ics07_test.go). Some of the tests use the prover network to generate the proofs, so you need to provide your SP1 network private key to `.env` for these tests to pass.
+
+To run the tests, run the following command:
+
+```sh
+just test-e2e $TEST_NAME
+```
+
+Where `$TEST_NAME` is the name of the test you want to run, for example:
+
+```sh
+just test-e2e TestDeploy
+```

@@ -30,23 +30,11 @@ genesis:
   @echo "Generating the genesis file..."
   RUST_LOG=info cargo run --bin operator --release -- genesis
 
-# Generate the `mock_fixture.json` file for the Celestia Mocha testnet using the mock prover
-mock-fixtures:
-  @echo "Generating mock fixtures for the Celestia Mocha testnet"
-  @echo "Building the program..."
-  just build-programs
-  @echo "Building the operator..."
-  just build-operator
-  @echo "Generating the mock fixtures..."
-  parallel --progress --shebang --ungroup -j 2 ::: \
-    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER='mock' TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2110658 --target-block 2110668" \
-    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER='mock' TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-0/clientState' --trusted-block 2110658"
-  @echo "Fixtures generated at 'contracts/fixtures/update_client_fixture.json' and 'contracts/fixtures/verify_membership_fixture.json'"
-
-# Generate the `fixture.json` file for the Celestia Mocha testnet using the network prover.
-# This command requires the `.env` file to be present in the root directory.
-# This generates the network fixtures for all programs in parallel using GNU parallel.
-network-fixtures:
+# Generate the `fixture.json` file for the Celestia Mocha testnet using the prover parameter.
+# The prover parameter should be one of: ["mock", "network", "local"]
+# This generates the fixtures for all programs in parallel using GNU parallel.
+# If prover is set to network, this command requires the `SP1_PRIVATE_KEY` environment variable to be set.
+fixtures prover:
   @echo "Generating fixtures for the Celestia Mocha testnet"
   @echo "Building the program..."
   just build-programs
@@ -54,9 +42,9 @@ network-fixtures:
   just build-operator
   @echo "Generating fixtures... This may take a while (up to 20 minutes)"
   parallel --progress --shebang --ungroup -j 2 ::: \
-    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER='network' TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2110658 --target-block 2110668" \
-    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER='network' TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-0/clientState' --trusted-block 2110658"
-  @echo "Fixtures generated at 'contracts/fixtures/update_client_fixture.json' and 'contracts/fixtures/verify_membership_fixture.json'"
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2110658 --target-block 2110668" \
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-0/clientState' --trusted-block 2110658"
+  @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
 # Requires `jq` to be installed on the system
@@ -83,6 +71,6 @@ operator:
   RUST_LOG=info cargo run --bin operator --release -- start
 
 # Run the e2e tests
-e2e-test testname:
+test-e2e testname:
   echo "Running {{testname}} test..."
-  cd e2e/interchaintestv8 && go test -v -run={{testname}} -timeout 40m
+  cd e2e/interchaintestv8 && go test -v -run=TestWithSP1ICS07TendermintTestSuite/{{testname}} -timeout 40m

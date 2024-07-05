@@ -14,7 +14,6 @@ use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
 };
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
-use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf};
 use tendermint_rpc::Client;
 
@@ -46,7 +45,7 @@ struct SP1ICS07VerifyMembershipFixture {
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = SP1ICS07TendermintProver::<VerifyMembershipProgram>::default();
+    let verify_mem_prover = SP1ICS07TendermintProver::<VerifyMembershipProgram>::default();
 
     let trusted_light_block = LightBlockWrapper::new(
         tm_rpc_client
@@ -78,7 +77,7 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
 
     // Generate a header update proof for the specified blocks.
     let proof_data =
-        tendermint_prover.generate_proof(&commitment_root_bytes, &args.key_path, vm_proof, &value);
+        verify_mem_prover.generate_proof(&commitment_root_bytes, &args.key_path, vm_proof, &value);
 
     let bytes = proof_data.public_values.as_slice();
     let output = VerifyMembershipOutput::abi_decode(bytes, true).unwrap();
@@ -93,11 +92,8 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
             SolConsensusState::from(trusted_consensus_state).abi_encode(),
         ),
         commitment_root: hex::encode(&commitment_root_bytes),
-        update_client_vkey: MockProver::new()
-            .setup(UpdateClientProgram::ELF)
-            .1
-            .bytes32(),
-        verify_membership_vkey: tendermint_prover.vkey.bytes32(),
+        update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
+        verify_membership_vkey: verify_mem_prover.vkey.bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
         value: hex::encode(value),

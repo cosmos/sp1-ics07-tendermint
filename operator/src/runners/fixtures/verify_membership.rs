@@ -1,7 +1,7 @@
 //! Runner for generating `verify_membership` fixtures
 
 use crate::{
-    cli::command::fixtures::VerifyMembershipCmd,
+    cli::command::fixtures::MembershipCmd,
     helpers::light_block::LightBlockWrapper,
     programs::{MembershipProgram, SP1Program, UpdateClientProgram},
     prover::SP1ICS07TendermintProver,
@@ -43,7 +43,7 @@ struct SP1ICS07VerifyMembershipFixture {
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
-pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
+pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = TendermintRPCClient::default();
     let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 

@@ -5,9 +5,9 @@ build-programs:
   cd programs/update-client && cargo prove build
   mv elf/riscv32im-succinct-zkvm-elf elf/update-client-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/update-client-riscv32im-succinct-zkvm-elf'"
-  cd programs/verify-membership && cargo prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/verify-membership-riscv32im-succinct-zkvm-elf
-  @echo "ELF created at 'elf/verify-membership-riscv32im-succinct-zkvm-elf'"
+  cd programs/membership && cargo prove build
+  mv elf/riscv32im-succinct-zkvm-elf elf/membership-riscv32im-succinct-zkvm-elf
+  @echo "ELF created at 'elf/membership-riscv32im-succinct-zkvm-elf'"
 
 # Build the operator executable using `cargo build` command
 build-operator:
@@ -35,15 +35,17 @@ genesis:
 # This generates the fixtures for all programs in parallel using GNU parallel.
 # If prover is set to network, this command requires the `SP1_PRIVATE_KEY` environment variable to be set.
 fixtures prover:
+  echo {{ if prover == "mock" { "mock_" } else { "" } }}
   @echo "Generating fixtures for the Celestia Mocha testnet"
   @echo "Building the program..."
   just build-programs
   @echo "Building the operator..."
   just build-operator
   @echo "Generating fixtures... This may take a while (up to 20 minutes)"
-  parallel --progress --shebang --ungroup -j 2 ::: \
-    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2110658 --target-block 2110668" \
-    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-0/clientState' --trusted-block 2110658"
+  parallel --progress --shebang --ungroup -j 3 ::: \
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2110658 --target-block 2110668 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}update_client_fixture.json'" \
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-0/clientState' --trusted-block 2110658 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}verify_membership_fixture.json'" \
+    "RUST_BACKTRACE=full RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures verify-membership --key-path 'clients/07-tendermint-001/clientState' --trusted-block 2110658 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}verify_non_membership_fixture.json'"
   @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract

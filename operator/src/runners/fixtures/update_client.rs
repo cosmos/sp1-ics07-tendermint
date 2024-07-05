@@ -11,7 +11,7 @@ use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UpdateClientOutput};
 use sp1_sdk::HashableKey;
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -83,22 +83,10 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     };
 
     // Save the proof data to the file path.
-    let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.fixture_path);
-
-    let sp1_prover_type = env::var("SP1_PROVER");
-    if sp1_prover_type.as_deref() == Ok("mock") {
-        std::fs::write(
-            fixture_path.join("mock_update_client_fixture.json"),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .unwrap();
-    } else {
-        std::fs::write(
-            fixture_path.join("update_client_fixture.json"),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .unwrap();
-    }
-
+    std::fs::write(
+        PathBuf::from(args.output_path),
+        serde_json::to_string_pretty(&fixture).unwrap(),
+    )
+    .unwrap();
     Ok(())
 }

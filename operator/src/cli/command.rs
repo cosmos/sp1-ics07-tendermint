@@ -85,13 +85,13 @@ pub mod fixtures {
         pub target_block: u32,
 
         /// Fixture path.
-        #[clap(long, default_value = "../contracts/fixtures")]
-        pub fixture_path: String,
+        #[clap(long, short = 'o')]
+        pub output_path: String,
     }
 
     /// The arguments for the `VerifyMembership` fixture executable.
     #[derive(Parser, Debug, Clone)]
-    #[command(about = "Generate the verify membership fixture")]
+    #[command(about = "Generate the verify (non)membership fixture")]
     pub struct VerifyMembershipCmd {
         /// Trusted block.
         #[clap(long)]
@@ -103,7 +103,7 @@ pub mod fixtures {
         pub key_path: String,
 
         /// Fixture path.
-        #[clap(long, default_value = "../contracts/fixtures")]
-        pub fixture_path: String,
+        #[clap(long, short = 'o')]
+        pub output_path: String,
     }
 }

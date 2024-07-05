@@ -14,7 +14,7 @@ use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
 };
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 use tendermint_rpc::Client;
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
@@ -72,7 +72,9 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     assert_eq!(res.key.as_slice(), args.key_path.as_bytes());
     let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
     let value = res.value;
-    assert!(!value.is_empty());
+    if value.is_empty() {
+        log::info!("Verifying non-membership");
+    }
     assert!(!vm_proof.proofs.is_empty());
 
     // Generate a header update proof for the specified blocks.
@@ -100,22 +102,10 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     };
 
     // Save the proof data to the file path.
-    let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.fixture_path);
-
-    let sp1_prover_type = env::var("SP1_PROVER");
-    if sp1_prover_type.as_deref() == Ok("mock") {
-        std::fs::write(
-            fixture_path.join("mock_verify_membership_fixture.json"),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .unwrap();
-    } else {
-        std::fs::write(
-            fixture_path.join("verify_membership_fixture.json"),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .unwrap();
-    }
-
+    std::fs::write(
+        PathBuf::from(args.output_path),
+        serde_json::to_string_pretty(&fixture).unwrap(),
+    )
+    .unwrap();
     Ok(())
 }

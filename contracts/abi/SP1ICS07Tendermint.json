@@ -94,13 +94,13 @@
           },
           {
             "name": "trusting_period",
-            "type": "uint64",
-            "internalType": "uint64"
+            "type": "uint32",
+            "internalType": "uint32"
           },
           {
             "name": "unbonding_period",
-            "type": "uint64",
-            "internalType": "uint64"
+            "type": "uint32",
+            "internalType": "uint32"
           },
           {
             "name": "is_frozen",
@@ -239,8 +239,8 @@
               },
               {
                 "name": "trusting_period",
-                "type": "uint64",
-                "internalType": "uint64"
+                "type": "uint32",
+                "internalType": "uint32"
               },
               {
                 "name": "now",

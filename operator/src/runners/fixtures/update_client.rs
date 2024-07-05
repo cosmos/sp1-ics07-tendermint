@@ -61,8 +61,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         trusting_period: trusted_client_state.trusting_period,
         now: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)?
-            .as_nanos()
-            .try_into()?,
+            .as_secs(),
     };
 
     // Generate a header update proof for the specified blocks.

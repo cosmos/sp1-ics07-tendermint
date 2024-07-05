@@ -72,8 +72,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
             trusting_period: contract_client_state.trusting_period,
             now: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)?
-                .as_nanos()
-                .try_into()?,
+                .as_secs(),
         };
 
         // Generate a proof of the transition from the trusted block to the target block.

@@ -24,8 +24,8 @@ contract SP1ICS07Tendermint {
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 => bytes32) private consensusStateHashes;
 
-    /// Allowed clock drift in nanoseconds
-    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3_000_000_000_000; // 3000 seconds
+    /// Allowed clock drift in seconds
+    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
     /// @param _ics07UpdateClientProgramVkey The verification key for the update client program.
@@ -161,10 +161,13 @@ contract SP1ICS07Tendermint {
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
         );
-        // TODO: Make sure this timestamp check is correct
         require(
-            block.timestamp * 1e9 <= output.env.now + ALLOWED_SP1_CLOCK_DRIFT,
-            "SP1ICS07Tendermint: invalid timestamp"
+            block.timestamp >= output.env.now,
+            "SP1ICS07Tendermint: proof is in the future"
+        );
+        require(
+            block.timestamp - output.env.now <= ALLOWED_SP1_CLOCK_DRIFT,
+            "SP1ICS07Tendermint: proof is too old"
         );
         require(
             keccak256(bytes(output.env.chain_id)) ==

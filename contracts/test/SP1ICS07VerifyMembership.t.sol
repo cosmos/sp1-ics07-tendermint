@@ -32,6 +32,8 @@ contract SP1ICS07TendermintTest is Test {
     SP1ICS07VerifyMembershipFixtureJson public mockFixture;
 
     function setUp() public {
+        vm.warp(1720161695);
+
         fixture = loadFixture("verify_membership_fixture.json");
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
@@ -84,12 +86,12 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.trust_level.denominator == 3);
         assert(clientState.latest_height.revision_number == 4);
         assert(clientState.latest_height.revision_height == 2110658);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.trusting_period == 1_209_600);
+        assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110658);
-        assert(consensusHash == trustedConsensusHash);
+        assert(consensusHash == mockTrustedConsensusHash);
     }
 
     function loadFixture(
@@ -135,6 +137,12 @@ contract SP1ICS07TendermintTest is Test {
             fixture.publicValues,
             fixture.proofHeight,
             fixture.trustedConsensusState
+        );
+
+        // to console
+        console.log(
+            "VerifyMembership gas used: ",
+            vm.lastCallGas().gasTotalUsed
         );
     }
 

@@ -31,7 +31,7 @@ impl LightBlockWrapper {
     /// Returns an error if the chain identifier or height cannot be parsed.
     pub fn to_sol_client_state(&self) -> anyhow::Result<ClientState> {
         let chain_id = ChainId::from_str(self.0.signed_header.header.chain_id.as_str())?;
-        let two_weeks_in_nanos = 14 * 24 * 60 * 60 * 1_000_000_000;
+        let two_weeks_in_seconds = 14 * 24 * 60 * 60;
         Ok(ClientState {
             chain_id: chain_id.to_string(),
             trust_level: TrustThreshold {
@@ -43,8 +43,8 @@ impl LightBlockWrapper {
                 revision_height: self.0.height().value().try_into()?,
             },
             is_frozen: false,
-            trusting_period: two_weeks_in_nanos,
-            unbonding_period: two_weeks_in_nanos,
+            trusting_period: two_weeks_in_seconds,
+            unbonding_period: two_weeks_in_seconds,
         })
     }
 

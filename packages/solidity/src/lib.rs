@@ -55,9 +55,7 @@ impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusStat
             .unwrap();
         Self {
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            timestamp: ics07_tendermint_consensus_state
-                .timestamp
-                .unix_timestamp_nanos() as u64,
+            timestamp: ics07_tendermint_consensus_state.timestamp.unix_timestamp() as u64,
             root: root.into(),
             next_validators_hash: next_validators_hash.into(),
         }
@@ -67,8 +65,9 @@ impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusStat
 #[allow(clippy::fallible_impl_from)]
 impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusState {
     fn from(consensus_state: sp1_ics07_tendermint::ConsensusState) -> Self {
-        let time = OffsetDateTime::from_unix_timestamp_nanos(i128::from(consensus_state.timestamp))
-            .unwrap();
+        let time =
+            OffsetDateTime::from_unix_timestamp(consensus_state.timestamp.try_into().unwrap())
+                .unwrap();
         let seconds = time.unix_timestamp();
         let nanos = time.nanosecond();
         Self {

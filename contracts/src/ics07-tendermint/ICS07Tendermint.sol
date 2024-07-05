@@ -30,10 +30,10 @@ contract ICS07Tendermint {
         /// Latest height the client was updated to
         Height latest_height;
         /// duration of the period since the LatestTimestamp during which the
-        /// submitted headers are valid for upgrade
-        uint64 trusting_period;
-        /// duration of the staking unbonding period
-        uint64 unbonding_period;
+        /// submitted headers are valid for upgrade in seconds
+        uint32 trusting_period;
+        /// duration of the staking unbonding period in seconds
+        uint32 unbonding_period;
         /// whether or not client is frozen (due to misbehavior)
         bool is_frozen;
     }

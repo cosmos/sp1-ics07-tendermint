@@ -48,7 +48,7 @@ pub fn main() {
     let chain_id = ChainId::from_str(&env.chain_id).unwrap();
     let options = Options {
         trust_threshold: env.trust_threshold.clone().into(),
-        trusting_period: Duration::from_nanos(env.trusting_period),
+        trusting_period: Duration::from_secs(env.trusting_period.into()),
         clock_drift: Duration::default(),
     };
 

@@ -6,6 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {stdError} from "forge-std/StdError.sol";
 import {ICS07Tendermint} from "../src/ics07-tendermint/ICS07Tendermint.sol";
+import {UpdateClientProgram} from "../src/ics07-tendermint/UpdateClientProgram.sol";
 import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
@@ -83,12 +84,12 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.trust_level.denominator == 3);
         assert(clientState.latest_height.revision_number == 4);
         assert(clientState.latest_height.revision_height == 2110658);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.trusting_period == 1_209_600);
+        assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110658);
-        assert(consensusHash == trustedConsensusHash);
+        assert(consensusHash == mockTrustedConsensusHash);
     }
 
     function loadFixture(
@@ -129,10 +130,21 @@ contract SP1ICS07TendermintTest is Test {
 
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidUpdateClient() public {
+        // set a correct timestamp
+        UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
+            fixture.publicValues,
+            (UpdateClientProgram.UpdateClientOutput)
+        );
+        vm.warp(output.env.now + 300);
+
+        // run verify
         ics07Tendermint.verifyIcs07UpdateClientProof(
             fixture.proof,
             fixture.publicValues
         );
+
+        // to console
+        console.log("UpdateClient gas used: ", vm.lastCallGas().gasTotalUsed);
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint
             .getClientState();
@@ -144,8 +156,8 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.trust_level.denominator == 3);
         assert(clientState.latest_height.revision_number == 4);
         assert(clientState.latest_height.revision_height == 2110668);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.trusting_period == 1_209_600);
+        assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusState(2110668);
@@ -158,6 +170,14 @@ contract SP1ICS07TendermintTest is Test {
 
     // Confirm that submitting an empty proof passes the mock verifier.
     function test_ValidMockUpdateClient() public {
+        // set a correct timestamp
+        UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
+            mockFixture.publicValues,
+            (UpdateClientProgram.UpdateClientOutput)
+        );
+        vm.warp(output.env.now + 300);
+
+        // run verify
         mockIcs07Tendermint.verifyIcs07UpdateClientProof(
             bytes(""),
             mockFixture.publicValues
@@ -173,8 +193,8 @@ contract SP1ICS07TendermintTest is Test {
         assert(clientState.trust_level.denominator == 3);
         assert(clientState.latest_height.revision_number == 4);
         assert(clientState.latest_height.revision_height == 2110668);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.trusting_period == 1_209_600);
+        assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110668);

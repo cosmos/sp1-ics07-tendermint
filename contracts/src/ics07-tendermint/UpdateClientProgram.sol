@@ -28,9 +28,9 @@ contract UpdateClientProgram {
         /// Fraction of validator overlap needed to update header
         ICS07Tendermint.TrustThreshold trust_threshold;
         /// Duration of the period since the `LatestTimestamp` during which the
-        /// submitted headers are valid for upgrade
-        uint64 trusting_period;
-        /// Timestamp in nanoseconds
+        /// submitted headers are valid for upgrade in seconds.
+        uint32 trusting_period;
+        /// Timestamp in seconds
         uint64 now;
     }
 }

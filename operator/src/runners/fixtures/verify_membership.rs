@@ -10,7 +10,7 @@ use crate::{
 use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ConsensusState as SolConsensusState, VerifyMembershipOutput,
+    ConsensusState as SolConsensusState, MembershipOutput,
 };
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
@@ -80,7 +80,7 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
         verify_mem_prover.generate_proof(&commitment_root_bytes, &args.key_path, vm_proof, &value);
 
     let bytes = proof_data.public_values.as_slice();
-    let output = VerifyMembershipOutput::abi_decode(bytes, true).unwrap();
+    let output = MembershipOutput::abi_decode(bytes, true).unwrap();
     assert_eq!(output.key_path, args.key_path);
     assert_eq!(output.value.to_vec(), value);
     assert_eq!(output.commitment_root.as_slice(), &commitment_root_bytes);

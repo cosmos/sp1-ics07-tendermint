@@ -12,7 +12,7 @@ sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::SolValue;
 
 use ibc_proto::Protobuf;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::VerifyMembershipOutput;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::MembershipOutput;
 
 use ibc_core_commitment_types::{
     commitment::CommitmentRoot,
@@ -63,7 +63,7 @@ pub fn main() {
             .unwrap();
     }
 
-    let output = VerifyMembershipOutput {
+    let output = MembershipOutput {
         commitment_root: app_hash.into(),
         key_path: path_str,
         value: value.into(),

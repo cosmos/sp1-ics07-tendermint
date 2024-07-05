@@ -4,15 +4,13 @@ use std::env;
 
 use crate::{
     cli::command::operator::Args,
+    helpers::light_block::LightBlockWrapper,
     prover::{SP1ICS07TendermintProver, UpdateClientProgram},
     rpc::TendermintRPCClient,
 };
 use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
 };
-use ibc_client_tendermint::types::{ConsensusState, Header};
-use ibc_core_client_types::Height as IbcHeight;
-use ibc_core_commitment_types::commitment::CommitmentRoot;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
@@ -53,7 +51,6 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let contract_client_state = contract.getClientState().call().await?._0;
 
         // Read the existing trusted header hash from the contract.
-        let trusted_revision_number = contract_client_state.latest_height.revision_number;
         let trusted_block_height = contract_client_state.latest_height.revision_height;
         assert!(
             trusted_block_height != 0,
@@ -63,36 +60,20 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let trusted_light_block = tendermint_rpc_client
             .get_light_block(Some(trusted_block_height))
             .await?;
+        let trusted_light_block_helper = LightBlockWrapper::new(trusted_light_block);
+
+        // Get trusted consensus state from the trusted light block.
+        let trusted_consensus_state = trusted_light_block_helper.to_consensus_state().into();
+
         let target_light_block = tendermint_rpc_client.get_light_block(None).await?;
         let target_height = target_light_block.height().value();
+        let target_light_block_helper = LightBlockWrapper::new(target_light_block);
 
-        // Get trusted consensus state from the contract.
-        let trusted_consensus_state = ConsensusState {
-            timestamp: trusted_light_block.signed_header.header.time,
-            root: CommitmentRoot::from_bytes(
-                trusted_light_block.signed_header.header.app_hash.as_bytes(),
-            ),
-            next_validators_hash: trusted_light_block
-                .signed_header
-                .header
-                .next_validators_hash,
-        }
-        .into();
-
-        let chain_id = target_light_block.signed_header.header.chain_id.to_string();
-        let proposed_header = Header {
-            signed_header: target_light_block.signed_header,
-            validator_set: target_light_block.validators,
-            trusted_height: IbcHeight::new(
-                trusted_revision_number.into(),
-                trusted_block_height.into(),
-            )
-            .unwrap(),
-            trusted_next_validator_set: trusted_light_block.next_validators,
-        };
+        let proposed_header =
+            target_light_block_helper.into_header(trusted_light_block_helper.as_light_block());
 
         let contract_env = Env {
-            chain_id,
+            chain_id: trusted_light_block_helper.chain_id()?.to_string(),
             trust_threshold: contract_client_state.trust_level,
             trusting_period: contract_client_state.trusting_period,
             now: std::time::SystemTime::now()

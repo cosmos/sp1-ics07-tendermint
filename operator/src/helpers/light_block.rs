@@ -1,8 +1,9 @@
 //! Provides helpers for deriving other types from `LightBlock`.
 
-use ibc_client_tendermint::types::ConsensusState;
+use ibc_client_tendermint::types::{ConsensusState, Header};
+use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
-use ibc_core_host_types::identifiers::ChainId;
+use ibc_core_host_types::{error::IdentifierError, identifiers::ChainId};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{ClientState, Height, TrustThreshold};
 use std::str::FromStr;
 use tendermint_light_client_verifier::types::LightBlock;
@@ -55,5 +56,32 @@ impl LightBlockWrapper {
             root: CommitmentRoot::from_bytes(self.0.signed_header.header.app_hash.as_bytes()),
             next_validators_hash: self.0.signed_header.header.next_validators_hash,
         }
+    }
+
+    /// Convert the [`LightBlockWrapper`] to a new [`Header`].
+    ///
+    /// # Panics
+    /// Panics if the `trusted_height` is zero.
+    #[must_use]
+    pub fn into_header(self, trusted_light_block: &LightBlock) -> Header {
+        let trusted_revision_number =
+            ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())
+                .unwrap()
+                .revision_number();
+        let trusted_block_height = trusted_light_block.height().value();
+        Header {
+            signed_header: self.0.signed_header,
+            validator_set: self.0.validators,
+            trusted_height: IbcHeight::new(trusted_revision_number, trusted_block_height).unwrap(),
+            trusted_next_validator_set: trusted_light_block.next_validators.clone(),
+        }
+    }
+
+    /// Get the chain identifier from the [`LightBlock`].
+    ///
+    /// # Errors
+    /// Returns an error if the chain identifier cannot be parsed.
+    pub fn chain_id(&self) -> Result<ChainId, IdentifierError> {
+        ChainId::from_str(self.0.signed_header.header.chain_id.as_str())
     }
 }

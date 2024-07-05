@@ -35,8 +35,6 @@ contract SP1ICS07TendermintTest is Test {
     SP1ICS07VerifyMembershipFixtureJson public mockFixture;
 
     function setUp() public {
-        vm.warp(1720161695);
-
         fixture = loadFixture("verify_membership_fixture.json");
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi

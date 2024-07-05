@@ -35,7 +35,6 @@ genesis:
 # This generates the fixtures for all programs in parallel using GNU parallel.
 # If prover is set to network, this command requires the `SP1_PRIVATE_KEY` environment variable to be set.
 fixtures prover:
-  echo {{ if prover == "mock" { "mock_" } else { "" } }}
   @echo "Generating fixtures for the Celestia Mocha testnet"
   @echo "Building the program..."
   just build-programs

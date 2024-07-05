@@ -3,7 +3,7 @@
 use crate::{
     cli::command::fixtures::VerifyMembershipCmd,
     helpers::light_block::LightBlockWrapper,
-    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    programs::{MembershipProgram, SP1Program, UpdateClientProgram},
     prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
@@ -45,7 +45,7 @@ struct SP1ICS07VerifyMembershipFixture {
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = TendermintRPCClient::default();
-    let verify_mem_prover = SP1ICS07TendermintProver::<VerifyMembershipProgram>::default();
+    let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 
     let trusted_light_block = LightBlockWrapper::new(
         tm_rpc_client

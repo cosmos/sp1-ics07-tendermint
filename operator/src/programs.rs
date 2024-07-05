@@ -20,14 +20,13 @@ pub trait SP1Program {
 pub struct UpdateClientProgram;
 
 /// SP1 ICS07 Tendermint verify membership program.
-pub struct VerifyMembershipProgram;
+pub struct MembershipProgram;
 
 impl SP1Program for UpdateClientProgram {
     const ELF: &'static [u8] =
         include_bytes!("../../elf/update-client-riscv32im-succinct-zkvm-elf");
 }
 
-impl SP1Program for VerifyMembershipProgram {
-    const ELF: &'static [u8] =
-        include_bytes!("../../elf/verify-membership-riscv32im-succinct-zkvm-elf");
+impl SP1Program for MembershipProgram {
+    const ELF: &'static [u8] = include_bytes!("../../elf/membership-riscv32im-succinct-zkvm-elf");
 }

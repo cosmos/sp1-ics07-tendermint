@@ -3,7 +3,7 @@
 use crate::{
     cli::command::genesis::Args,
     helpers::light_block::LightBlockWrapper,
-    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    programs::{MembershipProgram, SP1Program, UpdateClientProgram},
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;
@@ -55,7 +55,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         ),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
-        verify_membership_vkey: VerifyMembershipProgram::get_vkey().bytes32(),
+        verify_membership_vkey: MembershipProgram::get_vkey().bytes32(),
     };
 
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.genesis_path);

@@ -3,7 +3,7 @@
 use crate::{
     cli::command::fixtures::UpdateClientCmd,
     helpers::light_block::LightBlockWrapper,
-    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    programs::{MembershipProgram, SP1Program, UpdateClientProgram},
     prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
@@ -77,7 +77,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
         update_client_vkey: uc_prover.vkey.bytes32(),
-        verify_membership_vkey: VerifyMembershipProgram::get_vkey().bytes32(),
+        verify_membership_vkey: MembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };

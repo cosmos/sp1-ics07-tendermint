@@ -161,10 +161,13 @@ contract SP1ICS07Tendermint {
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
         );
-        // TODO: Make sure this timestamp check is correct
         require(
-            block.timestamp * 1e9 <= output.env.now + ALLOWED_SP1_CLOCK_DRIFT,
-            "SP1ICS07Tendermint: invalid timestamp"
+            block.timestamp >= output.env.now,
+            "SP1ICS07Tendermint: proof is in the future"
+        );
+        require(
+            block.timestamp - output.env.now <= ALLOWED_SP1_CLOCK_DRIFT,
+            "SP1ICS07Tendermint: proof is too old"
         );
         require(
             keccak256(bytes(output.env.chain_id)) ==

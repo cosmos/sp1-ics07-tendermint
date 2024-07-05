@@ -3,12 +3,13 @@
 use std::env;
 
 use crate::{
-    cli::command::operator::Args, helpers::light_block::LightBlockWrapper,
-    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver, rpc::TendermintRPCClient,
+    cli::command::operator::Args,
+    helpers::{self, light_block::LightBlockWrapper},
+    programs::UpdateClientProgram,
+    prover::SP1ICS07TendermintProver,
+    rpc::TendermintRPCClient,
 };
-use alloy::{
-    network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
-};
+use alloy::providers::ProviderBuilder;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
@@ -26,24 +27,18 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     }
 
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
-    let mut private_key = env::var("PRIVATE_KEY").expect("PRIVATE_KEY not set");
-    if let Some(stripped) = private_key.strip_prefix("0x") {
-        private_key = stripped.to_string();
-    }
     let contract_address = env::var("CONTRACT_ADDRESS").expect("CONTRACT_ADDRESS not set");
 
     // Instantiate a Tendermint prover based on the environment variable.
-    let signer: PrivateKeySigner = private_key.parse()?;
-    let wallet = EthereumWallet::from(signer);
+    let wallet = helpers::eth::wallet_from_env();
     let provider = ProviderBuilder::new()
         .with_recommended_fillers()
         .wallet(wallet)
         .on_http(Url::parse(rpc_url.as_str())?);
 
+    let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
     let tendermint_rpc_client = TendermintRPCClient::default();
     let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
-
-    let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
 
     loop {
         let contract_client_state = contract.getClientState().call().await?._0;

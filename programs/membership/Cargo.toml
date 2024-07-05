@@ -1,6 +1,6 @@
 [package]
-name = "sp1-ics07-tendermint-verify-membership"
-description = "Verify membership program for sp1-ics07-tendermint"
+name = "sp1-ics07-tendermint-membership"
+description = "Verify (non)membership program for sp1-ics07-tendermint"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

@@ -23,9 +23,9 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
 ## Overview
 
 This, `sp1-ics07-tendermint`, is an example of a ZK IBC tendermint light client on Ethereum. It's goal is to demonstrate how to use SP1 to generate proofs for:
-- Updating the light client state (including historical headers) - implemented
-- Verify membership (for IBC packets) - implemented
-- Verify non-membership (for IBC packets) - not implemented yet
+- Updating the light client state (including historical headers) - implemented in `programs/update-client`
+- Verify membership (for IBC) - implemented in `programs/membership`
+- Verify non-membership (for IBC packets) - in `programs/membership`
 - Misbehaviour detection (freezing the light client) - not implemented yet
 
 This project is structured as a cargo workspace with the following directories:

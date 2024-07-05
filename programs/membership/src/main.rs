@@ -1,5 +1,4 @@
-//! A program that verifies the next block header of a blockchain using an IBC tendermint light
-//! client.
+//! A program that verifies the membership or non-membership of a value in a commitment root.
 
 #![deny(missing_docs, clippy::nursery, clippy::pedantic, warnings)]
 #![allow(clippy::no_mangle_with_rust_abi)]
@@ -13,7 +12,7 @@ sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::SolValue;
 
 use ibc_proto::Protobuf;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::VerifyMembershipOutput;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::MembershipOutput;
 
 use ibc_core_commitment_types::{
     commitment::CommitmentRoot,
@@ -41,19 +40,30 @@ pub fn main() {
     let merkle_proof = MerkleProof::decode_vec(&encoded_3).unwrap();
 
     // encoded_4 is the value we want to prove the membership of
+    // if it is empty, we are verifying non-membership
     let value = sp1_zkvm::io::read_vec();
 
-    merkle_proof
-        .verify_membership::<HostFunctionsManager>(
-            &ProofSpecs::cosmos(),
-            commitment_root.into(),
-            path,
-            value.clone(),
-            0,
-        )
-        .unwrap();
+    if value.is_empty() {
+        merkle_proof
+            .verify_non_membership::<HostFunctionsManager>(
+                &ProofSpecs::cosmos(),
+                commitment_root.into(),
+                path,
+            )
+            .unwrap();
+    } else {
+        merkle_proof
+            .verify_membership::<HostFunctionsManager>(
+                &ProofSpecs::cosmos(),
+                commitment_root.into(),
+                path,
+                value.clone(),
+                0,
+            )
+            .unwrap();
+    }
 
-    let output = VerifyMembershipOutput {
+    let output = MembershipOutput {
         commitment_root: app_hash.into(),
         key_path: path_str,
         value: value.into(),

@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Genesis(args) => runners::genesis::run(args).await,
         Commands::Fixtures(cmd) => match cmd.command {
             fixtures::Cmds::UpdateClient(args) => update_client::run(args).await,
-            fixtures::Cmds::VerifyMembership(args) => verify_membership::run(args).await,
+            fixtures::Cmds::Membership(args) => verify_membership::run(args).await,
         },
     }
 }

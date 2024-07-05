@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
 import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
-import {VerifyMembershipProgram} from "./ics07-tendermint/VerifyMembershipProgram.sol";
+import {MembershipProgram} from "./ics07-tendermint/MembershipProgram.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 import "forge-std/console.sol";
 
@@ -100,22 +100,35 @@ contract SP1ICS07Tendermint {
     /// @param publicValues The encoded public values.
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
+    /// @param keyPath The key path.
+    /// @param value The value.
     function verifyIcs07VerifyMembershipProof(
         bytes memory proof,
         bytes memory publicValues,
         uint32 proofHeight,
-        bytes memory trustedConsensusStateBz
+        bytes memory trustedConsensusStateBz,
+        string memory keyPath,
+        bytes memory value
     ) public view {
-        VerifyMembershipProgram.VerifyMembershipOutput memory output = abi
-            .decode(
-                publicValues,
-                (VerifyMembershipProgram.VerifyMembershipOutput)
-            );
+        MembershipProgram.MembershipOutput memory output = abi.decode(
+            publicValues,
+            (MembershipProgram.MembershipOutput)
+        );
 
-        validateVerifyMembershipOutput(
+        require(
+            value.length != 0,
+            "SP1ICS07Tendermint: value must not be empty"
+        );
+        require(
+            keccak256(value) == keccak256(output.value),
+            "SP1ICS07Tendermint: value mismatch"
+        );
+
+        validateMembershipOutput(
             output,
             proofHeight,
-            trustedConsensusStateBz
+            trustedConsensusStateBz,
+            keyPath
         );
 
         verifier.verifyProof(
@@ -125,20 +138,63 @@ contract SP1ICS07Tendermint {
         );
     }
 
-    /// @notice Validates the SP1ICS07VerifyMembershipOutput public values and decodes the trusted consensus state.
+    /// @notice The entrypoint for verifying non-membership proof.
+    /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
+    /// @param proof The encoded proof.
+    /// @param publicValues The encoded public values.
+    /// @param proofHeight The height of the proof.
+    /// @param trustedConsensusStateBz The encoded trusted consensus state.
+    /// @param keyPath The key path.
+    function verifyIcs07VerifyNonMembershipProof(
+        bytes memory proof,
+        bytes memory publicValues,
+        uint32 proofHeight,
+        bytes memory trustedConsensusStateBz,
+        string memory keyPath
+    ) public view {
+        MembershipProgram.MembershipOutput memory output = abi.decode(
+            publicValues,
+            (MembershipProgram.MembershipOutput)
+        );
+
+        require(
+            output.value.length == 0,
+            "SP1ICS07Tendermint: value must be empty"
+        );
+
+        validateMembershipOutput(
+            output,
+            proofHeight,
+            trustedConsensusStateBz,
+            keyPath
+        );
+
+        verifier.verifyProof(
+            ics07VerifyMembershipProgramVkey,
+            publicValues,
+            proof
+        );
+    }
+
+    /// @notice Validates the MembershipOutput public values and decodes the trusted consensus state.
     /// @param output The public values.
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
     /// @return The decoded trusted consensus state.
-    function validateVerifyMembershipOutput(
-        VerifyMembershipProgram.VerifyMembershipOutput memory output,
+    function validateMembershipOutput(
+        MembershipProgram.MembershipOutput memory output,
         uint32 proofHeight,
-        bytes memory trustedConsensusStateBz
+        bytes memory trustedConsensusStateBz,
+        string memory keyPath
     ) public view returns (ICS07Tendermint.ConsensusState memory) {
         require(
             consensusStateHashes[proofHeight] ==
                 keccak256(trustedConsensusStateBz),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
+        );
+        require(
+            keccak256(bytes(keyPath)) == keccak256(bytes(output.key_path)),
+            "SP1ICS07Tendermint: key path mismatch"
         );
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi

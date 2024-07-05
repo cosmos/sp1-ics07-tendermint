@@ -63,5 +63,5 @@ jobs:
 
       - name: Build SP1 program
         run: |
-          cd programs/verify-membership
+          cd programs/membership
           ~/.config/.sp1/bin/cargo-prove prove build

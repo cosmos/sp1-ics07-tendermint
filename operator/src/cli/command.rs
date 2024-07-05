@@ -69,7 +69,7 @@ pub mod fixtures {
         /// The subcommand to generate the update client fixtures.
         UpdateClient(UpdateClientCmd),
         /// The subcommand to generate the verify membership fixtures.
-        VerifyMembership(VerifyMembershipCmd),
+        Membership(MembershipCmd),
     }
 
     /// The arguments for the `UpdateClient` fixture executable.
@@ -85,25 +85,24 @@ pub mod fixtures {
         pub target_block: u32,
 
         /// Fixture path.
-        #[clap(long, default_value = "../contracts/fixtures")]
-        pub fixture_path: String,
+        #[clap(long, short = 'o')]
+        pub output_path: String,
     }
 
     /// The arguments for the `VerifyMembership` fixture executable.
     #[derive(Parser, Debug, Clone)]
-    #[command(about = "Generate the verify membership fixture")]
-    pub struct VerifyMembershipCmd {
+    #[command(about = "Generate the verify (non)membership fixture")]
+    pub struct MembershipCmd {
         /// Trusted block.
         #[clap(long)]
         pub trusted_block: u32,
 
         /// Key path to prove membership.
-        // TODO: Add default value.
         #[clap(long)]
         pub key_path: String,
 
         /// Fixture path.
-        #[clap(long, default_value = "../contracts/fixtures")]
-        pub fixture_path: String,
+        #[clap(long, short = 'o')]
+        pub output_path: String,
     }
 }

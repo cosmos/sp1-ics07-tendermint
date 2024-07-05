@@ -7,6 +7,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {stdError} from "forge-std/StdError.sol";
 import {ICS07Tendermint} from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import {UpdateClientProgram} from "../src/ics07-tendermint/UpdateClientProgram.sol";
+import {SP1ICS07TendermintTest} from "./SP1ICS07TendermintTest.sol";
 import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
@@ -22,74 +23,20 @@ struct SP1ICS07UpdateClientFixtureJson {
     bytes proof;
 }
 
-contract SP1ICS07TendermintTest is Test {
+contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
     using stdJson for string;
-
-    SP1ICS07Tendermint public ics07Tendermint;
-    SP1ICS07Tendermint public mockIcs07Tendermint;
 
     SP1ICS07UpdateClientFixtureJson public fixture;
     SP1ICS07UpdateClientFixtureJson public mockFixture;
 
     function setUp() public {
         fixture = loadFixture("update_client_fixture.json");
-
-        ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
-            .decode(
-                fixture.trustedConsensusState,
-                (ICS07Tendermint.ConsensusState)
-            );
-
-        bytes32 trustedConsensusHash = keccak256(
-            abi.encode(trustedConsensusState)
-        );
-
-        SP1Verifier verifier = new SP1Verifier();
-        ics07Tendermint = new SP1ICS07Tendermint(
-            fixture.updateClientVkey,
-            fixture.verifyMembershipVkey,
-            address(verifier),
-            fixture.trustedClientState,
-            trustedConsensusHash
-        );
-
         mockFixture = loadFixture("mock_update_client_fixture.json");
 
-        ICS07Tendermint.ConsensusState memory mockTrustedConsensusState = abi
-            .decode(
-                mockFixture.trustedConsensusState,
-                (ICS07Tendermint.ConsensusState)
-            );
-
-        bytes32 mockTrustedConsensusHash = keccak256(
-            abi.encode(mockTrustedConsensusState)
+        setUpTest(
+            "update_client_fixture.json",
+            "mock_update_client_fixture.json"
         );
-
-        SP1MockVerifier mockVerifier = new SP1MockVerifier();
-        mockIcs07Tendermint = new SP1ICS07Tendermint(
-            mockFixture.updateClientVkey,
-            mockFixture.verifyMembershipVkey,
-            address(mockVerifier),
-            mockFixture.trustedClientState,
-            mockTrustedConsensusHash
-        );
-
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
-            .getClientState();
-        assert(
-            keccak256(bytes(clientState.chain_id)) ==
-                keccak256(bytes("mocha-4"))
-        );
-        assert(clientState.trust_level.numerator == 1);
-        assert(clientState.trust_level.denominator == 3);
-        assert(clientState.latest_height.revision_number == 4);
-        assert(clientState.latest_height.revision_height == 2110658);
-        assert(clientState.trusting_period == 1_209_600);
-        assert(clientState.unbonding_period == 1_209_600);
-        assert(clientState.is_frozen == false);
-
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110658);
-        assert(consensusHash == mockTrustedConsensusHash);
     }
 
     function loadFixture(

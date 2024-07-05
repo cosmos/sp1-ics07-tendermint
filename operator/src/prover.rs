@@ -1,6 +1,6 @@
 //! Prover for SP1 ICS07 Tendermint programs.
 
-use crate::programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram};
+use crate::programs::{MembershipProgram, SP1Program, UpdateClientProgram};
 use ibc_client_tendermint::types::Header;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
@@ -88,7 +88,7 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
     }
 }
 
-impl SP1ICS07TendermintProver<VerifyMembershipProgram> {
+impl SP1ICS07TendermintProver<MembershipProgram> {
     /// Generate a proof of a verify membership from `trusted_consensus_state` to a proposed header.
     ///
     /// # Panics

@@ -1,20 +1,20 @@
 //! Runner for generating `verify_membership` fixtures
 
 use crate::{
-    cli::command::fixtures::VerifyMembershipCmd,
+    cli::command::fixtures::MembershipCmd,
     helpers::light_block::LightBlockWrapper,
-    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    programs::{MembershipProgram, SP1Program, UpdateClientProgram},
     prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ConsensusState as SolConsensusState, VerifyMembershipOutput,
+    ConsensusState as SolConsensusState, MembershipOutput,
 };
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 use tendermint_rpc::Client;
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
@@ -43,9 +43,9 @@ struct SP1ICS07VerifyMembershipFixture {
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
-pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
+pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = TendermintRPCClient::default();
-    let verify_mem_prover = SP1ICS07TendermintProver::<VerifyMembershipProgram>::default();
+    let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 
     let trusted_light_block = LightBlockWrapper::new(
         tm_rpc_client
@@ -72,7 +72,9 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     assert_eq!(res.key.as_slice(), args.key_path.as_bytes());
     let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
     let value = res.value;
-    assert!(!value.is_empty());
+    if value.is_empty() {
+        log::info!("Verifying non-membership");
+    }
     assert!(!vm_proof.proofs.is_empty());
 
     // Generate a header update proof for the specified blocks.
@@ -80,7 +82,7 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
         verify_mem_prover.generate_proof(&commitment_root_bytes, &args.key_path, vm_proof, &value);
 
     let bytes = proof_data.public_values.as_slice();
-    let output = VerifyMembershipOutput::abi_decode(bytes, true).unwrap();
+    let output = MembershipOutput::abi_decode(bytes, true).unwrap();
     assert_eq!(output.key_path, args.key_path);
     assert_eq!(output.value.to_vec(), value);
     assert_eq!(output.commitment_root.as_slice(), &commitment_root_bytes);
@@ -100,22 +102,10 @@ pub async fn run(args: VerifyMembershipCmd) -> anyhow::Result<()> {
     };
 
     // Save the proof data to the file path.
-    let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.fixture_path);
-
-    let sp1_prover_type = env::var("SP1_PROVER");
-    if sp1_prover_type.as_deref() == Ok("mock") {
-        std::fs::write(
-            fixture_path.join("mock_verify_membership_fixture.json"),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .unwrap();
-    } else {
-        std::fs::write(
-            fixture_path.join("verify_membership_fixture.json"),
-            serde_json::to_string_pretty(&fixture).unwrap(),
-        )
-        .unwrap();
-    }
-
+    std::fs::write(
+        PathBuf::from(args.output_path),
+        serde_json::to_string_pretty(&fixture).unwrap(),
+    )
+    .unwrap();
     Ok(())
 }

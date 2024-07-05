@@ -5582,6 +5582,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-ics07-tendermint-membership"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "ibc-core-commitment-types",
+ "ibc-proto",
+ "sp1-ics07-tendermint-solidity",
+ "sp1-zkvm",
+]
+
+[[package]]
 name = "sp1-ics07-tendermint-operator"
 version = "0.1.0"
 dependencies = [
@@ -5663,17 +5674,6 @@ dependencies = [
  "tendermint",
  "tendermint-light-client-verifier",
  "time",
-]
-
-[[package]]
-name = "sp1-ics07-tendermint-verify-membership"
-version = "0.1.0"
-dependencies = [
- "alloy-sol-types",
- "ibc-core-commitment-types",
- "ibc-proto",
- "sp1-ics07-tendermint-solidity",
- "sp1-zkvm",
 ]
 
 [[package]]

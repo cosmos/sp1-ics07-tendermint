@@ -22,6 +22,9 @@ struct SP1ICS07VerifyMembershipFixtureJson {
     bytes value;
 }
 
+// set constant string
+string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
+
 contract SP1ICS07TendermintTest is Test {
     using stdJson for string;
 
@@ -136,7 +139,9 @@ contract SP1ICS07TendermintTest is Test {
             fixture.proof,
             fixture.publicValues,
             fixture.proofHeight,
-            fixture.trustedConsensusState
+            fixture.trustedConsensusState,
+            verifyMembershipPath,
+            fixture.value
         );
 
         // to console
@@ -152,7 +157,9 @@ contract SP1ICS07TendermintTest is Test {
             mockFixture.proof,
             mockFixture.publicValues,
             mockFixture.proofHeight,
-            mockFixture.trustedConsensusState
+            mockFixture.trustedConsensusState,
+            verifyMembershipPath,
+            mockFixture.value
         );
     }
 
@@ -164,7 +171,9 @@ contract SP1ICS07TendermintTest is Test {
             bytes("invalid"),
             mockFixture.publicValues,
             mockFixture.proofHeight,
-            mockFixture.trustedConsensusState
+            mockFixture.trustedConsensusState,
+            verifyMembershipPath,
+            mockFixture.value
         );
 
         // Invalid proof height
@@ -173,7 +182,9 @@ contract SP1ICS07TendermintTest is Test {
             bytes(""),
             mockFixture.publicValues,
             1,
-            mockFixture.trustedConsensusState
+            mockFixture.trustedConsensusState,
+            verifyMembershipPath,
+            mockFixture.value
         );
 
         // Invalid trusted consensus state
@@ -182,7 +193,9 @@ contract SP1ICS07TendermintTest is Test {
             bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
-            bytes("invalid")
+            bytes("invalid"),
+            verifyMembershipPath,
+            mockFixture.value
         );
     }
 
@@ -193,7 +206,9 @@ contract SP1ICS07TendermintTest is Test {
             bytes("invalid"),
             fixture.publicValues,
             fixture.proofHeight,
-            fixture.trustedConsensusState
+            fixture.trustedConsensusState,
+            verifyMembershipPath,
+            fixture.value
         );
     }
 }

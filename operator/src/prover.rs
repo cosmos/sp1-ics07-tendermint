@@ -8,9 +8,9 @@ use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
 };
 use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
-/// A prover for for [`SP1ICS07TendermintProgram`] programs.
+/// A prover for for [`SP1Program`] programs.
 #[allow(clippy::module_name_repetitions)]
-pub struct SP1ICS07TendermintProver<T: SP1ICS07TendermintProgram> {
+pub struct SP1ICS07TendermintProver<T: SP1Program> {
     /// [`sp1_sdk::ProverClient`] for generating proofs.
     pub prover_client: ProverClient,
     /// The proving key.
@@ -21,32 +21,32 @@ pub struct SP1ICS07TendermintProver<T: SP1ICS07TendermintProgram> {
 }
 
 /// Trait for SP1 ICS07 Tendermint programs.
-pub trait SP1ICS07TendermintProgram {
+pub trait SP1Program {
     /// The ELF file for the program.
     const ELF: &'static [u8];
 }
 
 /// SP1 ICS07 Tendermint update client program.
 pub struct UpdateClientProgram;
-impl SP1ICS07TendermintProgram for UpdateClientProgram {
+impl SP1Program for UpdateClientProgram {
     const ELF: &'static [u8] =
         include_bytes!("../../elf/update-client-riscv32im-succinct-zkvm-elf");
 }
 
 /// SP1 ICS07 Tendermint verify membership program.
 pub struct VerifyMembershipProgram;
-impl SP1ICS07TendermintProgram for VerifyMembershipProgram {
+impl SP1Program for VerifyMembershipProgram {
     const ELF: &'static [u8] =
         include_bytes!("../../elf/verify-membership-riscv32im-succinct-zkvm-elf");
 }
 
-impl<T: SP1ICS07TendermintProgram> Default for SP1ICS07TendermintProver<T> {
+impl<T: SP1Program> Default for SP1ICS07TendermintProver<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: SP1ICS07TendermintProgram> SP1ICS07TendermintProver<T> {
+impl<T: SP1Program> SP1ICS07TendermintProver<T> {
     /// Create a new prover.
     #[must_use]
     pub fn new() -> Self {

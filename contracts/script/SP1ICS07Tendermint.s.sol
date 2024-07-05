@@ -56,8 +56,8 @@ contract SP1TendermintScript is Script {
             .getClientState();
         assert(clientState.trust_level.numerator == 1);
         assert(clientState.trust_level.denominator == 3);
-        assert(clientState.trusting_period == 1_209_600_000_000_000);
-        assert(clientState.unbonding_period == 1_209_600_000_000_000);
+        assert(clientState.trusting_period == 1_209_600);
+        assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusState(

@@ -3,7 +3,7 @@
 use crate::{
     cli::command::genesis::Args,
     helpers::light_block::LightBlockWrapper,
-    prover::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;

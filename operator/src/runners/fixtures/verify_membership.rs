@@ -3,7 +3,8 @@
 use crate::{
     cli::command::fixtures::VerifyMembershipCmd,
     helpers::light_block::LightBlockWrapper,
-    prover::{SP1ICS07TendermintProver, SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;

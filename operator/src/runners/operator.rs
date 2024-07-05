@@ -3,10 +3,8 @@
 use std::env;
 
 use crate::{
-    cli::command::operator::Args,
-    helpers::light_block::LightBlockWrapper,
-    prover::{SP1ICS07TendermintProver, UpdateClientProgram},
-    rpc::TendermintRPCClient,
+    cli::command::operator::Args, helpers::light_block::LightBlockWrapper,
+    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver, rpc::TendermintRPCClient,
 };
 use alloy::{
     network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,

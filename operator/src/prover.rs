@@ -1,5 +1,6 @@
 //! Prover for SP1 ICS07 Tendermint programs.
 
+use crate::programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram};
 use ibc_client_tendermint::types::Header;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
@@ -18,26 +19,6 @@ pub struct SP1ICS07TendermintProver<T: SP1Program> {
     /// The verifying key.
     pub vkey: SP1VerifyingKey,
     _phantom: std::marker::PhantomData<T>,
-}
-
-/// Trait for SP1 ICS07 Tendermint programs.
-pub trait SP1Program {
-    /// The ELF file for the program.
-    const ELF: &'static [u8];
-}
-
-/// SP1 ICS07 Tendermint update client program.
-pub struct UpdateClientProgram;
-impl SP1Program for UpdateClientProgram {
-    const ELF: &'static [u8] =
-        include_bytes!("../../elf/update-client-riscv32im-succinct-zkvm-elf");
-}
-
-/// SP1 ICS07 Tendermint verify membership program.
-pub struct VerifyMembershipProgram;
-impl SP1Program for VerifyMembershipProgram {
-    const ELF: &'static [u8] =
-        include_bytes!("../../elf/verify-membership-riscv32im-succinct-zkvm-elf");
 }
 
 impl<T: SP1Program> Default for SP1ICS07TendermintProver<T> {

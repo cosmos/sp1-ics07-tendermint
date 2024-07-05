@@ -4,15 +4,12 @@ use std::env;
 
 use crate::{
     cli::command::operator::Args,
-    prover::{SP1ICS07TendermintProver, UpdateClientProgram},
+    helpers::{self, light_block::LightBlockWrapper},
+    programs::UpdateClientProgram,
+    prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
-use alloy::{
-    network::EthereumWallet, providers::ProviderBuilder, signers::local::PrivateKeySigner,
-};
-use ibc_client_tendermint::types::{ConsensusState, Header};
-use ibc_core_client_types::Height as IbcHeight;
-use ibc_core_commitment_types::commitment::CommitmentRoot;
+use alloy::providers::ProviderBuilder;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
@@ -30,69 +27,47 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     }
 
     let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
-    let mut private_key = env::var("PRIVATE_KEY").expect("PRIVATE_KEY not set");
-    if let Some(stripped) = private_key.strip_prefix("0x") {
-        private_key = stripped.to_string();
-    }
     let contract_address = env::var("CONTRACT_ADDRESS").expect("CONTRACT_ADDRESS not set");
 
     // Instantiate a Tendermint prover based on the environment variable.
-    let signer: PrivateKeySigner = private_key.parse()?;
-    let wallet = EthereumWallet::from(signer);
+    let wallet = helpers::eth::wallet_from_env();
     let provider = ProviderBuilder::new()
         .with_recommended_fillers()
         .wallet(wallet)
         .on_http(Url::parse(rpc_url.as_str())?);
 
+    let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
     let tendermint_rpc_client = TendermintRPCClient::default();
     let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
-
-    let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
 
     loop {
         let contract_client_state = contract.getClientState().call().await?._0;
 
         // Read the existing trusted header hash from the contract.
-        let trusted_revision_number = contract_client_state.latest_height.revision_number;
         let trusted_block_height = contract_client_state.latest_height.revision_height;
         assert!(
             trusted_block_height != 0,
             "No trusted height found on the contract. Something is wrong with the contract."
         );
 
-        let trusted_light_block = tendermint_rpc_client
-            .get_light_block(Some(trusted_block_height))
-            .await?;
-        let target_light_block = tendermint_rpc_client.get_light_block(None).await?;
-        let target_height = target_light_block.height().value();
+        let trusted_light_block = LightBlockWrapper::new(
+            tendermint_rpc_client
+                .get_light_block(Some(trusted_block_height))
+                .await?,
+        );
 
-        // Get trusted consensus state from the contract.
-        let trusted_consensus_state = ConsensusState {
-            timestamp: trusted_light_block.signed_header.header.time,
-            root: CommitmentRoot::from_bytes(
-                trusted_light_block.signed_header.header.app_hash.as_bytes(),
-            ),
-            next_validators_hash: trusted_light_block
-                .signed_header
-                .header
-                .next_validators_hash,
-        }
-        .into();
+        // Get trusted consensus state from the trusted light block.
+        let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
 
-        let chain_id = target_light_block.signed_header.header.chain_id.to_string();
-        let proposed_header = Header {
-            signed_header: target_light_block.signed_header,
-            validator_set: target_light_block.validators,
-            trusted_height: IbcHeight::new(
-                trusted_revision_number.into(),
-                trusted_block_height.into(),
-            )
-            .unwrap(),
-            trusted_next_validator_set: trusted_light_block.next_validators,
-        };
+        let target_light_block =
+            LightBlockWrapper::new(tendermint_rpc_client.get_light_block(None).await?);
+        let target_height = target_light_block.as_light_block().height().value();
+
+        // Get the proposed header from the target light block.
+        let proposed_header = target_light_block.into_header(trusted_light_block.as_light_block());
 
         let contract_env = Env {
-            chain_id,
+            chain_id: trusted_light_block.chain_id()?.to_string(),
             trust_threshold: contract_client_state.trust_level,
             trusting_period: contract_client_state.trusting_period,
             now: std::time::SystemTime::now()

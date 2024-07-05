@@ -2,24 +2,16 @@
 
 use crate::{
     cli::command::fixtures::UpdateClientCmd,
-    prover::{
-        SP1ICS07TendermintProgram, SP1ICS07TendermintProver, UpdateClientProgram,
-        VerifyMembershipProgram,
-    },
+    helpers::light_block::LightBlockWrapper,
+    programs::{SP1Program, UpdateClientProgram, VerifyMembershipProgram},
+    prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;
-use ibc_client_tendermint::types::{ConsensusState, Header};
-use ibc_core_client_types::Height as IbcHeight;
-use ibc_core_commitment_types::commitment::CommitmentRoot;
-use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ClientState, Env, Height, TrustThreshold, UpdateClientOutput,
-};
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UpdateClientOutput};
 use sp1_sdk::HashableKey;
-use sp1_sdk::{MockProver, Prover};
-use std::{env, path::PathBuf, str::FromStr};
+use std::{env, path::PathBuf};
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -47,55 +39,24 @@ struct SP1ICS07UpdateClientFixture {
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
+    let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
-    let trusted_light_block = tendermint_rpc_client
-        .get_light_block(Some(args.trusted_block))
-        .await?;
-    let target_light_block = tendermint_rpc_client
-        .get_light_block(Some(args.target_block))
-        .await?;
+    let trusted_light_block = LightBlockWrapper::new(
+        tendermint_rpc_client
+            .get_light_block(Some(args.trusted_block))
+            .await?,
+    );
+    let target_light_block = LightBlockWrapper::new(
+        tendermint_rpc_client
+            .get_light_block(Some(args.target_block))
+            .await?,
+    );
 
-    let two_weeks_in_nanos = 14 * 24 * 60 * 60 * 1_000_000_000;
-    let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
-    let trusted_client_state = ClientState {
-        chain_id: chain_id.to_string(),
-        trust_level: TrustThreshold {
-            numerator: 1,
-            denominator: 3,
-        },
-        latest_height: Height {
-            revision_number: chain_id.revision_number().try_into()?,
-            revision_height: args.trusted_block,
-        },
-        is_frozen: false,
-        // 2 weeks in nanoseconds
-        trusting_period: two_weeks_in_nanos,
-        unbonding_period: two_weeks_in_nanos,
-    };
-    let trusted_consensus_state = ConsensusState {
-        timestamp: trusted_light_block.signed_header.header.time,
-        root: CommitmentRoot::from_bytes(
-            trusted_light_block.signed_header.header.app_hash.as_bytes(),
-        ),
-        next_validators_hash: trusted_light_block
-            .signed_header
-            .header
-            .next_validators_hash,
-    }
-    .into();
-    let proposed_header = Header {
-        signed_header: target_light_block.signed_header,
-        validator_set: target_light_block.validators,
-        trusted_height: IbcHeight::new(
-            trusted_client_state.latest_height.revision_number.into(),
-            trusted_client_state.latest_height.revision_height.into(),
-        )
-        .unwrap(),
-        trusted_next_validator_set: trusted_light_block.next_validators,
-    };
+    let trusted_client_state = trusted_light_block.to_sol_client_state()?;
+    let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
+    let proposed_header = target_light_block.into_header(trusted_light_block.as_light_block());
     let contract_env = Env {
-        chain_id: chain_id.to_string(),
+        chain_id: trusted_light_block.chain_id()?.to_string(),
         trust_threshold: trusted_client_state.trust_level.clone(),
         trusting_period: trusted_client_state.trusting_period,
         now: std::time::SystemTime::now()
@@ -106,7 +67,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
 
     // Generate a header update proof for the specified blocks.
     let proof_data =
-        tendermint_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
+        uc_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
     let bytes = proof_data.public_values.as_slice();
     let output = UpdateClientOutput::abi_decode(bytes, false).unwrap();
@@ -116,11 +77,8 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
-        update_client_vkey: tendermint_prover.vkey.bytes32(),
-        verify_membership_vkey: MockProver::new()
-            .setup(VerifyMembershipProgram::ELF)
-            .1
-            .bytes32(),
+        update_client_vkey: uc_prover.vkey.bytes32(),
+        verify_membership_vkey: VerifyMembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };

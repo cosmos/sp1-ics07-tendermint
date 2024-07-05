@@ -66,7 +66,6 @@ impl TendermintRPCClient {
         let mut signed_header = commit_response.signed_header;
 
         let validator_response = self.as_tm_client().validators(height, Paging::All).await?;
-
         let validators = Set::new(validator_response.validators, None);
 
         let next_validator_response = self

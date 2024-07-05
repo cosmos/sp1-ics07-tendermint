@@ -143,6 +143,9 @@ contract SP1ICS07TendermintTest is Test {
             fixture.publicValues
         );
 
+        // to console
+        console.log("UpdateClient gas used: ", vm.lastCallGas().gasTotalUsed);
+
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint
             .getClientState();
         assert(

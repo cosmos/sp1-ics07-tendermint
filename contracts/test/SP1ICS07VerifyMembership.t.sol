@@ -138,6 +138,12 @@ contract SP1ICS07TendermintTest is Test {
             fixture.proofHeight,
             fixture.trustedConsensusState
         );
+
+        // to console
+        console.log(
+            "VerifyMembership gas used: ",
+            vm.lastCallGas().gasTotalUsed
+        );
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.

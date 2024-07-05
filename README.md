@@ -1,6 +1,8 @@
 # SP1 ICS07-Tendermint IBC Light Client
 
-This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum for powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
+This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
+
+![Light Mode Diagram](./sp1-ics07-tendermint-light.svg#gh-light-mode-only)![Dark Mode Diagram](./sp1-ics07-tendermint-dark.svg#gh-dark-mode-only)
 
 ## Table of Contents
 
@@ -22,9 +24,9 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
 
 This, `sp1-ics07-tendermint`, is an example of a ZK IBC tendermint light client on Ethereum. It's goal is to demonstrate how to use SP1 to generate proofs for:
 - Updating the light client state (including historical headers) - implemented
-- Verify membership proofs (for IBC packets) - implemented
+- Verify membership (for IBC packets) - implemented
+- Verify non-membership (for IBC packets) - not implemented yet
 - Misbehaviour detection (freezing the light client) - not implemented yet
-- Verify non-membership proofs (for IBC packets) - not implemented yet
 
 This project is structured as a cargo workspace with the following directories:
 * The `contracts` directory contains a Solidity contract that implements the ICS-07 Tendermint light client which can verify SP1 proofs. This is a [`foundry`](https://github.com/foundry-rs/foundry) project, and not a part of the cargo workspace.

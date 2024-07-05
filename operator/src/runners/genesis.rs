@@ -38,20 +38,20 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     let (_, update_client_vk) = mock_prover.setup(UpdateClientProgram::ELF);
     let (_, verify_membership_vk) = mock_prover.setup(VerifyMembershipProgram::ELF);
 
-    let trusted_light_block = tendermint_rpc_client
-        .get_light_block(args.trusted_block)
-        .await?;
+    let trusted_light_block = LightBlockWrapper::new(
+        tendermint_rpc_client
+            .get_light_block(args.trusted_block)
+            .await?,
+    );
     if args.trusted_block.is_none() {
         log::info!(
             "Latest block height: {}",
-            trusted_light_block.height().value()
+            trusted_light_block.as_light_block().height().value()
         );
     }
 
-    let light_block_helper = LightBlockWrapper::new(trusted_light_block);
-
-    let trusted_client_state = light_block_helper.to_sol_client_state()?;
-    let trusted_consensus_state = light_block_helper.to_consensus_state();
+    let trusted_client_state = trusted_light_block.to_sol_client_state()?;
+    let trusted_consensus_state = trusted_light_block.to_consensus_state();
     let genesis = SP1ICS07TendermintGenesis {
         trusted_consensus_state: hex::encode(
             SolConsensusState::from(trusted_consensus_state).abi_encode(),

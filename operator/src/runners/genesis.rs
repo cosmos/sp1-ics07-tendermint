@@ -8,7 +8,7 @@ use crate::{
 };
 use alloy_sol_types::SolValue;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
-use sp1_sdk::{utils::setup_logger, HashableKey, MockProver, Prover};
+use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf};
 
 /// The genesis data for the SP1 ICS07 Tendermint contract.
@@ -34,9 +34,6 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     }
 
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let mock_prover = MockProver::new();
-    let (_, update_client_vk) = mock_prover.setup(UpdateClientProgram::ELF);
-    let (_, verify_membership_vk) = mock_prover.setup(VerifyMembershipProgram::ELF);
 
     let trusted_light_block = LightBlockWrapper::new(
         tendermint_rpc_client
@@ -57,8 +54,8 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
             SolConsensusState::from(trusted_consensus_state).abi_encode(),
         ),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
-        update_client_vkey: update_client_vk.bytes32(),
-        verify_membership_vkey: verify_membership_vk.bytes32(),
+        update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
+        verify_membership_vkey: VerifyMembershipProgram::get_vkey().bytes32(),
     };
 
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.genesis_path);

@@ -11,7 +11,6 @@ use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UpdateClientOutput};
 use sp1_sdk::HashableKey;
-use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf};
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
@@ -40,7 +39,7 @@ struct SP1ICS07UpdateClientFixture {
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
+    let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     let trusted_light_block = LightBlockWrapper::new(
         tendermint_rpc_client
@@ -68,7 +67,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
 
     // Generate a header update proof for the specified blocks.
     let proof_data =
-        tendermint_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
+        uc_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
     let bytes = proof_data.public_values.as_slice();
     let output = UpdateClientOutput::abi_decode(bytes, false).unwrap();
@@ -78,11 +77,8 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
-        update_client_vkey: tendermint_prover.vkey.bytes32(),
-        verify_membership_vkey: MockProver::new()
-            .setup(VerifyMembershipProgram::ELF)
-            .1
-            .bytes32(),
+        update_client_vkey: uc_prover.vkey.bytes32(),
+        verify_membership_vkey: VerifyMembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };

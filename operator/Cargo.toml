@@ -6,18 +6,6 @@ edition = { workspace = true }
 repository = { workspace = true }
 license = { workspace = true }
 
-[[bin]]
-name = "operator"
-path = "bin/operator.rs"
-
-[[bin]]
-name = "fixture"
-path = "bin/fixture.rs"
-
-[[bin]]
-name = "genesis"
-path = "bin/genesis.rs"
-
 [dependencies]
 sp1-sdk = { workspace = true }
 reqwest = { workspace = true }
@@ -46,4 +34,6 @@ log = { workspace = true }
 async-trait = { workspace = true }
 hex = { workspace = true }
 sp1-ics07-tendermint-update-client = { workspace = true }
-sp1-ics07-tendermint-shared = { workspace = true, features = ["rpc"] }
+sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }
+sp1-ics07-tendermint-utils = { workspace = true }
+ibc-proto = { workspace = true }

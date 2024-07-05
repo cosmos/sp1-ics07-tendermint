@@ -1,4 +1,6 @@
-//! This module contains the shared types for `sp1-ics07-tendermint`.
+#![doc = include_str!("../README.md")]
+#![deny(missing_docs)]
+#![deny(clippy::nursery, clippy::pedantic, warnings)]
 
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
@@ -38,19 +40,26 @@ impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
     }
 }
 
+#[allow(clippy::fallible_impl_from)]
 impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusState {
     fn from(ics07_tendermint_consensus_state: ICS07TendermintConsensusState) -> Self {
+        let root: [u8; 32] = ics07_tendermint_consensus_state
+            .root
+            .into_vec()
+            .try_into()
+            .unwrap();
+        let next_validators_hash: [u8; 32] = ics07_tendermint_consensus_state
+            .next_validators_hash
+            .as_bytes()
+            .try_into()
+            .unwrap();
         Self {
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             timestamp: ics07_tendermint_consensus_state
                 .timestamp
                 .unix_timestamp_nanos() as u64,
-            root: ics07_tendermint_consensus_state.root.into_vec().into(),
-            next_validators_hash: ics07_tendermint_consensus_state
-                .next_validators_hash
-                .as_bytes()
-                .to_vec()
-                .into(),
+            root: root.into(),
+            next_validators_hash: next_validators_hash.into(),
         }
     }
 }
@@ -64,10 +73,10 @@ impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusStat
         let nanos = time.nanosecond();
         Self {
             timestamp: Time::from_unix_timestamp(seconds, nanos).unwrap(),
-            root: CommitmentRoot::from_bytes(&consensus_state.root),
+            root: CommitmentRoot::from_bytes(&consensus_state.root.0),
             next_validators_hash: Hash::from_bytes(
                 Algorithm::Sha256,
-                &consensus_state.next_validators_hash,
+                &consensus_state.next_validators_hash.0,
             )
             .unwrap(),
         }

@@ -25,10 +25,10 @@ This project is structured as a cargo workspace with the following directories:
 
 ## Build the programs
 
-You can build the program for zkVM by running the following command:
+You can build the programs for zkVM by running the following command:
 
 ```sh
-just build-program
+just build-programs
 ```
 
 ## Run ICS-07 Tendermint Light Client End to End

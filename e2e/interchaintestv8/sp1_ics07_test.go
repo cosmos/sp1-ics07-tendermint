@@ -128,7 +128,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	_, simd := s.ChainA, s.ChainB
 
 	s.Require().True(s.Run("Update client", func() {
-		s.Require().NoError(operator.RunOperator("--only-once"))
+		s.Require().NoError(operator.StartOperator("--only-once"))
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)

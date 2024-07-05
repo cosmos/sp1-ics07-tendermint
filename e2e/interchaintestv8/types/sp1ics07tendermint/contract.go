@@ -42,8 +42,8 @@ type ICS07TendermintClientState struct {
 // ICS07TendermintConsensusState is an auto generated low-level Go binding around an user-defined struct.
 type ICS07TendermintConsensusState struct {
 	Timestamp          uint64
-	Root               []byte
-	NextValidatorsHash []byte
+	Root               [32]byte
+	NextValidatorsHash [32]byte
 }
 
 // ICS07TendermintHeight is an auto generated low-level Go binding around an user-defined struct.
@@ -58,26 +58,33 @@ type ICS07TendermintTrustThreshold struct {
 	Denominator uint8
 }
 
-// SP1ICS07TendermintEnv is an auto generated low-level Go binding around an user-defined struct.
-type SP1ICS07TendermintEnv struct {
+// UpdateClientProgramEnv is an auto generated low-level Go binding around an user-defined struct.
+type UpdateClientProgramEnv struct {
 	ChainId        string
 	TrustThreshold ICS07TendermintTrustThreshold
 	TrustingPeriod uint64
 	Now            uint64
 }
 
-// SP1ICS07TendermintSP1ICS07TendermintOutput is an auto generated low-level Go binding around an user-defined struct.
-type SP1ICS07TendermintSP1ICS07TendermintOutput struct {
+// UpdateClientProgramUpdateClientOutput is an auto generated low-level Go binding around an user-defined struct.
+type UpdateClientProgramUpdateClientOutput struct {
 	TrustedConsensusState ICS07TendermintConsensusState
 	NewConsensusState     ICS07TendermintConsensusState
-	Env                   SP1ICS07TendermintEnv
+	Env                   UpdateClientProgramEnv
 	TrustedHeight         ICS07TendermintHeight
 	NewHeight             ICS07TendermintHeight
 }
 
+// VerifyMembershipProgramVerifyMembershipOutput is an auto generated low-level Go binding around an user-defined struct.
+type VerifyMembershipProgramVerifyMembershipOutput struct {
+	CommitmentRoot [32]byte
+	KeyPath        string
+	Value          []byte
+}
+
 // ContractMetaData contains all meta data concerning the Contract contract.
 var ContractMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_ics07ProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_verifier\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_clientState\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"_consensusState\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"ALLOWED_SP1_CLOCK_DRIFT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"clientState\",\"inputs\":[],\"outputs\":[{\"name\":\"chain_id\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trust_level\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"latest_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"trusting_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"unbonding_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"is_frozen\",\"type\":\"bool\",\"internalType\":\"bool\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"consensusStateHashes\",\"inputs\":[{\"name\":\"\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getClientState\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ClientState\",\"components\":[{\"name\":\"chain_id\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trust_level\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"latest_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"trusting_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"unbonding_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"is_frozen\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getConsensusState\",\"inputs\":[{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ics07UpdateClientProgramVkey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"validatePublicValues\",\"inputs\":[{\"name\":\"output\",\"type\":\"tuple\",\"internalType\":\"structSP1ICS07Tendermint.SP1ICS07TendermintOutput\",\"components\":[{\"name\":\"trusted_consensus_state\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"next_validators_hash\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"new_consensus_state\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"next_validators_hash\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"env\",\"type\":\"tuple\",\"internalType\":\"structSP1ICS07Tendermint.Env\",\"components\":[{\"name\":\"chain_id\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trust_threshold\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"trusting_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"now\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"trusted_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"new_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}]}],\"outputs\":[],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"verifier\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractISP1Verifier\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"verifyIcs07UpdateClientProof\",\"inputs\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_ics07UpdateClientProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_ics07VerifyMembershipProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"_verifier\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_clientState\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"_consensusState\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"ALLOWED_SP1_CLOCK_DRIFT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint64\",\"internalType\":\"uint64\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getClientState\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ClientState\",\"components\":[{\"name\":\"chain_id\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trust_level\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"latest_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"trusting_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"unbonding_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"is_frozen\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getConsensusState\",\"inputs\":[{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ics07UpdateClientProgramVkey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"ics07VerifyMembershipProgramVkey\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"validateUpdateClientPublicValues\",\"inputs\":[{\"name\":\"output\",\"type\":\"tuple\",\"internalType\":\"structUpdateClientProgram.UpdateClientOutput\",\"components\":[{\"name\":\"trusted_consensus_state\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"next_validators_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"new_consensus_state\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"next_validators_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"env\",\"type\":\"tuple\",\"internalType\":\"structUpdateClientProgram.Env\",\"components\":[{\"name\":\"chain_id\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trust_threshold\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"trusting_period\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"now\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"trusted_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"new_height\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revision_number\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revision_height\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}]}],\"outputs\":[],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"validateVerifyMembershipOutput\",\"inputs\":[{\"name\":\"output\",\"type\":\"tuple\",\"internalType\":\"structVerifyMembershipProgram.VerifyMembershipOutput\",\"components\":[{\"name\":\"commitment_root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"key_path\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"value\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"proofHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"trustedConsensusStateBz\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"next_validators_hash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"verifier\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractISP1Verifier\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"verifyIcs07UpdateClientProof\",\"inputs\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"verifyIcs07VerifyMembershipProof\",\"inputs\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"proofHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"trustedConsensusStateBz\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"view\"}]",
 }
 
 // ContractABI is the input ABI used to generate the binding from.
@@ -257,102 +264,6 @@ func (_Contract *ContractCallerSession) ALLOWEDSP1CLOCKDRIFT() (uint64, error) {
 	return _Contract.Contract.ALLOWEDSP1CLOCKDRIFT(&_Contract.CallOpts)
 }
 
-// ClientState is a free data retrieval call binding the contract method 0xbd3ce6b0.
-//
-// Solidity: function clientState() view returns(string chain_id, (uint8,uint8) trust_level, (uint32,uint32) latest_height, uint64 trusting_period, uint64 unbonding_period, bool is_frozen)
-func (_Contract *ContractCaller) ClientState(opts *bind.CallOpts) (struct {
-	ChainId         string
-	TrustLevel      ICS07TendermintTrustThreshold
-	LatestHeight    ICS07TendermintHeight
-	TrustingPeriod  uint64
-	UnbondingPeriod uint64
-	IsFrozen        bool
-}, error) {
-	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "clientState")
-
-	outstruct := new(struct {
-		ChainId         string
-		TrustLevel      ICS07TendermintTrustThreshold
-		LatestHeight    ICS07TendermintHeight
-		TrustingPeriod  uint64
-		UnbondingPeriod uint64
-		IsFrozen        bool
-	})
-	if err != nil {
-		return *outstruct, err
-	}
-
-	outstruct.ChainId = *abi.ConvertType(out[0], new(string)).(*string)
-	outstruct.TrustLevel = *abi.ConvertType(out[1], new(ICS07TendermintTrustThreshold)).(*ICS07TendermintTrustThreshold)
-	outstruct.LatestHeight = *abi.ConvertType(out[2], new(ICS07TendermintHeight)).(*ICS07TendermintHeight)
-	outstruct.TrustingPeriod = *abi.ConvertType(out[3], new(uint64)).(*uint64)
-	outstruct.UnbondingPeriod = *abi.ConvertType(out[4], new(uint64)).(*uint64)
-	outstruct.IsFrozen = *abi.ConvertType(out[5], new(bool)).(*bool)
-
-	return *outstruct, err
-
-}
-
-// ClientState is a free data retrieval call binding the contract method 0xbd3ce6b0.
-//
-// Solidity: function clientState() view returns(string chain_id, (uint8,uint8) trust_level, (uint32,uint32) latest_height, uint64 trusting_period, uint64 unbonding_period, bool is_frozen)
-func (_Contract *ContractSession) ClientState() (struct {
-	ChainId         string
-	TrustLevel      ICS07TendermintTrustThreshold
-	LatestHeight    ICS07TendermintHeight
-	TrustingPeriod  uint64
-	UnbondingPeriod uint64
-	IsFrozen        bool
-}, error) {
-	return _Contract.Contract.ClientState(&_Contract.CallOpts)
-}
-
-// ClientState is a free data retrieval call binding the contract method 0xbd3ce6b0.
-//
-// Solidity: function clientState() view returns(string chain_id, (uint8,uint8) trust_level, (uint32,uint32) latest_height, uint64 trusting_period, uint64 unbonding_period, bool is_frozen)
-func (_Contract *ContractCallerSession) ClientState() (struct {
-	ChainId         string
-	TrustLevel      ICS07TendermintTrustThreshold
-	LatestHeight    ICS07TendermintHeight
-	TrustingPeriod  uint64
-	UnbondingPeriod uint64
-	IsFrozen        bool
-}, error) {
-	return _Contract.Contract.ClientState(&_Contract.CallOpts)
-}
-
-// ConsensusStateHashes is a free data retrieval call binding the contract method 0x7733c36c.
-//
-// Solidity: function consensusStateHashes(uint32 ) view returns(bytes32)
-func (_Contract *ContractCaller) ConsensusStateHashes(opts *bind.CallOpts, arg0 uint32) ([32]byte, error) {
-	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "consensusStateHashes", arg0)
-
-	if err != nil {
-		return *new([32]byte), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
-
-	return out0, err
-
-}
-
-// ConsensusStateHashes is a free data retrieval call binding the contract method 0x7733c36c.
-//
-// Solidity: function consensusStateHashes(uint32 ) view returns(bytes32)
-func (_Contract *ContractSession) ConsensusStateHashes(arg0 uint32) ([32]byte, error) {
-	return _Contract.Contract.ConsensusStateHashes(&_Contract.CallOpts, arg0)
-}
-
-// ConsensusStateHashes is a free data retrieval call binding the contract method 0x7733c36c.
-//
-// Solidity: function consensusStateHashes(uint32 ) view returns(bytes32)
-func (_Contract *ContractCallerSession) ConsensusStateHashes(arg0 uint32) ([32]byte, error) {
-	return _Contract.Contract.ConsensusStateHashes(&_Contract.CallOpts, arg0)
-}
-
 // GetClientState is a free data retrieval call binding the contract method 0xef913a4b.
 //
 // Solidity: function getClientState() view returns((string,(uint8,uint8),(uint32,uint32),uint64,uint64,bool))
@@ -446,12 +357,43 @@ func (_Contract *ContractCallerSession) Ics07UpdateClientProgramVkey() ([32]byte
 	return _Contract.Contract.Ics07UpdateClientProgramVkey(&_Contract.CallOpts)
 }
 
-// ValidatePublicValues is a free data retrieval call binding the contract method 0xccd65ced.
+// Ics07VerifyMembershipProgramVkey is a free data retrieval call binding the contract method 0xc77eb6c2.
 //
-// Solidity: function validatePublicValues(((uint64,bytes,bytes),(uint64,bytes,bytes),(string,(uint8,uint8),uint64,uint64),(uint32,uint32),(uint32,uint32)) output) view returns()
-func (_Contract *ContractCaller) ValidatePublicValues(opts *bind.CallOpts, output SP1ICS07TendermintSP1ICS07TendermintOutput) error {
+// Solidity: function ics07VerifyMembershipProgramVkey() view returns(bytes32)
+func (_Contract *ContractCaller) Ics07VerifyMembershipProgramVkey(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "validatePublicValues", output)
+	err := _Contract.contract.Call(opts, &out, "ics07VerifyMembershipProgramVkey")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// Ics07VerifyMembershipProgramVkey is a free data retrieval call binding the contract method 0xc77eb6c2.
+//
+// Solidity: function ics07VerifyMembershipProgramVkey() view returns(bytes32)
+func (_Contract *ContractSession) Ics07VerifyMembershipProgramVkey() ([32]byte, error) {
+	return _Contract.Contract.Ics07VerifyMembershipProgramVkey(&_Contract.CallOpts)
+}
+
+// Ics07VerifyMembershipProgramVkey is a free data retrieval call binding the contract method 0xc77eb6c2.
+//
+// Solidity: function ics07VerifyMembershipProgramVkey() view returns(bytes32)
+func (_Contract *ContractCallerSession) Ics07VerifyMembershipProgramVkey() ([32]byte, error) {
+	return _Contract.Contract.Ics07VerifyMembershipProgramVkey(&_Contract.CallOpts)
+}
+
+// ValidateUpdateClientPublicValues is a free data retrieval call binding the contract method 0x18324dac.
+//
+// Solidity: function validateUpdateClientPublicValues(((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint64,uint64),(uint32,uint32),(uint32,uint32)) output) view returns()
+func (_Contract *ContractCaller) ValidateUpdateClientPublicValues(opts *bind.CallOpts, output UpdateClientProgramUpdateClientOutput) error {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "validateUpdateClientPublicValues", output)
 
 	if err != nil {
 		return err
@@ -461,18 +403,49 @@ func (_Contract *ContractCaller) ValidatePublicValues(opts *bind.CallOpts, outpu
 
 }
 
-// ValidatePublicValues is a free data retrieval call binding the contract method 0xccd65ced.
+// ValidateUpdateClientPublicValues is a free data retrieval call binding the contract method 0x18324dac.
 //
-// Solidity: function validatePublicValues(((uint64,bytes,bytes),(uint64,bytes,bytes),(string,(uint8,uint8),uint64,uint64),(uint32,uint32),(uint32,uint32)) output) view returns()
-func (_Contract *ContractSession) ValidatePublicValues(output SP1ICS07TendermintSP1ICS07TendermintOutput) error {
-	return _Contract.Contract.ValidatePublicValues(&_Contract.CallOpts, output)
+// Solidity: function validateUpdateClientPublicValues(((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint64,uint64),(uint32,uint32),(uint32,uint32)) output) view returns()
+func (_Contract *ContractSession) ValidateUpdateClientPublicValues(output UpdateClientProgramUpdateClientOutput) error {
+	return _Contract.Contract.ValidateUpdateClientPublicValues(&_Contract.CallOpts, output)
 }
 
-// ValidatePublicValues is a free data retrieval call binding the contract method 0xccd65ced.
+// ValidateUpdateClientPublicValues is a free data retrieval call binding the contract method 0x18324dac.
 //
-// Solidity: function validatePublicValues(((uint64,bytes,bytes),(uint64,bytes,bytes),(string,(uint8,uint8),uint64,uint64),(uint32,uint32),(uint32,uint32)) output) view returns()
-func (_Contract *ContractCallerSession) ValidatePublicValues(output SP1ICS07TendermintSP1ICS07TendermintOutput) error {
-	return _Contract.Contract.ValidatePublicValues(&_Contract.CallOpts, output)
+// Solidity: function validateUpdateClientPublicValues(((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint64,uint64),(uint32,uint32),(uint32,uint32)) output) view returns()
+func (_Contract *ContractCallerSession) ValidateUpdateClientPublicValues(output UpdateClientProgramUpdateClientOutput) error {
+	return _Contract.Contract.ValidateUpdateClientPublicValues(&_Contract.CallOpts, output)
+}
+
+// ValidateVerifyMembershipOutput is a free data retrieval call binding the contract method 0x58efd5c7.
+//
+// Solidity: function validateVerifyMembershipOutput((bytes32,string,bytes) output, uint32 proofHeight, bytes trustedConsensusStateBz) view returns((uint64,bytes32,bytes32))
+func (_Contract *ContractCaller) ValidateVerifyMembershipOutput(opts *bind.CallOpts, output VerifyMembershipProgramVerifyMembershipOutput, proofHeight uint32, trustedConsensusStateBz []byte) (ICS07TendermintConsensusState, error) {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "validateVerifyMembershipOutput", output, proofHeight, trustedConsensusStateBz)
+
+	if err != nil {
+		return *new(ICS07TendermintConsensusState), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(ICS07TendermintConsensusState)).(*ICS07TendermintConsensusState)
+
+	return out0, err
+
+}
+
+// ValidateVerifyMembershipOutput is a free data retrieval call binding the contract method 0x58efd5c7.
+//
+// Solidity: function validateVerifyMembershipOutput((bytes32,string,bytes) output, uint32 proofHeight, bytes trustedConsensusStateBz) view returns((uint64,bytes32,bytes32))
+func (_Contract *ContractSession) ValidateVerifyMembershipOutput(output VerifyMembershipProgramVerifyMembershipOutput, proofHeight uint32, trustedConsensusStateBz []byte) (ICS07TendermintConsensusState, error) {
+	return _Contract.Contract.ValidateVerifyMembershipOutput(&_Contract.CallOpts, output, proofHeight, trustedConsensusStateBz)
+}
+
+// ValidateVerifyMembershipOutput is a free data retrieval call binding the contract method 0x58efd5c7.
+//
+// Solidity: function validateVerifyMembershipOutput((bytes32,string,bytes) output, uint32 proofHeight, bytes trustedConsensusStateBz) view returns((uint64,bytes32,bytes32))
+func (_Contract *ContractCallerSession) ValidateVerifyMembershipOutput(output VerifyMembershipProgramVerifyMembershipOutput, proofHeight uint32, trustedConsensusStateBz []byte) (ICS07TendermintConsensusState, error) {
+	return _Contract.Contract.ValidateVerifyMembershipOutput(&_Contract.CallOpts, output, proofHeight, trustedConsensusStateBz)
 }
 
 // Verifier is a free data retrieval call binding the contract method 0x2b7ac3f3.
@@ -504,6 +477,35 @@ func (_Contract *ContractSession) Verifier() (common.Address, error) {
 // Solidity: function verifier() view returns(address)
 func (_Contract *ContractCallerSession) Verifier() (common.Address, error) {
 	return _Contract.Contract.Verifier(&_Contract.CallOpts)
+}
+
+// VerifyIcs07VerifyMembershipProof is a free data retrieval call binding the contract method 0xfb15c3db.
+//
+// Solidity: function verifyIcs07VerifyMembershipProof(bytes proof, bytes publicValues, uint32 proofHeight, bytes trustedConsensusStateBz) view returns()
+func (_Contract *ContractCaller) VerifyIcs07VerifyMembershipProof(opts *bind.CallOpts, proof []byte, publicValues []byte, proofHeight uint32, trustedConsensusStateBz []byte) error {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "verifyIcs07VerifyMembershipProof", proof, publicValues, proofHeight, trustedConsensusStateBz)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
+}
+
+// VerifyIcs07VerifyMembershipProof is a free data retrieval call binding the contract method 0xfb15c3db.
+//
+// Solidity: function verifyIcs07VerifyMembershipProof(bytes proof, bytes publicValues, uint32 proofHeight, bytes trustedConsensusStateBz) view returns()
+func (_Contract *ContractSession) VerifyIcs07VerifyMembershipProof(proof []byte, publicValues []byte, proofHeight uint32, trustedConsensusStateBz []byte) error {
+	return _Contract.Contract.VerifyIcs07VerifyMembershipProof(&_Contract.CallOpts, proof, publicValues, proofHeight, trustedConsensusStateBz)
+}
+
+// VerifyIcs07VerifyMembershipProof is a free data retrieval call binding the contract method 0xfb15c3db.
+//
+// Solidity: function verifyIcs07VerifyMembershipProof(bytes proof, bytes publicValues, uint32 proofHeight, bytes trustedConsensusStateBz) view returns()
+func (_Contract *ContractCallerSession) VerifyIcs07VerifyMembershipProof(proof []byte, publicValues []byte, proofHeight uint32, trustedConsensusStateBz []byte) error {
+	return _Contract.Contract.VerifyIcs07VerifyMembershipProof(&_Contract.CallOpts, proof, publicValues, proofHeight, trustedConsensusStateBz)
 }
 
 // VerifyIcs07UpdateClientProof is a paid mutator transaction binding the contract method 0x61d311c5.

@@ -10,12 +10,13 @@ import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
 
-struct SP1ICS07TendermintFixtureJson {
+struct SP1ICS07UpdateClientFixtureJson {
     bytes trustedClientState;
     bytes trustedConsensusState;
     bytes targetConsensusState;
     uint32 targetHeight;
-    bytes32 vkey;
+    bytes32 updateClientVkey;
+    bytes32 verifyMembershipVkey;
     bytes publicValues;
     bytes proof;
 }
@@ -26,10 +27,11 @@ contract SP1ICS07TendermintTest is Test {
     SP1ICS07Tendermint public ics07Tendermint;
     SP1ICS07Tendermint public mockIcs07Tendermint;
 
+    SP1ICS07UpdateClientFixtureJson public fixture;
+    SP1ICS07UpdateClientFixtureJson public mockFixture;
+
     function setUp() public {
-        SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
-            "fixture.json"
-        );
+        fixture = loadFixture("update_client_fixture.json");
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
             .decode(
@@ -43,16 +45,14 @@ contract SP1ICS07TendermintTest is Test {
 
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
-            fixture.vkey,
+            fixture.updateClientVkey,
+            fixture.verifyMembershipVkey,
             address(verifier),
             fixture.trustedClientState,
             trustedConsensusHash
         );
 
-        // Mock ICS07Tendermint
-        SP1ICS07TendermintFixtureJson memory mockFixture = loadFixture(
-            "mock_fixture.json"
-        );
+        mockFixture = loadFixture("mock_update_client_fixture.json");
 
         ICS07Tendermint.ConsensusState memory mockTrustedConsensusState = abi
             .decode(
@@ -66,7 +66,8 @@ contract SP1ICS07TendermintTest is Test {
 
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
-            mockFixture.vkey,
+            mockFixture.updateClientVkey,
+            mockFixture.verifyMembershipVkey,
             address(mockVerifier),
             mockFixture.trustedClientState,
             mockTrustedConsensusHash
@@ -92,7 +93,7 @@ contract SP1ICS07TendermintTest is Test {
 
     function loadFixture(
         string memory fileName
-    ) public view returns (SP1ICS07TendermintFixtureJson memory) {
+    ) public view returns (SP1ICS07UpdateClientFixtureJson memory) {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/fixtures/", fileName);
         string memory json = vm.readFile(path);
@@ -104,30 +105,30 @@ contract SP1ICS07TendermintTest is Test {
             ".targetConsensusState"
         );
         uint32 targetHeight = uint32(json.readUint(".targetHeight"));
-        bytes32 vkey = json.readBytes32(".vkey");
+        bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
+        bytes32 verifyMembershipVkey = json.readBytes32(
+            ".verifyMembershipVkey"
+        );
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
 
-        SP1ICS07TendermintFixtureJson
-            memory fixture = SP1ICS07TendermintFixtureJson({
+        SP1ICS07UpdateClientFixtureJson
+            memory fix = SP1ICS07UpdateClientFixtureJson({
                 trustedClientState: trustedClientState,
                 trustedConsensusState: trustedConsensusState,
                 targetConsensusState: targetConsensusState,
                 targetHeight: targetHeight,
-                vkey: vkey,
+                updateClientVkey: updateClientVkey,
+                verifyMembershipVkey: verifyMembershipVkey,
                 publicValues: publicValues,
                 proof: proof
             });
 
-        return fixture;
+        return fix;
     }
 
     // Confirm that submitting a real proof passes the verifier.
-    function test_ValidSP1ICS07Tendermint() public {
-        SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
-            "fixture.json"
-        );
-
+    function test_ValidUpdateClient() public {
         ics07Tendermint.verifyIcs07UpdateClientProof(
             fixture.proof,
             fixture.publicValues
@@ -156,14 +157,10 @@ contract SP1ICS07TendermintTest is Test {
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
-    function test_ValidMockTendermint() public {
-        SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
-            "mock_fixture.json"
-        );
-
+    function test_ValidMockUpdateClient() public {
         mockIcs07Tendermint.verifyIcs07UpdateClientProof(
             bytes(""),
-            fixture.publicValues
+            mockFixture.publicValues
         );
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
@@ -189,24 +186,16 @@ contract SP1ICS07TendermintTest is Test {
     }
 
     // Confirm that submitting a non-empty proof with the mock verifier fails.
-    function test_Invalid_MockTendermint() public {
-        SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
-            "mock_fixture.json"
-        );
-
+    function test_Invalid_MockUpdateClient() public {
         vm.expectRevert();
         mockIcs07Tendermint.verifyIcs07UpdateClientProof(
             bytes("invalid"),
-            fixture.publicValues
+            mockFixture.publicValues
         );
     }
 
     // Confirm that submitting a random proof with the real verifier fails.
-    function test_Invalid_SP1ICS07Tendermint() public {
-        SP1ICS07TendermintFixtureJson memory fixture = loadFixture(
-            "fixture.json"
-        );
-
+    function test_Invalid_UpdateClient() public {
         vm.expectRevert();
         ics07Tendermint.verifyIcs07UpdateClientProof(
             bytes("invalid"),

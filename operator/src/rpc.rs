@@ -1,3 +1,5 @@
+//! RPC client for interacting with a Tendermint node.
+
 use core::str::FromStr;
 use std::{collections::HashMap, env};
 
@@ -7,6 +9,8 @@ use tendermint::{block::signed_header::SignedHeader, validator::Set};
 use tendermint_light_client_verifier::types::{LightBlock, ValidatorSet};
 use tendermint_rpc::{Client, HttpClient, Paging, Url};
 
+/// A wrapper around the [`HttpClient`] that provides additional methods for
+/// obtaining light blocks.
 pub struct TendermintRPCClient(HttpClient);
 
 impl Default for TendermintRPCClient {
@@ -16,6 +20,12 @@ impl Default for TendermintRPCClient {
 }
 
 impl TendermintRPCClient {
+    /// Creates a new instance of the Tendermint RPC client from the environment variables.
+    ///
+    /// # Panics
+    /// Panics if the `TENDERMINT_RPC_URL` environment variable is not set or if the URL is
+    /// invalid.
+    #[must_use]
     pub fn new() -> Self {
         Self(
             HttpClient::new::<Url>(
@@ -27,11 +37,16 @@ impl TendermintRPCClient {
     }
 
     /// Get the inner tendermint [`HttpClient`].
-    pub fn as_tm_client(&self) -> &HttpClient {
+    #[must_use]
+    pub const fn as_tm_client(&self) -> &HttpClient {
         &self.0
     }
 
-    /// Gets a light block for a specific block height and peer ID.
+    /// Gets a light block for a specific block height.
+    /// If `block_height` is `None`, the latest block is fetched.
+    ///
+    /// # Errors
+    /// Returns an error if the RPC request fails or if the response cannot be parsed.
     pub async fn get_light_block(&self, block_height: Option<u32>) -> Result<LightBlock> {
         let peer_id = self.as_tm_client().status().await?.node_info.id;
         let commit_response;
@@ -41,7 +56,12 @@ impl TendermintRPCClient {
             height = block_height;
         } else {
             commit_response = self.as_tm_client().latest_commit().await?;
-            height = commit_response.signed_header.header.height.value() as u32;
+            height = commit_response
+                .signed_header
+                .header
+                .height
+                .value()
+                .try_into()?;
         }
         let mut signed_header = commit_response.signed_header;
 

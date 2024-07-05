@@ -1,67 +1,53 @@
+//! Runner for generating `update_client` fixtures
+
+use crate::{
+    cli::command::fixtures::UpdateClientCmd,
+    prover::{
+        SP1ICS07TendermintProgram, SP1ICS07TendermintProver, UpdateClientProgram,
+        VerifyMembershipProgram,
+    },
+    rpc::TendermintRPCClient,
+};
 use alloy_sol_types::SolValue;
-use clap::Parser;
 use ibc_client_tendermint::types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::identifiers::ChainId;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_operator::{rpc::TendermintRPCClient, SP1ICS07TendermintProver};
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{
-    ClientState, Height, TrustThreshold,
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
+    ClientState, Env, Height, TrustThreshold, UpdateClientOutput,
 };
-use sp1_ics07_tendermint_shared::types::sp1_ics07_tendermint::{Env, SP1ICS07TendermintOutput};
-use sp1_sdk::{utils::setup_logger, HashableKey};
+use sp1_sdk::HashableKey;
+use sp1_sdk::{MockProver, Prover};
 use std::{env, path::PathBuf, str::FromStr};
 
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct FixtureArgs {
-    /// Trusted block.
-    #[clap(long)]
-    trusted_block: u32,
-
-    /// Target block.
-    #[clap(long, env)]
-    target_block: u32,
-
-    /// Fixture path.
-    #[clap(long, default_value = "../contracts/fixtures")]
-    fixture_path: String,
-}
-
+/// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct SP1ICS07TendermintFixture {
-    // The encoded trusted client state.
+struct SP1ICS07UpdateClientFixture {
+    /// The encoded trusted client state.
     trusted_client_state: String,
-    // The encoded trusted consensus state.
+    /// The encoded trusted consensus state.
     trusted_consensus_state: String,
-    // The encoded target consensus state.
+    /// The encoded target consensus state.
     target_consensus_state: String,
-    // Target height.
+    /// Target height.
     target_height: u32,
-    vkey: String,
+    /// The encoded key for the [`UpdateClientProgram`].
+    update_client_vkey: String,
+    /// The encoded key for the [`VerifyMembershipProgram`].
+    verify_membership_vkey: String,
+    /// The encoded public values.
     public_values: String,
+    /// The encoded proof.
     proof: String,
 }
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
-/// Example:
-/// ```
-/// RUST_LOG=info cargo run --bin fixture --release -- --trusted-block=1 --target-block=5
-/// ```
-/// The fixture will be written to the path: ./contracts/fixtures/fixture.json
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    setup_logger();
-    if dotenv::dotenv().is_err() {
-        log::warn!("No .env file found");
-    }
-
-    let args = FixtureArgs::parse();
-
+#[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
+pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let tendermint_rpc_client = TendermintRPCClient::default();
-    let tendermint_prover = SP1ICS07TendermintProver::new();
+    let tendermint_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     let trusted_light_block = tendermint_rpc_client
         .get_light_block(Some(args.trusted_block))
@@ -70,6 +56,7 @@ async fn main() -> anyhow::Result<()> {
         .get_light_block(Some(args.target_block))
         .await?;
 
+    let two_weeks_in_nanos = 14 * 24 * 60 * 60 * 1_000_000_000;
     let chain_id = ChainId::from_str(trusted_light_block.signed_header.header.chain_id.as_str())?;
     let trusted_client_state = ClientState {
         chain_id: chain_id.to_string(),
@@ -83,8 +70,8 @@ async fn main() -> anyhow::Result<()> {
         },
         is_frozen: false,
         // 2 weeks in nanoseconds
-        trusting_period: 14 * 24 * 60 * 60 * 1_000_000_000,
-        unbonding_period: 14 * 24 * 60 * 60 * 1_000_000_000,
+        trusting_period: two_weeks_in_nanos,
+        unbonding_period: two_weeks_in_nanos,
     };
     let trusted_consensus_state = ConsensusState {
         timestamp: trusted_light_block.signed_header.header.time,
@@ -112,27 +99,28 @@ async fn main() -> anyhow::Result<()> {
         trust_threshold: trusted_client_state.trust_level.clone(),
         trusting_period: trusted_client_state.trusting_period,
         now: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos() as u64,
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_nanos()
+            .try_into()?,
     };
 
     // Generate a header update proof for the specified blocks.
-    let proof_data = tendermint_prover.generate_ics07_update_client_proof(
-        &trusted_consensus_state,
-        &proposed_header,
-        &contract_env,
-    );
+    let proof_data =
+        tendermint_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
     let bytes = proof_data.public_values.as_slice();
-    let output = SP1ICS07TendermintOutput::abi_decode(bytes, false).unwrap();
+    let output = UpdateClientOutput::abi_decode(bytes, false).unwrap();
 
-    let fixture = SP1ICS07TendermintFixture {
+    let fixture = SP1ICS07UpdateClientFixture {
         trusted_consensus_state: hex::encode(trusted_consensus_state.abi_encode()),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
-        vkey: tendermint_prover.vkey.bytes32(),
+        update_client_vkey: tendermint_prover.vkey.bytes32(),
+        verify_membership_vkey: MockProver::new()
+            .setup(VerifyMembershipProgram::ELF)
+            .1
+            .bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };
@@ -140,17 +128,16 @@ async fn main() -> anyhow::Result<()> {
     // Save the proof data to the file path.
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.fixture_path);
 
-    // TODO: Change to prover.id
     let sp1_prover_type = env::var("SP1_PROVER");
     if sp1_prover_type.as_deref() == Ok("mock") {
         std::fs::write(
-            fixture_path.join("mock_fixture.json"),
+            fixture_path.join("mock_update_client_fixture.json"),
             serde_json::to_string_pretty(&fixture).unwrap(),
         )
         .unwrap();
     } else {
         std::fs::write(
-            fixture_path.join("fixture.json"),
+            fixture_path.join("update_client_fixture.json"),
             serde_json::to_string_pretty(&fixture).unwrap(),
         )
         .unwrap();

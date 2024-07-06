@@ -172,14 +172,21 @@
             "internalType": "bytes32"
           },
           {
-            "name": "key_path",
-            "type": "string",
-            "internalType": "string"
-          },
-          {
-            "name": "value",
-            "type": "bytes",
-            "internalType": "bytes"
+            "name": "kv_pairs",
+            "type": "tuple[]",
+            "internalType": "struct MembershipProgram.KVPair[]",
+            "components": [
+              {
+                "name": "key",
+                "type": "string",
+                "internalType": "string"
+              },
+              {
+                "name": "value",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
           }
         ]
       },
@@ -192,37 +199,9 @@
         "name": "trustedConsensusStateBz",
         "type": "bytes",
         "internalType": "bytes"
-      },
-      {
-        "name": "keyPath",
-        "type": "string",
-        "internalType": "string"
       }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "tuple",
-        "internalType": "struct ICS07Tendermint.ConsensusState",
-        "components": [
-          {
-            "name": "timestamp",
-            "type": "uint64",
-            "internalType": "uint64"
-          },
-          {
-            "name": "root",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "next_validators_hash",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          }
-        ]
-      }
-    ],
+    "outputs": [],
     "stateMutability": "view"
   },
   {
@@ -372,6 +351,39 @@
   },
   {
     "type": "function",
+    "name": "verifyIcs07MembershipProof",
+    "inputs": [
+      {
+        "name": "proof",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "publicValues",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "proofHeight",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "trustedConsensusStateBz",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "kvPairHashes",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "verifyIcs07UpdateClientProof",
     "inputs": [
       {
@@ -387,76 +399,5 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "verifyIcs07VerifyMembershipProof",
-    "inputs": [
-      {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "publicValues",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "proofHeight",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
-        "name": "trustedConsensusStateBz",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "keyPath",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "value",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "verifyIcs07VerifyNonMembershipProof",
-    "inputs": [
-      {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "publicValues",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "proofHeight",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
-        "name": "trustedConsensusStateBz",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "keyPath",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "view"
   }
 ]

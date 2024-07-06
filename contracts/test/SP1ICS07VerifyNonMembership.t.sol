@@ -77,12 +77,12 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
 
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidSP1ICS07VerifyNonMembership() public view {
-        ics07Tendermint.verifyIcs07VerifyNonMembershipProof(
+        ics07Tendermint.verifyIcs07MembershipProof(
             fixture.proof,
             fixture.publicValues,
             fixture.proofHeight,
             fixture.trustedConsensusState,
-            verifyNonMembershipPath
+            new bytes32[](0) // TODO: add kvPairHashes
         );
 
         // to console
@@ -94,12 +94,12 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
 
     // Confirm that submitting an empty proof passes the mock verifier.
     function test_ValidMockVerifyMembership() public view {
-        mockIcs07Tendermint.verifyIcs07VerifyNonMembershipProof(
+        mockIcs07Tendermint.verifyIcs07MembershipProof(
             mockFixture.proof,
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,
-            verifyNonMembershipPath
+            new bytes32[](0) // TODO: add kvPairHashes
         );
     }
 
@@ -107,44 +107,44 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
     function test_Invalid_MockVerifyNonMembership() public {
         // Invalid proof
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07VerifyNonMembershipProof(
+        mockIcs07Tendermint.verifyIcs07MembershipProof(
             bytes("invalid"),
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,
-            verifyNonMembershipPath
+            new bytes32[](0) // TODO: add kvPairHashes
         );
 
         // Invalid proof height
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07VerifyNonMembershipProof(
+        mockIcs07Tendermint.verifyIcs07MembershipProof(
             bytes(""),
             mockFixture.publicValues,
             1,
             mockFixture.trustedConsensusState,
-            verifyNonMembershipPath
+            new bytes32[](0) // TODO: add kvPairHashes
         );
 
         // Invalid trusted consensus state
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07VerifyNonMembershipProof(
+        mockIcs07Tendermint.verifyIcs07MembershipProof(
             bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
             bytes("invalid"),
-            verifyNonMembershipPath
+            new bytes32[](0) // TODO: add kvPairHashes
         );
     }
 
     // Confirm that submitting a random proof with the real verifier fails.
     function test_Invalid_VerifyNonMembership() public {
         vm.expectRevert();
-        ics07Tendermint.verifyIcs07VerifyNonMembershipProof(
+        ics07Tendermint.verifyIcs07MembershipProof(
             bytes("invalid"),
             fixture.publicValues,
             fixture.proofHeight,
             fixture.trustedConsensusState,
-            verifyNonMembershipPath
+            new bytes32[](0) // TODO: add kvPairHashes
         );
     }
 }

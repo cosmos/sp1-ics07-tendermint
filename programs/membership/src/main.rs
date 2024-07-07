@@ -44,7 +44,7 @@ pub fn main() {
             let loop_encoded_2 = sp1_zkvm::io::read_vec();
             let merkle_proof = MerkleProof::decode_vec(&loop_encoded_2).unwrap();
 
-            // encoded_4 is the value we want to prove the membership of
+            // loop_encoded_3 is the value we want to prove the membership of
             // if it is empty, we are verifying non-membership
             let value = sp1_zkvm::io::read_vec();
 

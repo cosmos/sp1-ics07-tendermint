@@ -75,7 +75,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
 
         // to console
         console.log(
-            "VerifyNonMembership gas used: ",
+            "VerifyMultiMembership gas used: ",
             vm.lastCallGas().gasTotalUsed
         );
     }

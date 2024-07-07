@@ -89,7 +89,7 @@ pub mod fixtures {
         pub output_path: String,
     }
 
-    /// The arguments for the `VerifyMembership` fixture executable.
+    /// The arguments for the `Membership` fixture executable.
     #[derive(Parser, Debug, Clone)]
     #[command(about = "Generate the verify (non)membership fixture")]
     pub struct MembershipCmd {
@@ -97,9 +97,9 @@ pub mod fixtures {
         #[clap(long)]
         pub trusted_block: u32,
 
-        /// Key path to prove membership.
-        #[clap(long)]
-        pub key_path: String,
+        /// Key paths to prove membership.
+        #[clap(long, value_delimiter = ',')]
+        pub key_paths: Vec<String>,
 
         /// Fixture path.
         #[clap(long, short = 'o')]

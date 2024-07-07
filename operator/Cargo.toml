@@ -10,6 +10,7 @@ license = { workspace = true }
 sp1-sdk = { workspace = true }
 reqwest = { workspace = true }
 tokio = { workspace = true }
+futures = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
 tendermint = { workspace = true }
@@ -23,7 +24,6 @@ alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy = { workspace = true, features = ["full", "node-bindings"] }
 bincode = { workspace = true }
-itertools = { workspace = true }
 serde_cbor = { workspace = true }
 sha2 = { workspace = true }
 dotenv = { workspace = true }

@@ -18,7 +18,7 @@ struct SP1ICS07UpdateClientFixtureJson {
     bytes targetConsensusState;
     uint32 targetHeight;
     bytes32 updateClientVkey;
-    bytes32 verifyMembershipVkey;
+    bytes32 membershipVkey;
     bytes publicValues;
     bytes proof;
 }
@@ -54,9 +54,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         );
         uint32 targetHeight = uint32(json.readUint(".targetHeight"));
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
-        bytes32 verifyMembershipVkey = json.readBytes32(
-            ".verifyMembershipVkey"
-        );
+        bytes32 membershipVkey = json.readBytes32(".membershipVkey");
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
 
@@ -67,7 +65,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
                 targetConsensusState: targetConsensusState,
                 targetHeight: targetHeight,
                 updateClientVkey: updateClientVkey,
-                verifyMembershipVkey: verifyMembershipVkey,
+                membershipVkey: membershipVkey,
                 publicValues: publicValues,
                 proof: proof
             });

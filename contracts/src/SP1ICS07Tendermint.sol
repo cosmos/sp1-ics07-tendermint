@@ -96,19 +96,19 @@ contract SP1ICS07Tendermint {
 
     /// @notice The entrypoint for verifying membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
+    /// @dev It can validate a subset of the key-value pairs by providing their hashes.
+    /// @dev This is useful for batch verification. Zero hashes are skipped.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
-    /// @param keyPath The key path.
-    /// @param value The value.
-    function verifyIcs07VerifyMembershipProof(
+    /// @param kvPairHashes The hashes of the key-value pairs.
+    function verifyIcs07MembershipProof(
         bytes memory proof,
         bytes memory publicValues,
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz,
-        string memory keyPath,
-        bytes memory value
+        bytes32[] memory kvPairHashes
     ) public view {
         MembershipProgram.MembershipOutput memory output = abi.decode(
             publicValues,
@@ -116,58 +116,36 @@ contract SP1ICS07Tendermint {
         );
 
         require(
-            value.length != 0,
-            "SP1ICS07Tendermint: value must not be empty"
-        );
-        require(
-            keccak256(value) == keccak256(output.value),
-            "SP1ICS07Tendermint: value mismatch"
-        );
-
-        validateMembershipOutput(
-            output,
-            proofHeight,
-            trustedConsensusStateBz,
-            keyPath
-        );
-
-        verifier.verifyProof(
-            ics07VerifyMembershipProgramVkey,
-            publicValues,
-            proof
-        );
-    }
-
-    /// @notice The entrypoint for verifying non-membership proof.
-    /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
-    /// @param proof The encoded proof.
-    /// @param publicValues The encoded public values.
-    /// @param proofHeight The height of the proof.
-    /// @param trustedConsensusStateBz The encoded trusted consensus state.
-    /// @param keyPath The key path.
-    function verifyIcs07VerifyNonMembershipProof(
-        bytes memory proof,
-        bytes memory publicValues,
-        uint32 proofHeight,
-        bytes memory trustedConsensusStateBz,
-        string memory keyPath
-    ) public view {
-        MembershipProgram.MembershipOutput memory output = abi.decode(
-            publicValues,
-            (MembershipProgram.MembershipOutput)
+            kvPairHashes.length != 0,
+            "SP1ICS07Tendermint: kvPairs length is zero"
         );
 
         require(
-            output.value.length == 0,
-            "SP1ICS07Tendermint: value must be empty"
+            kvPairHashes.length <= output.kv_pairs.length,
+            "SP1ICS07Tendermint: kvPairs length mismatch"
         );
 
-        validateMembershipOutput(
-            output,
-            proofHeight,
-            trustedConsensusStateBz,
-            keyPath
-        );
+        // loop through the key-value pairs and validate them
+        for (uint8 i = 0; i < kvPairHashes.length; i++) {
+            bytes32 kvPairHash = kvPairHashes[i];
+            if (kvPairHash == 0) {
+                // skip the empty hash
+                continue;
+            }
+
+            MembershipProgram.KVPair memory kvPair = output.kv_pairs[i];
+
+            require(
+                kvPairHash == keccak256(abi.encode(kvPair)),
+                "SP1ICS07Tendermint: kvPair hash mismatch"
+            );
+
+            validateMembershipOutput(
+                output,
+                proofHeight,
+                trustedConsensusStateBz
+            );
+        }
 
         verifier.verifyProof(
             ics07VerifyMembershipProgramVkey,
@@ -180,21 +158,15 @@ contract SP1ICS07Tendermint {
     /// @param output The public values.
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
-    /// @return The decoded trusted consensus state.
     function validateMembershipOutput(
         MembershipProgram.MembershipOutput memory output,
         uint32 proofHeight,
-        bytes memory trustedConsensusStateBz,
-        string memory keyPath
-    ) public view returns (ICS07Tendermint.ConsensusState memory) {
+        bytes memory trustedConsensusStateBz
+    ) public view {
         require(
             consensusStateHashes[proofHeight] ==
                 keccak256(trustedConsensusStateBz),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
-        );
-        require(
-            keccak256(bytes(keyPath)) == keccak256(bytes(output.key_path)),
-            "SP1ICS07Tendermint: key path mismatch"
         );
 
         ICS07Tendermint.ConsensusState memory trustedConsensusState = abi
@@ -204,8 +176,6 @@ contract SP1ICS07Tendermint {
             output.commitment_root == trustedConsensusState.root,
             "SP1ICS07Tendermint: invalid commitment root"
         );
-
-        return trustedConsensusState;
     }
 
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.

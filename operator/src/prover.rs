@@ -89,23 +89,27 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
 }
 
 impl SP1ICS07TendermintProver<MembershipProgram> {
-    /// Generate a proof of a verify membership from `trusted_consensus_state` to a proposed header.
+    /// Generate a proof of verify (non)membership for multiple key-value pairs.
     ///
     /// # Panics
     /// Panics if the proof cannot be generated or the proof is invalid.
     #[must_use]
     pub fn generate_proof(
         &self,
-        root: &[u8],
-        path: &str,
-        proof: MerkleProof,
-        value: &[u8],
+        commitment_root: &[u8],
+        kv_proofs: Vec<(String, MerkleProof, Vec<u8>)>,
     ) -> SP1PlonkBn254Proof {
+        assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
+        let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
+
         let mut stdin = SP1Stdin::new();
-        stdin.write_slice(root);
-        stdin.write_slice(path.as_bytes());
-        stdin.write_vec(proof.encode_vec());
-        stdin.write_slice(value);
+        stdin.write_slice(commitment_root);
+        stdin.write_vec(vec![len]);
+        for (path, proof, value) in kv_proofs {
+            stdin.write_slice(path.as_bytes());
+            stdin.write_vec(proof.encode_vec());
+            stdin.write_vec(value);
+        }
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
         // network proof.

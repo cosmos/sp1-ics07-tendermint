@@ -3,7 +3,7 @@ use sp1_ics07_tendermint_operator::{
     cli::command::{fixtures, Commands, OperatorCli},
     runners::{
         self,
-        fixtures::{update_client, verify_membership},
+        fixtures::{membership, update_client},
     },
 };
 use sp1_sdk::utils::setup_logger;
@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Genesis(args) => runners::genesis::run(args).await,
         Commands::Fixtures(cmd) => match cmd.command {
             fixtures::Cmds::UpdateClient(args) => update_client::run(args).await,
-            fixtures::Cmds::Membership(args) => verify_membership::run(args).await,
+            fixtures::Cmds::Membership(args) => membership::run(args).await,
         },
     }
 }

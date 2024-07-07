@@ -21,8 +21,8 @@ struct SP1ICS07TendermintGenesis {
     trusted_consensus_state: String,
     /// The encoded key for [`UpdateClientProgram`].
     update_client_vkey: String,
-    /// The encoded key for [`VerifyMembershipProgram`].
-    verify_membership_vkey: String,
+    /// The encoded key for [`MembershipProgram`].
+    membership_vkey: String,
 }
 
 /// Creates the `genesis.json` file for the `SP1ICS07Tendermint` contract.
@@ -55,7 +55,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         ),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
-        verify_membership_vkey: MembershipProgram::get_vkey().bytes32(),
+        membership_vkey: MembershipProgram::get_vkey().bytes32(),
     };
 
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.genesis_path);

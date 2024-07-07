@@ -24,7 +24,6 @@ alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy = { workspace = true, features = ["full", "node-bindings"] }
 bincode = { workspace = true }
-itertools = { workspace = true }
 serde_cbor = { workspace = true }
 sha2 = { workspace = true }
 dotenv = { workspace = true }

@@ -41,7 +41,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
 
     function test_ValidVerifyNonMembership() public view {
         bytes32[] memory kvPairHashes = new bytes32[](2);
-        kvPairHashes[0] = bytes32(0);
+        kvPairHashes[0] = bytes32(0); // skip validation of the first kvPair
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
         ics07Tendermint.verifyIcs07MembershipProof(

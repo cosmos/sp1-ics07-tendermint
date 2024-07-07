@@ -96,6 +96,8 @@ contract SP1ICS07Tendermint {
 
     /// @notice The entrypoint for verifying membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
+    /// @dev It can validate a subset of the key-value pairs by providing their hashes.
+    /// @dev This is useful for batch verification. Zero hashes are skipped.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @param proofHeight The height of the proof.
@@ -114,7 +116,7 @@ contract SP1ICS07Tendermint {
         );
 
         require(
-            output.kv_pairs.length != 0,
+            kvPairHashes.length != 0,
             "SP1ICS07Tendermint: kvPairs length is zero"
         );
 
@@ -126,6 +128,11 @@ contract SP1ICS07Tendermint {
         // loop through the key-value pairs and validate them
         for (uint8 i = 0; i < kvPairHashes.length; i++) {
             bytes32 kvPairHash = kvPairHashes[i];
+            if (kvPairHash == 0) {
+                // skip the empty hash
+                continue;
+            }
+
             MembershipProgram.KVPair memory kvPair = output.kv_pairs[i];
 
             require(

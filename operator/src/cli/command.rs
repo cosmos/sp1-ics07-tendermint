@@ -98,7 +98,7 @@ pub mod fixtures {
         pub trusted_block: u32,
 
         /// Key paths to prove membership.
-        #[clap(long)]
+        #[clap(long, value_delimiter = ',')]
         pub key_paths: Vec<String>,
 
         /// Fixture path.

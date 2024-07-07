@@ -30,9 +30,6 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
     SP1ICS07MembershipFixtureJson public fixture;
     SP1ICS07MembershipFixtureJson public mockFixture;
 
-    MembershipProgram.KVPair[] public kvPairs;
-    MembershipProgram.KVPair[] public mockKvPairs;
-
     function setUpTestWithFixtures(
         string memory fileName,
         string memory mockFileName
@@ -40,13 +37,19 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
         fixture = loadFixture(fileName);
         mockFixture = loadFixture(mockFileName);
 
-        kvPairs = abi.decode(fixture.kvPairsBz, (MembershipProgram.KVPair[]));
-        mockKvPairs = abi.decode(
-            mockFixture.kvPairsBz,
-            (MembershipProgram.KVPair[])
-        );
-
         setUpTest(fileName, mockFileName);
+    }
+
+    function kvPairs() public view returns (MembershipProgram.KVPair[] memory) {
+        return abi.decode(fixture.kvPairsBz, (MembershipProgram.KVPair[]));
+    }
+
+    function mockKvPairs()
+        public
+        view
+        returns (MembershipProgram.KVPair[] memory)
+    {
+        return abi.decode(mockFixture.kvPairsBz, (MembershipProgram.KVPair[]));
     }
 
     function loadFixture(

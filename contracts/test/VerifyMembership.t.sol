@@ -12,18 +12,6 @@ import {MembershipProgram} from "../src/ics07-tendermint/MembershipProgram.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
 
-struct SP1ICS07MembershipFixtureJson {
-    uint32 proofHeight;
-    bytes trustedClientState;
-    bytes trustedConsensusState;
-    bytes32 updateClientVkey;
-    bytes32 membershipVkey;
-    bytes32 commitmentRoot;
-    bytes publicValues;
-    bytes proof;
-    bytes kvPairs;
-}
-
 // set constant string
 string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
 
@@ -35,20 +23,20 @@ contract SP1ICS07VerifyMembershipTest is MembershipTest {
         );
     }
 
-    function test_VerifyFixtures() public view {
-        assertEq(kvPairs.length, 1);
-        assertEq(kvPairs[0].key, verifyMembershipPath);
-        assert(kvPairs[0].value.length != 0);
+    function test_ValidateFixtures() public view {
+        assertEq(kvPairs().length, 1);
+        assertEq(kvPairs()[0].key, verifyMembershipPath);
+        assert(kvPairs()[0].value.length != 0);
 
-        assertEq(mockKvPairs.length, 1);
-        assertEq(mockKvPairs[0].key, verifyMembershipPath);
-        assert(mockKvPairs[0].value.length != 0);
+        assertEq(mockKvPairs().length, 1);
+        assertEq(mockKvPairs()[0].key, verifyMembershipPath);
+        assert(mockKvPairs()[0].value.length != 0);
     }
 
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidVerifyMembership() public view {
         bytes32[] memory kvPairHashes = new bytes32[](1);
-        bytes32 kvPairHash = keccak256(abi.encode(kvPairs[0]));
+        bytes32 kvPairHash = keccak256(abi.encode(kvPairs()[0]));
         kvPairHashes[0] = kvPairHash;
 
         ics07Tendermint.verifyIcs07MembershipProof(
@@ -69,7 +57,7 @@ contract SP1ICS07VerifyMembershipTest is MembershipTest {
     // Confirm that submitting an empty proof passes the mock verifier.
     function test_ValidMockVerifyMembership() public view {
         bytes32[] memory kvPairHashes = new bytes32[](1);
-        bytes32 kvPairHash = keccak256(abi.encode(mockKvPairs[0]));
+        bytes32 kvPairHash = keccak256(abi.encode(mockKvPairs()[0]));
         kvPairHashes[0] = kvPairHash;
 
         mockIcs07Tendermint.verifyIcs07MembershipProof(
@@ -84,7 +72,7 @@ contract SP1ICS07VerifyMembershipTest is MembershipTest {
     // Confirm that submitting a non-empty proof with the mock verifier fails.
     function test_Invalid_MockVerifyMembership() public {
         bytes32[] memory kvPairHashes = new bytes32[](1);
-        bytes32 kvPairHash = keccak256(abi.encode(mockKvPairs[0]));
+        bytes32 kvPairHash = keccak256(abi.encode(mockKvPairs()[0]));
         kvPairHashes[0] = kvPairHash;
 
         // Invalid proof
@@ -128,20 +116,22 @@ contract SP1ICS07VerifyMembershipTest is MembershipTest {
         );
 
         // Invalid kvPairHashes
+        bytes32[] memory invalidHashes = new bytes32[](1);
+        invalidHashes[0] = keccak256("invalid");
         vm.expectRevert();
         mockIcs07Tendermint.verifyIcs07MembershipProof(
             bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,
-            new bytes32[](1)
+            invalidHashes
         );
     }
 
     // Confirm that submitting a random proof with the real verifier fails.
     function test_Invalid_VerifyMembership() public {
         bytes32[] memory kvPairHashes = new bytes32[](1);
-        bytes32 kvPairHash = keccak256(abi.encode(mockKvPairs[0]));
+        bytes32 kvPairHash = keccak256(abi.encode(mockKvPairs()[0]));
         kvPairHashes[0] = kvPairHash;
 
         vm.expectRevert();

@@ -7,80 +7,70 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {stdError} from "forge-std/StdError.sol";
 import {ICS07Tendermint} from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
-import {SP1ICS07TendermintTest} from "./SP1ICS07TendermintTest.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
-
-struct SP1ICS07MembershipFixtureJson {
-    uint32 proofHeight;
-    bytes trustedClientState;
-    bytes trustedConsensusState;
-    bytes32 updateClientVkey;
-    bytes32 membershipVkey;
-    bytes32 commitmentRoot;
-    bytes publicValues;
-    bytes proof;
-}
+import {MembershipTest} from "./MembershipTest.sol";
 
 // set constant string
+string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
 string constant verifyNonMembershipPath = "clients/07-tendermint-001/clientState";
 
-contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
+contract SP1ICS07MultiMembershipTest is MembershipTest {
     using stdJson for string;
 
-    SP1ICS07MembershipFixtureJson public fixture;
-    SP1ICS07MembershipFixtureJson public mockFixture;
-
     function setUp() public {
-        fixture = loadFixture("verify_non_membership_fixture.json");
-        mockFixture = loadFixture("mock_verify_non_membership_fixture.json");
-
-        setUpTest(
-            "verify_non_membership_fixture.json",
-            "mock_verify_non_membership_fixture.json"
+        setUpTestWithFixtures(
+            "memberships_fixture.json",
+            "mock_memberships_fixture.json"
         );
     }
 
-    function loadFixture(
-        string memory fileName
-    ) public view returns (SP1ICS07MembershipFixtureJson memory) {
-        string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/fixtures/", fileName);
-        string memory json = vm.readFile(path);
-        bytes memory trustedClientState = json.readBytes(".trustedClientState");
-        bytes memory trustedConsensusState = json.readBytes(
-            ".trustedConsensusState"
-        );
-        uint32 proofHeight = uint32(json.readUint(".proofHeight"));
-        bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
-        bytes32 membershipVkey = json.readBytes32(".membershipVkey");
-        bytes32 commitmentRoot = json.readBytes32(".commitmentRoot");
-        bytes memory publicValues = json.readBytes(".publicValues");
-        bytes memory proof = json.readBytes(".proof");
+    function test_ValidateFixtures() public view {
+        assertEq(kvPairs().length, 2);
+        assertEq(kvPairs()[0].key, verifyMembershipPath);
+        assert(kvPairs()[0].value.length != 0);
+        assertEq(kvPairs()[1].key, verifyNonMembershipPath);
+        assertEq(kvPairs()[1].value.length, 0);
 
-        SP1ICS07MembershipFixtureJson
-            memory fix = SP1ICS07MembershipFixtureJson({
-                commitmentRoot: commitmentRoot,
-                trustedClientState: trustedClientState,
-                trustedConsensusState: trustedConsensusState,
-                proofHeight: proofHeight,
-                updateClientVkey: updateClientVkey,
-                membershipVkey: membershipVkey,
-                publicValues: publicValues,
-                proof: proof
-            });
-
-        return fix;
+        assertEq(mockKvPairs().length, 2);
+        assertEq(mockKvPairs()[0].key, verifyMembershipPath);
+        assert(mockKvPairs()[0].value.length != 0);
+        assertEq(mockKvPairs()[1].key, verifyNonMembershipPath);
+        assertEq(mockKvPairs()[1].value.length, 0);
     }
 
-    // Confirm that submitting a real proof passes the verifier.
-    function test_ValidSP1ICS07VerifyNonMembership() public view {
+    function test_ValidVerifyNonMembership() public view {
+        bytes32[] memory kvPairHashes = new bytes32[](2);
+        kvPairHashes[0] = bytes32(0);
+        kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
+
         ics07Tendermint.verifyIcs07MembershipProof(
             fixture.proof,
             fixture.publicValues,
             fixture.proofHeight,
             fixture.trustedConsensusState,
-            new bytes32[](0) // TODO: add kvPairHashes
+            kvPairHashes
+        );
+
+        // to console
+        console.log(
+            "VerifyNonMembership gas used: ",
+            vm.lastCallGas().gasTotalUsed
+        );
+    }
+
+    // Confirm that submitting a real proof passes the verifier.
+    function test_ValidMultiMembership() public view {
+        bytes32[] memory kvPairHashes = new bytes32[](2);
+        kvPairHashes[0] = keccak256(abi.encode(kvPairs()[0]));
+        kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
+
+        ics07Tendermint.verifyIcs07MembershipProof(
+            fixture.proof,
+            fixture.publicValues,
+            fixture.proofHeight,
+            fixture.trustedConsensusState,
+            kvPairHashes
         );
 
         // to console
@@ -91,18 +81,24 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
-    function test_ValidMockVerifyMembership() public view {
+    function test_ValidMockMultiMembership() public view {
+        bytes32[] memory kvPairHashes = new bytes32[](2);
+        kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
+        kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
+
         mockIcs07Tendermint.verifyIcs07MembershipProof(
             mockFixture.proof,
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,
-            new bytes32[](0) // TODO: add kvPairHashes
+            kvPairHashes
         );
     }
 
-    // Confirm that submitting a non-empty proof with the mock verifier fails.
-    function test_Invalid_MockVerifyNonMembership() public {
+    function test_Invalid_MockMultiMembership() public {
+        bytes32[] memory kvPairHashes = new bytes32[](2);
+        kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
+        kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
         // Invalid proof
         vm.expectRevert();
         mockIcs07Tendermint.verifyIcs07MembershipProof(
@@ -110,7 +106,7 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,
-            new bytes32[](0) // TODO: add kvPairHashes
+            kvPairHashes
         );
 
         // Invalid proof height
@@ -120,7 +116,7 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
             mockFixture.publicValues,
             1,
             mockFixture.trustedConsensusState,
-            new bytes32[](0) // TODO: add kvPairHashes
+            kvPairHashes
         );
 
         // Invalid trusted consensus state
@@ -130,19 +126,33 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
             mockFixture.publicValues,
             mockFixture.proofHeight,
             bytes("invalid"),
-            new bytes32[](0) // TODO: add kvPairHashes
+            kvPairHashes
+        );
+
+        // Empty kvPairHashes length
+        vm.expectRevert();
+        mockIcs07Tendermint.verifyIcs07MembershipProof(
+            bytes(""),
+            mockFixture.publicValues,
+            mockFixture.proofHeight,
+            mockFixture.trustedConsensusState,
+            new bytes32[](0)
         );
     }
 
     // Confirm that submitting a random proof with the real verifier fails.
-    function test_Invalid_VerifyNonMembership() public {
+    function test_Invalid_MultiMembership() public {
+        bytes32[] memory kvPairHashes = new bytes32[](2);
+        kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
+        kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
+
         vm.expectRevert();
         ics07Tendermint.verifyIcs07MembershipProof(
             bytes("invalid"),
             fixture.publicValues,
             fixture.proofHeight,
             fixture.trustedConsensusState,
-            new bytes32[](0) // TODO: add kvPairHashes
+            kvPairHashes
         );
     }
 }

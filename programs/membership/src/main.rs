@@ -33,46 +33,47 @@ pub fn main() {
     // encoded_2 is the number of key-value pairs we want to verify
     let request_len = sp1_zkvm::io::read_vec()[0];
 
-    let mut kv_pairs = vec![];
-    for _ in 0..request_len {
-        let loop_encoded_1 = sp1_zkvm::io::read_vec();
-        let path_str = String::from_utf8(loop_encoded_1).unwrap();
-        let path = MerklePath {
-            key_path: vec!["ibc".to_string(), path_str.clone()],
-        };
+    let kv_pairs = (0..request_len)
+        .map(|_| {
+            let loop_encoded_1 = sp1_zkvm::io::read_vec();
+            let path_str = String::from_utf8(loop_encoded_1).unwrap();
+            let path = MerklePath {
+                key_path: vec!["ibc".to_string(), path_str.clone()],
+            };
 
-        let loop_encoded_2 = sp1_zkvm::io::read_vec();
-        let merkle_proof = MerkleProof::decode_vec(&loop_encoded_2).unwrap();
+            let loop_encoded_2 = sp1_zkvm::io::read_vec();
+            let merkle_proof = MerkleProof::decode_vec(&loop_encoded_2).unwrap();
 
-        // encoded_4 is the value we want to prove the membership of
-        // if it is empty, we are verifying non-membership
-        let value = sp1_zkvm::io::read_vec();
+            // encoded_4 is the value we want to prove the membership of
+            // if it is empty, we are verifying non-membership
+            let value = sp1_zkvm::io::read_vec();
 
-        if value.is_empty() {
-            merkle_proof
-                .verify_non_membership::<HostFunctionsManager>(
-                    &ProofSpecs::cosmos(),
-                    commitment_root.clone().into(),
-                    path,
-                )
-                .unwrap();
-        } else {
-            merkle_proof
-                .verify_membership::<HostFunctionsManager>(
-                    &ProofSpecs::cosmos(),
-                    commitment_root.clone().into(),
-                    path,
-                    value.clone(),
-                    0,
-                )
-                .unwrap();
-        }
+            if value.is_empty() {
+                merkle_proof
+                    .verify_non_membership::<HostFunctionsManager>(
+                        &ProofSpecs::cosmos(),
+                        commitment_root.clone().into(),
+                        path,
+                    )
+                    .unwrap();
+            } else {
+                merkle_proof
+                    .verify_membership::<HostFunctionsManager>(
+                        &ProofSpecs::cosmos(),
+                        commitment_root.clone().into(),
+                        path,
+                        value.clone(),
+                        0,
+                    )
+                    .unwrap();
+            }
 
-        kv_pairs.push(KVPair {
-            key: path_str,
-            value: value.into(),
-        });
-    }
+            KVPair {
+                key: path_str,
+                value: value.into(),
+            }
+        })
+        .collect();
 
     let output = MembershipOutput {
         commitment_root: app_hash.into(),

@@ -21,7 +21,7 @@ use tendermint_rpc::Client;
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct SP1ICS07VerifyMembershipFixture {
+struct SP1ICS07MembershipFixture {
     /// The proof height.
     proof_height: u32,
     /// The encoded trusted client state.
@@ -38,7 +38,7 @@ struct SP1ICS07VerifyMembershipFixture {
     public_values: String,
     /// The encoded proof.
     proof: String,
-    /// Hex-encoded [`KVPair`] value.
+    /// Hex-encoded `KVPair` value.
     kv_pairs: String,
 }
 
@@ -93,7 +93,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let output = MembershipOutput::abi_decode(bytes, true).unwrap();
     assert_eq!(output.commitment_root.as_slice(), &commitment_root_bytes);
 
-    let fixture = SP1ICS07VerifyMembershipFixture {
+    let fixture = SP1ICS07MembershipFixture {
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         proof_height: args.trusted_block,
         trusted_consensus_state: hex::encode(

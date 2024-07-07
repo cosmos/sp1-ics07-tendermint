@@ -14,7 +14,7 @@ struct SP1ICS07GenesisFixtureJson {
     bytes trustedClientState;
     bytes trustedConsensusState;
     bytes32 updateClientVkey;
-    bytes32 verifyMembershipVkey;
+    bytes32 membershipVkey;
 }
 
 abstract contract SP1ICS07TendermintTest is Test {
@@ -45,7 +45,7 @@ abstract contract SP1ICS07TendermintTest is Test {
         SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesisFixture.updateClientVkey,
-            genesisFixture.verifyMembershipVkey,
+            genesisFixture.membershipVkey,
             address(verifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
@@ -66,7 +66,7 @@ abstract contract SP1ICS07TendermintTest is Test {
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
             mockGenesisFixture.updateClientVkey,
-            mockGenesisFixture.verifyMembershipVkey,
+            mockGenesisFixture.membershipVkey,
             address(mockVerifier),
             mockGenesisFixture.trustedClientState,
             mockTrustedConsensusHash
@@ -101,15 +101,13 @@ abstract contract SP1ICS07TendermintTest is Test {
             ".trustedConsensusState"
         );
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
-        bytes32 verifyMembershipVkey = json.readBytes32(
-            ".verifyMembershipVkey"
-        );
+        bytes32 membershipVkey = json.readBytes32(".membershipVkey");
 
         SP1ICS07GenesisFixtureJson memory fix = SP1ICS07GenesisFixtureJson({
             trustedClientState: trustedClientState,
             trustedConsensusState: trustedConsensusState,
             updateClientVkey: updateClientVkey,
-            verifyMembershipVkey: verifyMembershipVkey
+            membershipVkey: membershipVkey
         });
 
         return fix;

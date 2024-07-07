@@ -89,7 +89,7 @@ pub mod fixtures {
         pub output_path: String,
     }
 
-    /// The arguments for the `VerifyMembership` fixture executable.
+    /// The arguments for the `Membership` fixture executable.
     #[derive(Parser, Debug, Clone)]
     #[command(about = "Generate the verify (non)membership fixture")]
     pub struct MembershipCmd {

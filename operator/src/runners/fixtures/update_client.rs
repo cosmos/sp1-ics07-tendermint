@@ -27,8 +27,8 @@ struct SP1ICS07UpdateClientFixture {
     target_height: u32,
     /// The encoded key for the [`UpdateClientProgram`].
     update_client_vkey: String,
-    /// The encoded key for the [`VerifyMembershipProgram`].
-    verify_membership_vkey: String,
+    /// The encoded key for the [`MembershipProgram`].
+    membership_vkey: String,
     /// The encoded public values.
     public_values: String,
     /// The encoded proof.
@@ -77,7 +77,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
         target_height: args.target_block,
         update_client_vkey: uc_prover.vkey.bytes32(),
-        verify_membership_vkey: MembershipProgram::get_vkey().bytes32(),
+        membership_vkey: MembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };

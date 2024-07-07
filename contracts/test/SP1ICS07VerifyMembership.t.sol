@@ -12,16 +12,16 @@ import {MembershipProgram} from "../src/ics07-tendermint/MembershipProgram.sol";
 import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
 import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
 
-struct SP1ICS07VerifyMembershipFixtureJson {
+struct SP1ICS07MembershipFixtureJson {
     uint32 proofHeight;
     bytes trustedClientState;
     bytes trustedConsensusState;
     bytes32 updateClientVkey;
-    bytes32 verifyMembershipVkey;
+    bytes32 membershipVkey;
     bytes32 commitmentRoot;
     bytes publicValues;
     bytes proof;
-    bytes value;
+    bytes kvPairs;
 }
 
 // set constant string
@@ -30,8 +30,8 @@ string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
 contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
     using stdJson for string;
 
-    SP1ICS07VerifyMembershipFixtureJson public fixture;
-    SP1ICS07VerifyMembershipFixtureJson public mockFixture;
+    SP1ICS07MembershipFixtureJson public fixture;
+    SP1ICS07MembershipFixtureJson public mockFixture;
 
     function setUp() public {
         fixture = loadFixture("verify_membership_fixture.json");
@@ -45,7 +45,7 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
 
     function loadFixture(
         string memory fileName
-    ) public view returns (SP1ICS07VerifyMembershipFixtureJson memory) {
+    ) public view returns (SP1ICS07MembershipFixtureJson memory) {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/fixtures/", fileName);
         string memory json = vm.readFile(path);
@@ -55,25 +55,23 @@ contract SP1ICS07VerifyMembershipTest is SP1ICS07TendermintTest {
         );
         uint32 proofHeight = uint32(json.readUint(".proofHeight"));
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
-        bytes32 verifyMembershipVkey = json.readBytes32(
-            ".verifyMembershipVkey"
-        );
+        bytes32 membershipVkey = json.readBytes32(".membershipVkey");
         bytes32 commitmentRoot = json.readBytes32(".commitmentRoot");
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
-        bytes memory value = json.readBytes(".value");
+        bytes memory kvPairs = json.readBytes(".kvPairs");
 
-        SP1ICS07VerifyMembershipFixtureJson
-            memory fix = SP1ICS07VerifyMembershipFixtureJson({
+        SP1ICS07MembershipFixtureJson
+            memory fix = SP1ICS07MembershipFixtureJson({
                 commitmentRoot: commitmentRoot,
                 trustedClientState: trustedClientState,
                 trustedConsensusState: trustedConsensusState,
                 proofHeight: proofHeight,
                 updateClientVkey: updateClientVkey,
-                verifyMembershipVkey: verifyMembershipVkey,
+                membershipVkey: membershipVkey,
                 publicValues: publicValues,
                 proof: proof,
-                value: value
+                kvPairs: kvPairs
             });
 
         return fix;

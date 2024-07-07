@@ -1,4 +1,4 @@
-//! Runner for generating `verify_membership` fixtures
+//! Runner for generating `membership` fixtures
 
 use crate::{
     cli::command::fixtures::MembershipCmd,
@@ -33,7 +33,7 @@ struct SP1ICS07MembershipFixture {
     /// The encoded key for the [`UpdateClientProgram`].
     update_client_vkey: String,
     /// The encoded key for the [`MembershipProgram`].
-    verify_membership_vkey: String,
+    membership_vkey: String,
     /// The encoded public values.
     public_values: String,
     /// The encoded proof.
@@ -101,7 +101,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         ),
         commitment_root: hex::encode(&commitment_root_bytes),
         update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
-        verify_membership_vkey: verify_mem_prover.vkey.bytes32(),
+        membership_vkey: verify_mem_prover.vkey.bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
         kv_pairs: hex::encode(output.kv_pairs.abi_encode()),

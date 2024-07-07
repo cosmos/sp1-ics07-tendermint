@@ -114,6 +114,11 @@ contract SP1ICS07Tendermint {
         );
 
         require(
+            output.kv_pairs.length != 0,
+            "SP1ICS07Tendermint: kvPairs length is zero"
+        );
+
+        require(
             kvPairHashes.length <= output.kv_pairs.length,
             "SP1ICS07Tendermint: kvPairs length mismatch"
         );

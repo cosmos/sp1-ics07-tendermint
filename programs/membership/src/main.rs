@@ -12,7 +12,7 @@ sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::SolValue;
 
 use ibc_proto::Protobuf;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::MembershipOutput;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{KVPair, MembershipOutput};
 
 use ibc_core_commitment_types::{
     commitment::CommitmentRoot,
@@ -31,42 +31,52 @@ pub fn main() {
     let commitment_root = CommitmentRoot::from_bytes(&app_hash);
 
     let encoded_2 = sp1_zkvm::io::read_vec();
-    let path_str = String::from_utf8(encoded_2).unwrap();
-    let path = MerklePath {
-        key_path: vec!["ibc".to_string(), path_str.clone()],
-    };
+    let request_len = u8::from_be_bytes(encoded_2.try_into().unwrap());
 
-    let encoded_3 = sp1_zkvm::io::read_vec();
-    let merkle_proof = MerkleProof::decode_vec(&encoded_3).unwrap();
+    let mut kv_pairs = vec![];
+    for _ in 0..request_len {
+        let loop_encoded_1 = sp1_zkvm::io::read_vec();
+        let path_str = String::from_utf8(loop_encoded_1).unwrap();
+        let path = MerklePath {
+            key_path: vec!["ibc".to_string(), path_str.clone()],
+        };
 
-    // encoded_4 is the value we want to prove the membership of
-    // if it is empty, we are verifying non-membership
-    let value = sp1_zkvm::io::read_vec();
+        let loop_encoded_2 = sp1_zkvm::io::read_vec();
+        let merkle_proof = MerkleProof::decode_vec(&loop_encoded_2).unwrap();
 
-    if value.is_empty() {
-        merkle_proof
-            .verify_non_membership::<HostFunctionsManager>(
-                &ProofSpecs::cosmos(),
-                commitment_root.into(),
-                path,
-            )
-            .unwrap();
-    } else {
-        merkle_proof
-            .verify_membership::<HostFunctionsManager>(
-                &ProofSpecs::cosmos(),
-                commitment_root.into(),
-                path,
-                value.clone(),
-                0,
-            )
-            .unwrap();
+        // encoded_4 is the value we want to prove the membership of
+        // if it is empty, we are verifying non-membership
+        let value = sp1_zkvm::io::read_vec();
+
+        if value.is_empty() {
+            merkle_proof
+                .verify_non_membership::<HostFunctionsManager>(
+                    &ProofSpecs::cosmos(),
+                    commitment_root.clone().into(),
+                    path,
+                )
+                .unwrap();
+        } else {
+            merkle_proof
+                .verify_membership::<HostFunctionsManager>(
+                    &ProofSpecs::cosmos(),
+                    commitment_root.clone().into(),
+                    path,
+                    value.clone(),
+                    0,
+                )
+                .unwrap();
+        }
+
+        kv_pairs.push(KVPair {
+            key: path_str,
+            value: value.into(),
+        });
     }
 
     let output = MembershipOutput {
         commitment_root: app_hash.into(),
-        key_path: path_str,
-        value: value.into(),
+        kv_pairs,
     }
     .abi_encode();
     sp1_zkvm::io::commit_slice(&output);

@@ -5604,6 +5604,7 @@ dependencies = [
  "bincode",
  "clap",
  "dotenv",
+ "futures",
  "hex",
  "ibc-client-tendermint",
  "ibc-core-client-types",

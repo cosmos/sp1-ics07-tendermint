@@ -97,9 +97,9 @@ pub mod fixtures {
         #[clap(long)]
         pub trusted_block: u32,
 
-        /// Key path to prove membership.
+        /// Key paths to prove membership.
         #[clap(long)]
-        pub key_path: String,
+        pub key_paths: Vec<String>,
 
         /// Fixture path.
         #[clap(long, short = 'o')]

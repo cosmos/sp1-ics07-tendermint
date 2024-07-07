@@ -30,8 +30,8 @@ pub fn main() {
     let app_hash: [u8; 32] = encoded_1.try_into().unwrap();
     let commitment_root = CommitmentRoot::from_bytes(&app_hash);
 
-    let encoded_2 = sp1_zkvm::io::read_vec();
-    let request_len = u8::from_be_bytes(encoded_2.try_into().unwrap());
+    // encoded_2 is the number of key-value pairs we want to verify
+    let request_len = sp1_zkvm::io::read_vec()[0];
 
     let mut kv_pairs = vec![];
     for _ in 0..request_len {

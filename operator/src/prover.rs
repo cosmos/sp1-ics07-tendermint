@@ -100,14 +100,11 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
         kv_proofs: Vec<(String, MerkleProof, Vec<u8>)>,
     ) -> SP1PlonkBn254Proof {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
-        assert!(
-            kv_proofs.len() <= u8::MAX.into(),
-            "Too many key-value pairs to prove"
-        );
+        let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
 
         let mut stdin = SP1Stdin::new();
         stdin.write_slice(commitment_root);
-        stdin.write_slice(&kv_proofs.len().to_be_bytes());
+        stdin.write_vec(vec![len]);
         for (path, proof, value) in kv_proofs {
             stdin.write_slice(path.as_bytes());
             stdin.write_vec(proof.encode_vec());

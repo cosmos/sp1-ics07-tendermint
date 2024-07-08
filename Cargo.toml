@@ -21,6 +21,7 @@ sp1-helper = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.5-te
 
 sp1-ics07-tendermint-solidity = { path = "./packages/solidity/" }
 sp1-ics07-tendermint-update-client = { path = "./programs/update-client/" }
+sp1-ics07-tendermint-membership = { path = "./programs/membership/" }
 
 tendermint-light-client-verifier = { version = "0.36.0", default-features = false }
 ibc-client-tendermint = { version = "0.53.0", default-features = false, features = ["serde"] }

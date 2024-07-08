@@ -12,9 +12,14 @@ sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::SolValue;
 
 use ibc_proto::Protobuf;
-use sp1_ics07_tendermint_uc_and_membership::membership;
+use sp1_ics07_tendermint_uc_and_membership::update_client_and_membership;
 
 use ibc_core_commitment_types::merkle::MerkleProof;
+
+use ibc_client_tendermint_types::Header;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
+    ConsensusState as SolConsensusState, Env,
+};
 
 /// The main function of the program.
 ///
@@ -22,10 +27,20 @@ use ibc_core_commitment_types::merkle::MerkleProof;
 /// Panics if the verification fails.
 pub fn main() {
     let encoded_1 = sp1_zkvm::io::read_vec();
-    let app_hash: [u8; 32] = encoded_1.try_into().unwrap();
-
-    // encoded_2 is the number of key-value pairs we want to verify
+    let encoded_2 = sp1_zkvm::io::read_vec();
+    let encoded_3 = sp1_zkvm::io::read_vec();
+    // encoded_4 is the number of key-value pairs we want to verify
     let request_len = sp1_zkvm::io::read_vec()[0];
+
+    // input 1: the trusted consensus state
+    let trusted_consensus_state = bincode::deserialize::<SolConsensusState>(&encoded_1)
+        .unwrap()
+        .into();
+    // input 2: the proposed header
+    let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
+    // input 3: environment
+    let env = bincode::deserialize::<Env>(&encoded_3).unwrap();
+    // TODO: find an encoding that works for all the structs above.
 
     let request_iter = (0..request_len).map(|_| {
         let loop_encoded_1 = sp1_zkvm::io::read_vec();
@@ -41,7 +56,8 @@ pub fn main() {
         (path_str, merkle_proof, value)
     });
 
-    let output = membership(app_hash, request_iter);
+    let output =
+        update_client_and_membership(trusted_consensus_state, proposed_header, env, request_iter);
 
     sp1_zkvm::io::commit_slice(&output.abi_encode());
 }

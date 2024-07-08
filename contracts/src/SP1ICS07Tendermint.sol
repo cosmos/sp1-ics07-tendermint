@@ -280,4 +280,14 @@ contract SP1ICS07Tendermint {
         );
         // TODO: Make sure that we don't need more checks.
     }
+
+    /// @notice A dummy function to generate the ABI for the parameters.
+    function abiPublicTypes(
+        MembershipProgram.MembershipOutput memory output,
+        UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output2
+    ) public pure {
+        // This is a dummy function to generate the ABI for MembershipOutput
+        // so that it can be used in the SP1 verifier contract.
+        // The function is not used in the contract.
+    }
 }

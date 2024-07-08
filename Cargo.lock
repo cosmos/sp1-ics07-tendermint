@@ -5648,9 +5648,14 @@ name = "sp1-ics07-tendermint-uc-and-membership"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "bincode",
+ "ibc-client-tendermint-types",
  "ibc-core-commitment-types",
  "ibc-proto",
+ "serde_cbor",
+ "sp1-ics07-tendermint-membership",
  "sp1-ics07-tendermint-solidity",
+ "sp1-ics07-tendermint-update-client",
  "sp1-zkvm",
 ]
 

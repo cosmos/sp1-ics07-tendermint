@@ -68,7 +68,7 @@ pub mod fixtures {
     pub enum Cmds {
         /// The subcommand to generate the update client fixtures.
         UpdateClient(UpdateClientCmd),
-        /// The subcommand to generate the verify membership fixtures.
+        /// The subcommand to generate the verify (non)membership fixtures.
         Membership(MembershipCmd),
     }
 

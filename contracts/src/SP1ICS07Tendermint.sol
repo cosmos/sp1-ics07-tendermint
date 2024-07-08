@@ -15,7 +15,7 @@ import "forge-std/console.sol";
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
     bytes32 public immutable ics07UpdateClientProgramVkey;
-    /// @notice The verification key for the verify membership program.
+    /// @notice The verification key for the verify (non)membership program.
     bytes32 public immutable ics07VerifyMembershipProgramVkey;
     /// @notice The SP1 verifier contract.
     ISP1Verifier public verifier;

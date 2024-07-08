@@ -8,6 +8,9 @@ build-programs:
   cd programs/membership && cargo prove build
   mv elf/riscv32im-succinct-zkvm-elf elf/membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/membership-riscv32im-succinct-zkvm-elf'"
+  cd programs/uc-and-membership && cargo prove build
+  mv elf/riscv32im-succinct-zkvm-elf elf/uc-and-membership-riscv32im-succinct-zkvm-elf
+  @echo "ELF created at 'elf/uc-and-membership-riscv32im-succinct-zkvm-elf'"
 
 # Build the operator executable using `cargo build` command
 build-operator:

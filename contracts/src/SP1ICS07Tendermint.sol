@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
 import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
 import {MembershipProgram} from "./ics07-tendermint/MembershipProgram.sol";
+import {UpdateClientAndMembershipProgram} from "./ics07-tendermint/UcAndMembershipProgram.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
 import "forge-std/console.sol";
 
@@ -133,19 +134,17 @@ contract SP1ICS07Tendermint {
                 continue;
             }
 
-            MembershipProgram.KVPair memory kvPair = output.kv_pairs[i];
-
             require(
-                kvPairHash == keccak256(abi.encode(kvPair)),
+                kvPairHash == keccak256(abi.encode(output.kv_pairs[i])),
                 "SP1ICS07Tendermint: kvPair hash mismatch"
             );
-
-            validateMembershipOutput(
-                output,
-                proofHeight,
-                trustedConsensusStateBz
-            );
         }
+
+        validateMembershipOutput(
+            output.commitment_root,
+            proofHeight,
+            trustedConsensusStateBz
+        );
 
         verifier.verifyProof(
             ics07VerifyMembershipProgramVkey,
@@ -154,12 +153,71 @@ contract SP1ICS07Tendermint {
         );
     }
 
-    /// @notice Validates the MembershipOutput public values and decodes the trusted consensus state.
-    /// @param output The public values.
+    /// @notice The entrypoint for updating the client and membership proof.
+    /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
+    /// @param proof The encoded proof.
+    /// @param publicValues The encoded public values.
+    /// @param kvPairHashes The hashes of the key-value pairs.
+    function verifyIcs07UcAndMembershipProof(
+        bytes memory proof,
+        bytes memory publicValues,
+        bytes32[] memory kvPairHashes
+    ) public {
+        UpdateClientAndMembershipProgram.UcAndMembershipOutput
+            memory output = abi.decode(
+                publicValues,
+                (UpdateClientAndMembershipProgram.UcAndMembershipOutput)
+            );
+
+        validateUpdateClientPublicValues(output.update_client_output);
+
+        require(
+            kvPairHashes.length != 0,
+            "SP1ICS07Tendermint: kvPairs length is zero"
+        );
+
+        require(
+            kvPairHashes.length <= output.kv_pairs.length,
+            "SP1ICS07Tendermint: kvPairs length mismatch"
+        );
+
+        // loop through the key-value pairs and validate them
+        for (uint8 i = 0; i < kvPairHashes.length; i++) {
+            bytes32 kvPairHash = kvPairHashes[i];
+            if (kvPairHash == 0) {
+                // skip the empty hash
+                continue;
+            }
+
+            require(
+                kvPairHash == keccak256(abi.encode(output.kv_pairs[i])),
+                "SP1ICS07Tendermint: kvPair hash mismatch"
+            );
+        }
+
+        validateMembershipOutput(
+            output.update_client_output.new_consensus_state.root,
+            output.update_client_output.new_height.revision_height,
+            abi.encode(output.update_client_output.new_consensus_state)
+        );
+
+        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
+
+        // adding the new consensus state to the mapping
+        clientState.latest_height = output.update_client_output.new_height;
+        consensusStateHashes[
+            output.update_client_output.new_height.revision_height
+        ] = keccak256(
+            abi.encode(output.update_client_output.new_consensus_state)
+        );
+    }
+
+    /// @notice Validates the MembershipOutput public values.
+    /// @param outputCommitmentRoot The commitment root of the output.
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
     function validateMembershipOutput(
-        MembershipProgram.MembershipOutput memory output,
+        bytes32 outputCommitmentRoot,
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
     ) public view {
@@ -173,7 +231,7 @@ contract SP1ICS07Tendermint {
             .decode(trustedConsensusStateBz, (ICS07Tendermint.ConsensusState));
 
         require(
-            output.commitment_root == trustedConsensusState.root,
+            outputCommitmentRoot == trustedConsensusState.root,
             "SP1ICS07Tendermint: invalid commitment root"
         );
     }

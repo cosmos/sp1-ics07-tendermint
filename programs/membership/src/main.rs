@@ -26,6 +26,7 @@ pub fn main() {
 
     // encoded_2 is the number of key-value pairs we want to verify
     let request_len = sp1_zkvm::io::read_vec()[0];
+    assert!(request_len != 0);
 
     let request_iter = (0..request_len).map(|_| {
         let loop_encoded_1 = sp1_zkvm::io::read_vec();

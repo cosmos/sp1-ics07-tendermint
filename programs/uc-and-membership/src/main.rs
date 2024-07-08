@@ -31,6 +31,7 @@ pub fn main() {
     let encoded_3 = sp1_zkvm::io::read_vec();
     // encoded_4 is the number of key-value pairs we want to verify
     let request_len = sp1_zkvm::io::read_vec()[0];
+    assert!(request_len != 0);
 
     // input 1: the trusted consensus state
     let trusted_consensus_state = bincode::deserialize::<SolConsensusState>(&encoded_1)

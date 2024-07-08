@@ -26,6 +26,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Fixtures(cmd) => match cmd.command {
             fixtures::Cmds::UpdateClient(args) => update_client::run(args).await,
             fixtures::Cmds::Membership(args) => membership::run(args).await,
+            fixtures::Cmds::UpdateClientAndMembership(_args) => todo!(),
         },
     }
 }

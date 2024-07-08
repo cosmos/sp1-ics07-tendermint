@@ -70,6 +70,8 @@ pub mod fixtures {
         UpdateClient(UpdateClientCmd),
         /// The subcommand to generate the verify (non)membership fixtures.
         Membership(MembershipCmd),
+        /// The subcommand to generate the update client and verify (non)membership fixtures.
+        UpdateClientAndMembership(UpdateClientAndMembershipCmd),
     }
 
     /// The arguments for the `UpdateClient` fixture executable.
@@ -96,6 +98,27 @@ pub mod fixtures {
         /// Trusted block.
         #[clap(long)]
         pub trusted_block: u32,
+
+        /// Key paths to prove membership.
+        #[clap(long, value_delimiter = ',')]
+        pub key_paths: Vec<String>,
+
+        /// Fixture path.
+        #[clap(long, short = 'o')]
+        pub output_path: String,
+    }
+
+    /// The arguments for the `UpdateClientAndMembership` fixture executable.
+    #[derive(Parser, Debug, Clone)]
+    #[command(about = "Generate the update client and membership fixture")]
+    pub struct UpdateClientAndMembershipCmd {
+        /// Trusted block.
+        #[clap(long)]
+        pub trusted_block: u32,
+
+        /// Target block.
+        #[clap(long, env)]
+        pub target_block: u32,
 
         /// Key paths to prove membership.
         #[clap(long, value_delimiter = ',')]

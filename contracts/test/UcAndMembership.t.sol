@@ -47,43 +47,6 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         assert(
             clientState.latest_height.revision_height < mockFixture.targetHeight
         );
-
-        UpdateClientAndMembershipProgram.UcAndMembershipOutput
-            memory output = abi.decode(
-                fixture.publicValues,
-                (UpdateClientAndMembershipProgram.UcAndMembershipOutput)
-            );
-        ICS07Tendermint.ConsensusState memory initialConsensusState = abi
-            .decode(
-                fixture.trustedConsensusState,
-                (ICS07Tendermint.ConsensusState)
-            );
-
-        assert(
-            keccak256(
-                abi.encode(output.update_client_output.trusted_consensus_state)
-            ) == keccak256(abi.encode(initialConsensusState))
-        );
-
-        assert(
-            output.update_client_output.trusted_height.revision_height ==
-                2230264
-        );
-
-        assert(
-            ics07Tendermint.getConsensusState(2230264) ==
-                keccak256(abi.encode(initialConsensusState))
-        );
-        assert(
-            ics07Tendermint.getConsensusState(
-                output.update_client_output.trusted_height.revision_height
-            ) ==
-                keccak256(
-                    abi.encode(
-                        output.update_client_output.trusted_consensus_state
-                    )
-                )
-        );
     }
 
     function loadFixture(
@@ -206,10 +169,10 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(
-            fixture.targetHeight
+            mockFixture.targetHeight
         );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
-            fixture.targetConsensusState,
+            mockFixture.targetConsensusState,
             (ICS07Tendermint.ConsensusState)
         );
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));

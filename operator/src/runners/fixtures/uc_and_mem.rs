@@ -1,8 +1,12 @@
 //! Runner for generating `update_client` fixtures
 
 use crate::{
-    cli::command::fixtures::UpdateClientAndMembershipCmd, helpers::light_block::LightBlockWrapper,
-    programs::UpdateClientAndMembershipProgram, prover::SP1ICS07TendermintProver,
+    cli::command::fixtures::UpdateClientAndMembershipCmd,
+    helpers::light_block::LightBlockWrapper,
+    programs::{
+        MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
+    },
+    prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;
@@ -26,6 +30,10 @@ struct SP1ICS07UpdateClientAndMembershipFixture {
     target_consensus_state: String,
     /// Target height.
     target_height: u32,
+    /// The encoded key for the [`UpdateClientProgram`].
+    update_client_vkey: String,
+    /// The encoded key for the [`MembershipProgram`].
+    membership_vkey: String,
     /// The encoded key for the [`UpdateClientAndMembershipProgram`].
     uc_and_membership_vkey: String,
     /// The encoded public values.
@@ -109,6 +117,8 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
             output.update_client_output.new_consensus_state.abi_encode(),
         ),
         target_height: args.target_block,
+        update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
+        membership_vkey: MembershipProgram::get_vkey().bytes32(),
         uc_and_membership_vkey: uc_mem_prover.vkey.bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),

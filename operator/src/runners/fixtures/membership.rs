@@ -1,8 +1,13 @@
 //! Runner for generating `membership` fixtures
 
 use crate::{
-    cli::command::fixtures::MembershipCmd, helpers::light_block::LightBlockWrapper,
-    programs::MembershipProgram, prover::SP1ICS07TendermintProver, rpc::TendermintRPCClient,
+    cli::command::fixtures::MembershipCmd,
+    helpers::light_block::LightBlockWrapper,
+    programs::{
+        MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
+    },
+    prover::SP1ICS07TendermintProver,
+    rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;
 use ibc_core_commitment_types::merkle::MerkleProof;
@@ -27,8 +32,12 @@ struct SP1ICS07MembershipFixture {
     trusted_consensus_state: String,
     /// The encoded commitment root.
     commitment_root: String,
+    /// The encoded key for the [`UpdateClientProgram`].
+    update_client_vkey: String,
     /// The encoded key for the [`MembershipProgram`].
     membership_vkey: String,
+    /// The encoded key for the [`UpdateClientAndMembershipProgram`].
+    uc_and_membership_vkey: String,
     /// The encoded public values.
     public_values: String,
     /// The encoded proof.
@@ -95,7 +104,9 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
             SolConsensusState::from(trusted_consensus_state).abi_encode(),
         ),
         commitment_root: hex::encode(&commitment_root_bytes),
+        update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
         membership_vkey: verify_mem_prover.vkey.bytes32(),
+        uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
         kv_pairs: hex::encode(output.kv_pairs.abi_encode()),

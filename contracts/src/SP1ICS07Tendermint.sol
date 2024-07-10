@@ -17,6 +17,8 @@ contract SP1ICS07Tendermint {
     bytes32 public immutable ics07UpdateClientProgramVkey;
     /// @notice The verification key for the verify (non)membership program.
     bytes32 public immutable ics07VerifyMembershipProgramVkey;
+    /// @notice The verification key for the update client and membership program.
+    bytes32 public immutable updateClientAndMembershipProgramVkey;
     /// @notice The SP1 verifier contract.
     ISP1Verifier public verifier;
 
@@ -36,12 +38,14 @@ contract SP1ICS07Tendermint {
     constructor(
         bytes32 _ics07UpdateClientProgramVkey,
         bytes32 _ics07VerifyMembershipProgramVkey,
+        bytes32 _updateClientAndMembershipProgramVkey,
         address _verifier,
         bytes memory _clientState,
         bytes32 _consensusState
     ) {
         ics07UpdateClientProgramVkey = _ics07UpdateClientProgramVkey;
         ics07VerifyMembershipProgramVkey = _ics07VerifyMembershipProgramVkey;
+        updateClientAndMembershipProgramVkey = _updateClientAndMembershipProgramVkey;
         verifier = ISP1Verifier(_verifier);
 
         clientState = abi.decode(_clientState, (ICS07Tendermint.ClientState));

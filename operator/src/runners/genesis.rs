@@ -3,7 +3,9 @@
 use crate::{
     cli::command::genesis::Args,
     helpers::light_block::LightBlockWrapper,
-    programs::{MembershipProgram, SP1Program, UpdateClientProgram},
+    programs::{
+        MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
+    },
     rpc::TendermintRPCClient,
 };
 use alloy_sol_types::SolValue;
@@ -23,6 +25,8 @@ struct SP1ICS07TendermintGenesis {
     update_client_vkey: String,
     /// The encoded key for [`MembershipProgram`].
     membership_vkey: String,
+    /// The encoded key for [`UpdateClientAndMembershipProgram`].
+    uc_and_membership_vkey: String,
 }
 
 /// Creates the `genesis.json` file for the `SP1ICS07Tendermint` contract.
@@ -56,6 +60,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
         membership_vkey: MembershipProgram::get_vkey().bytes32(),
+        uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
     };
 
     let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.genesis_path);

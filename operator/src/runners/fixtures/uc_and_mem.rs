@@ -47,6 +47,11 @@ struct SP1ICS07UpdateClientAndMembershipFixture {
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
+    assert!(
+        args.trusted_block < args.target_block,
+        "The target block must be greater than the trusted block"
+    );
+
     let tm_rpc_client = TendermintRPCClient::default();
     let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
 

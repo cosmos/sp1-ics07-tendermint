@@ -17,8 +17,6 @@ struct SP1ICS07UpdateClientFixtureJson {
     bytes trustedConsensusState;
     bytes targetConsensusState;
     uint32 targetHeight;
-    bytes32 updateClientVkey;
-    bytes32 membershipVkey;
     bytes publicValues;
     bytes proof;
 }
@@ -37,6 +35,12 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
             "update_client_fixture.json",
             "mock_update_client_fixture.json"
         );
+
+        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
+            .getClientState();
+        assert(
+            clientState.latest_height.revision_height < mockFixture.targetHeight
+        );
     }
 
     function loadFixture(
@@ -53,8 +57,6 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
             ".targetConsensusState"
         );
         uint32 targetHeight = uint32(json.readUint(".targetHeight"));
-        bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
-        bytes32 membershipVkey = json.readBytes32(".membershipVkey");
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
 
@@ -64,8 +66,6 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
                 trustedConsensusState: trustedConsensusState,
                 targetConsensusState: targetConsensusState,
                 targetHeight: targetHeight,
-                updateClientVkey: updateClientVkey,
-                membershipVkey: membershipVkey,
                 publicValues: publicValues,
                 proof: proof
             });
@@ -100,12 +100,16 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(clientState.trust_level.numerator == 1);
         assert(clientState.trust_level.denominator == 3);
         assert(clientState.latest_height.revision_number == 4);
-        assert(clientState.latest_height.revision_height == 2110668);
+        assert(
+            clientState.latest_height.revision_height == fixture.targetHeight
+        );
         assert(clientState.trusting_period == 1_209_600);
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusState(2110668);
+        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+            fixture.targetHeight
+        );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
             fixture.targetConsensusState,
             (ICS07Tendermint.ConsensusState)
@@ -137,12 +141,17 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(clientState.trust_level.numerator == 1);
         assert(clientState.trust_level.denominator == 3);
         assert(clientState.latest_height.revision_number == 4);
-        assert(clientState.latest_height.revision_height == 2110668);
+        assert(
+            clientState.latest_height.revision_height ==
+                mockFixture.targetHeight
+        );
         assert(clientState.trusting_period == 1_209_600);
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(2110668);
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(
+            mockFixture.targetHeight
+        );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
             fixture.targetConsensusState,
             (ICS07Tendermint.ConsensusState)

@@ -16,8 +16,6 @@ struct SP1ICS07MembershipFixtureJson {
     uint32 proofHeight;
     bytes trustedClientState;
     bytes trustedConsensusState;
-    bytes32 updateClientVkey;
-    bytes32 membershipVkey;
     bytes32 commitmentRoot;
     bytes publicValues;
     bytes proof;
@@ -63,8 +61,6 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
             ".trustedConsensusState"
         );
         uint32 proofHeight = uint32(json.readUint(".proofHeight"));
-        bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
-        bytes32 membershipVkey = json.readBytes32(".membershipVkey");
         bytes32 commitmentRoot = json.readBytes32(".commitmentRoot");
         bytes memory publicValues = json.readBytes(".publicValues");
         bytes memory proof = json.readBytes(".proof");
@@ -76,8 +72,6 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
                 trustedClientState: trustedClientState,
                 trustedConsensusState: trustedConsensusState,
                 proofHeight: proofHeight,
-                updateClientVkey: updateClientVkey,
-                membershipVkey: membershipVkey,
                 publicValues: publicValues,
                 proof: proof,
                 kvPairsBz: kvPairsBz

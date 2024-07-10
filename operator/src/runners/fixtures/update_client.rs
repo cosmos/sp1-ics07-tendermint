@@ -3,7 +3,9 @@
 use crate::{
     cli::command::fixtures::UpdateClientCmd,
     helpers::light_block::LightBlockWrapper,
-    programs::{MembershipProgram, SP1Program, UpdateClientProgram},
+    programs::{
+        MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
+    },
     prover::SP1ICS07TendermintProver,
     rpc::TendermintRPCClient,
 };
@@ -29,6 +31,8 @@ struct SP1ICS07UpdateClientFixture {
     update_client_vkey: String,
     /// The encoded key for the [`MembershipProgram`].
     membership_vkey: String,
+    /// The encoded key for the [`UpdateClientAndMembershipProgram`].
+    uc_and_membership_vkey: String,
     /// The encoded public values.
     public_values: String,
     /// The encoded proof.
@@ -38,6 +42,11 @@ struct SP1ICS07UpdateClientFixture {
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
+    assert!(
+        args.trusted_block < args.target_block,
+        "The target block must be greater than the trusted block"
+    );
+
     let tendermint_rpc_client = TendermintRPCClient::default();
     let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
@@ -78,6 +87,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         target_height: args.target_block,
         update_client_vkey: uc_prover.vkey.bytes32(),
         membership_vkey: MembershipProgram::get_vkey().bytes32(),
+        uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.bytes(),
         proof: proof_data.bytes(),
     };

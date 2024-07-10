@@ -3,12 +3,17 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "_ics07UpdateClientProgramVkey",
+        "name": "_updateClientProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
       {
-        "name": "_ics07VerifyMembershipProgramVkey",
+        "name": "_membershipProgramVkey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "_updateClientAndMembershipProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
@@ -42,6 +47,191 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "abiPublicTypes",
+    "inputs": [
+      {
+        "name": "output",
+        "type": "tuple",
+        "internalType": "struct MembershipProgram.MembershipOutput",
+        "components": [
+          {
+            "name": "commitment_root",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "kv_pairs",
+            "type": "tuple[]",
+            "internalType": "struct MembershipProgram.KVPair[]",
+            "components": [
+              {
+                "name": "key",
+                "type": "string",
+                "internalType": "string"
+              },
+              {
+                "name": "value",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "output2",
+        "type": "tuple",
+        "internalType": "struct UpdateClientAndMembershipProgram.UcAndMembershipOutput",
+        "components": [
+          {
+            "name": "update_client_output",
+            "type": "tuple",
+            "internalType": "struct UpdateClientProgram.UpdateClientOutput",
+            "components": [
+              {
+                "name": "trusted_consensus_state",
+                "type": "tuple",
+                "internalType": "struct ICS07Tendermint.ConsensusState",
+                "components": [
+                  {
+                    "name": "timestamp",
+                    "type": "uint64",
+                    "internalType": "uint64"
+                  },
+                  {
+                    "name": "root",
+                    "type": "bytes32",
+                    "internalType": "bytes32"
+                  },
+                  {
+                    "name": "next_validators_hash",
+                    "type": "bytes32",
+                    "internalType": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "new_consensus_state",
+                "type": "tuple",
+                "internalType": "struct ICS07Tendermint.ConsensusState",
+                "components": [
+                  {
+                    "name": "timestamp",
+                    "type": "uint64",
+                    "internalType": "uint64"
+                  },
+                  {
+                    "name": "root",
+                    "type": "bytes32",
+                    "internalType": "bytes32"
+                  },
+                  {
+                    "name": "next_validators_hash",
+                    "type": "bytes32",
+                    "internalType": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "env",
+                "type": "tuple",
+                "internalType": "struct UpdateClientProgram.Env",
+                "components": [
+                  {
+                    "name": "chain_id",
+                    "type": "string",
+                    "internalType": "string"
+                  },
+                  {
+                    "name": "trust_threshold",
+                    "type": "tuple",
+                    "internalType": "struct ICS07Tendermint.TrustThreshold",
+                    "components": [
+                      {
+                        "name": "numerator",
+                        "type": "uint8",
+                        "internalType": "uint8"
+                      },
+                      {
+                        "name": "denominator",
+                        "type": "uint8",
+                        "internalType": "uint8"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "trusting_period",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  },
+                  {
+                    "name": "now",
+                    "type": "uint64",
+                    "internalType": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "trusted_height",
+                "type": "tuple",
+                "internalType": "struct ICS07Tendermint.Height",
+                "components": [
+                  {
+                    "name": "revision_number",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  },
+                  {
+                    "name": "revision_height",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  }
+                ]
+              },
+              {
+                "name": "new_height",
+                "type": "tuple",
+                "internalType": "struct ICS07Tendermint.Height",
+                "components": [
+                  {
+                    "name": "revision_number",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  },
+                  {
+                    "name": "revision_height",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "kv_pairs",
+            "type": "tuple[]",
+            "internalType": "struct MembershipProgram.KVPair[]",
+            "components": [
+              {
+                "name": "key",
+                "type": "string",
+                "internalType": "string"
+              },
+              {
+                "name": "value",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -133,7 +323,7 @@
   },
   {
     "type": "function",
-    "name": "ics07UpdateClientProgramVkey",
+    "name": "membershipProgramVkey",
     "inputs": [],
     "outputs": [
       {
@@ -146,7 +336,20 @@
   },
   {
     "type": "function",
-    "name": "ics07VerifyMembershipProgramVkey",
+    "name": "updateClientAndMembershipProgramVkey",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "updateClientProgramVkey",
     "inputs": [],
     "outputs": [
       {
@@ -162,33 +365,9 @@
     "name": "validateMembershipOutput",
     "inputs": [
       {
-        "name": "output",
-        "type": "tuple",
-        "internalType": "struct MembershipProgram.MembershipOutput",
-        "components": [
-          {
-            "name": "commitment_root",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "kv_pairs",
-            "type": "tuple[]",
-            "internalType": "struct MembershipProgram.KVPair[]",
-            "components": [
-              {
-                "name": "key",
-                "type": "string",
-                "internalType": "string"
-              },
-              {
-                "name": "value",
-                "type": "bytes",
-                "internalType": "bytes"
-              }
-            ]
-          }
-        ]
+        "name": "outputCommitmentRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
       },
       {
         "name": "proofHeight",
@@ -381,6 +560,29 @@
     ],
     "outputs": [],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "verifyIcs07UcAndMembershipProof",
+    "inputs": [
+      {
+        "name": "proof",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "publicValues",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "kvPairHashes",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",

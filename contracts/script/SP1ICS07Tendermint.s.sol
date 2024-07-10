@@ -13,6 +13,7 @@ struct SP1ICS07TendermintGenesisJson {
     bytes trustedConsensusState;
     bytes32 updateClientVkey;
     bytes32 membershipVkey;
+    bytes32 ucAndMembershipVkey;
 }
 
 contract SP1TendermintScript is Script {
@@ -45,6 +46,7 @@ contract SP1TendermintScript is Script {
         ics07Tendermint = new SP1ICS07Tendermint(
             genesis.updateClientVkey,
             genesis.membershipVkey,
+            genesis.ucAndMembershipVkey,
             address(verifier),
             genesis.trustedClientState,
             trustedConsensusHash
@@ -80,13 +82,15 @@ contract SP1TendermintScript is Script {
         );
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
         bytes32 membershipVkey = json.readBytes32(".membershipVkey");
+        bytes32 ucAndMembershipVkey = json.readBytes32(".ucAndMembershipVkey");
 
         SP1ICS07TendermintGenesisJson
             memory fixture = SP1ICS07TendermintGenesisJson({
                 trustedClientState: trustedClientState,
                 trustedConsensusState: trustedConsensusState,
                 updateClientVkey: updateClientVkey,
-                membershipVkey: membershipVkey
+                membershipVkey: membershipVkey,
+                ucAndMembershipVkey: ucAndMembershipVkey
             });
 
         return fixture;

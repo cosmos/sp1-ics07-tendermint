@@ -11,19 +11,12 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 
-use std::{str::FromStr, time::Duration};
-
 use alloy_sol_types::SolValue;
-use ibc_client_tendermint::{
-    client_state::verify_header,
-    types::{ConsensusState, Header, TENDERMINT_CLIENT_TYPE},
-};
-use ibc_core_host_types::identifiers::{ChainId, ClientId};
+use ibc_client_tendermint::types::Header;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    self, ConsensusState as SolConsensusState, Env, UpdateClientOutput,
+    ConsensusState as SolConsensusState, Env,
 };
-use sp1_ics07_tendermint_update_client::types;
-use tendermint_light_client_verifier::{options::Options, ProdVerifier};
+use sp1_ics07_tendermint_update_client::update_client;
 
 /// The main function of the program.
 ///
@@ -44,59 +37,7 @@ pub fn main() {
     let env = bincode::deserialize::<Env>(&encoded_3).unwrap();
     // TODO: find an encoding that works for all the structs above.
 
-    let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
-    let chain_id = ChainId::from_str(&env.chain_id).unwrap();
-    let options = Options {
-        trust_threshold: env.trust_threshold.clone().into(),
-        trusting_period: Duration::from_secs(env.trusting_period.into()),
-        clock_drift: Duration::default(),
-    };
-
-    let ctx = types::validation::ClientValidationCtx::new(&env, &trusted_consensus_state);
-
-    verify_header::<_, sha2::Sha256>(
-        &ctx,
-        &proposed_header,
-        &client_id,
-        &chain_id,
-        &options,
-        &ProdVerifier::default(),
-    )
-    .unwrap();
-
-    let trusted_height = sp1_ics07_tendermint::Height {
-        revision_number: proposed_header
-            .trusted_height
-            .revision_number()
-            .try_into()
-            .unwrap(),
-        revision_height: proposed_header
-            .trusted_height
-            .revision_height()
-            .try_into()
-            .unwrap(),
-    };
-    let new_height = sp1_ics07_tendermint::Height {
-        revision_number: proposed_header
-            .height()
-            .revision_number()
-            .try_into()
-            .unwrap(),
-        revision_height: proposed_header
-            .height()
-            .revision_height()
-            .try_into()
-            .unwrap(),
-    };
-    let new_consensus_state = ConsensusState::from(proposed_header);
-
-    let output = UpdateClientOutput {
-        trusted_consensus_state: trusted_consensus_state.into(),
-        new_consensus_state: new_consensus_state.into(),
-        env,
-        trusted_height,
-        new_height,
-    };
+    let output = update_client(trusted_consensus_state, proposed_header, env);
 
     sp1_zkvm::io::commit_slice(&output.abi_encode());
 }

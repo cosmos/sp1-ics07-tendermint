@@ -174,6 +174,13 @@ contract SP1ICS07Tendermint {
             );
 
         validateUpdateClientPublicValues(output.update_client_output);
+        // adding the new consensus state to the mapping
+        clientState.latest_height = output.update_client_output.new_height;
+        consensusStateHashes[
+            output.update_client_output.new_height.revision_height
+        ] = keccak256(
+            abi.encode(output.update_client_output.new_consensus_state)
+        );
 
         require(
             kvPairHashes.length != 0,
@@ -206,14 +213,6 @@ contract SP1ICS07Tendermint {
         );
 
         verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
-
-        // adding the new consensus state to the mapping
-        clientState.latest_height = output.update_client_output.new_height;
-        consensusStateHashes[
-            output.update_client_output.new_height.revision_height
-        ] = keccak256(
-            abi.encode(output.update_client_output.new_consensus_state)
-        );
     }
 
     /// @notice Validates the MembershipOutput public values.

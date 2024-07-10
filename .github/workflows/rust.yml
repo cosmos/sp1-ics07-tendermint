@@ -31,10 +31,9 @@ jobs:
         with:
           command: clippy
 
-  build-all-features:
-    name: Build (without programs)
+  tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -49,11 +48,26 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --locked
         env:
           RUST_BACKTRACE: 1
+
+  build-all-features:
+    name: Build (without programs)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: 1.79.0
+          override: true
+          components: rustfmt, clippy
       - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership--locked --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership--locked --exclude sp1-ics07-tendermint-uc-and-membership --all-features

@@ -37,6 +37,12 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
             "update_client_fixture.json",
             "mock_update_client_fixture.json"
         );
+
+        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
+            .getClientState();
+        assert(
+            clientState.latest_height.revision_height < mockFixture.targetHeight
+        );
     }
 
     function loadFixture(

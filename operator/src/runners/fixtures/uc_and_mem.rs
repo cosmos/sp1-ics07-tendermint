@@ -86,12 +86,12 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
                     Some("store/ibc/key".to_string()),
                     key_path.as_bytes(),
                     // Proof height should be the block before the target block.
-                    Some((args.trusted_block - 1).into()),
+                    Some((args.target_block - 1).into()),
                     true,
                 )
                 .await?;
 
-            assert_eq!(u32::try_from(res.height.value())? + 1, args.trusted_block);
+            assert_eq!(u32::try_from(res.height.value())? + 1, args.target_block);
             assert_eq!(res.key.as_slice(), key_path.as_bytes());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             let value = res.value;

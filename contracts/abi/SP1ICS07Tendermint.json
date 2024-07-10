@@ -3,12 +3,17 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "_ics07UpdateClientProgramVkey",
+        "name": "_updateClientProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
       {
-        "name": "_ics07VerifyMembershipProgramVkey",
+        "name": "_membershipProgramVkey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "_updateClientAndMembershipProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
@@ -318,7 +323,7 @@
   },
   {
     "type": "function",
-    "name": "ics07UpdateClientProgramVkey",
+    "name": "membershipProgramVkey",
     "inputs": [],
     "outputs": [
       {
@@ -331,7 +336,20 @@
   },
   {
     "type": "function",
-    "name": "ics07VerifyMembershipProgramVkey",
+    "name": "updateClientAndMembershipProgramVkey",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "updateClientProgramVkey",
     "inputs": [],
     "outputs": [
       {

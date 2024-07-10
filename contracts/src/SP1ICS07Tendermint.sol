@@ -14,13 +14,13 @@ import "forge-std/console.sol";
 /// @custom:poc This is a proof of concept implementation.
 contract SP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
-    bytes32 public immutable ics07UpdateClientProgramVkey;
+    bytes32 public immutable updateClientProgramVkey;
     /// @notice The verification key for the verify (non)membership program.
-    bytes32 public immutable ics07VerifyMembershipProgramVkey;
+    bytes32 public immutable membershipProgramVkey;
     /// @notice The verification key for the update client and membership program.
     bytes32 public immutable updateClientAndMembershipProgramVkey;
     /// @notice The SP1 verifier contract.
-    ISP1Verifier public verifier;
+    ISP1Verifier public immutable verifier;
 
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState private clientState;
@@ -31,20 +31,22 @@ contract SP1ICS07Tendermint {
     uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
-    /// @param _ics07UpdateClientProgramVkey The verification key for the update client program.
+    /// @param _updateClientProgramVkey The verification key for the update client program.
+    /// @param _membershipProgramVkey The verification key for the verify (non)membership program.
+    /// @param _updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
     /// @param _verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
     constructor(
-        bytes32 _ics07UpdateClientProgramVkey,
-        bytes32 _ics07VerifyMembershipProgramVkey,
+        bytes32 _updateClientProgramVkey,
+        bytes32 _membershipProgramVkey,
         bytes32 _updateClientAndMembershipProgramVkey,
         address _verifier,
         bytes memory _clientState,
         bytes32 _consensusState
     ) {
-        ics07UpdateClientProgramVkey = _ics07UpdateClientProgramVkey;
-        ics07VerifyMembershipProgramVkey = _ics07VerifyMembershipProgramVkey;
+        updateClientProgramVkey = _updateClientProgramVkey;
+        membershipProgramVkey = _membershipProgramVkey;
         updateClientAndMembershipProgramVkey = _updateClientAndMembershipProgramVkey;
         verifier = ISP1Verifier(_verifier);
 
@@ -90,7 +92,7 @@ contract SP1ICS07Tendermint {
 
         // TODO: Make sure that other checks have been made in the proof verification
         // such as the consensus state not being outside the trusting period.
-        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
+        verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
 
         // adding the new consensus state to the mapping
         clientState.latest_height = output.new_height;
@@ -150,11 +152,7 @@ contract SP1ICS07Tendermint {
             trustedConsensusStateBz
         );
 
-        verifier.verifyProof(
-            ics07VerifyMembershipProgramVkey,
-            publicValues,
-            proof
-        );
+        verifier.verifyProof(membershipProgramVkey, publicValues, proof);
     }
 
     /// @notice The entrypoint for updating the client and membership proof.
@@ -212,7 +210,7 @@ contract SP1ICS07Tendermint {
             abi.encode(output.update_client_output.new_consensus_state)
         );
 
-        verifier.verifyProof(ics07UpdateClientProgramVkey, publicValues, proof);
+        verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
     }
 
     /// @notice Validates the MembershipOutput public values.

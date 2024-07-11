@@ -91,8 +91,12 @@ contract SP1ICS07Tendermint {
         validateUpdateClientPublicValues(output);
 
         // TODO: Make sure that other checks have been made in the proof verification
-        // such as the consensus state not being outside the trusting period.
         verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
+
+        if (checkBasicMisbehaviour(output)) {
+            clientState.is_frozen = true;
+            return;
+        }
 
         // adding the new consensus state to the mapping
         clientState.latest_height = output.new_height;
@@ -172,6 +176,12 @@ contract SP1ICS07Tendermint {
             );
 
         validateUpdateClientPublicValues(output.update_client_output);
+
+        if (checkBasicMisbehaviour(output.update_client_output)) {
+            clientState.is_frozen = true;
+            return;
+        }
+
         // adding the new consensus state to the mapping
         clientState.latest_height = output.update_client_output.new_height;
         consensusStateHashes[
@@ -280,6 +290,31 @@ contract SP1ICS07Tendermint {
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );
         // TODO: Make sure that we don't need more checks.
+    }
+
+    /// @notice Checks for basic misbehaviour.
+    /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
+    /// @dev This function does not check timestamp misbehaviour (a niche case).
+    /// @param output The public values of the update client program.
+    function checkBasicMisbehaviour(
+        UpdateClientProgram.UpdateClientOutput memory output
+    ) public view returns (bool) {
+        bytes32 consensusStateHash = consensusStateHashes[
+            output.new_height.revision_height
+        ];
+        if (consensusStateHash == bytes32(0)) {
+            // No consensus state at the new height, so no misbehaviour
+            return false;
+        }
+        if (
+            consensusStateHash !=
+            keccak256(abi.encode(output.new_consensus_state))
+        ) {
+            // The consensus state at the new height is different than the one in the mapping
+            return true;
+        }
+
+        return false;
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

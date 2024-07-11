@@ -98,7 +98,12 @@ contract SP1ICS07Tendermint {
         );
         if (updateResult == UpdateClientProgram.UpdateResult.Update) {
             // adding the new consensus state to the mapping
-            clientState.latest_height = output.new_height;
+            if (
+                output.new_height.revision_height >
+                clientState.latest_height.revision_height
+            ) {
+                clientState.latest_height = output.new_height;
+            }
             consensusStateHashes[output.new_height.revision_height] = keccak256(
                 abi.encode(output.new_consensus_state)
             );

@@ -41,6 +41,11 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(
             clientState.latest_height.revision_height < mockFixture.targetHeight
         );
+
+        assert(
+            mockIcs07Tendermint.getConsensusState(mockFixture.targetHeight) ==
+                bytes32(0)
+        );
     }
 
     function loadFixture(

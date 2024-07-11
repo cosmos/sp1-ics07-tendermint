@@ -90,6 +90,7 @@ contract SP1ICS07Tendermint {
 
         validateUpdateClientPublicValues(output);
 
+        // TODO: Make sure that other checks have been made in the proof verification
         verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
 
         UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(

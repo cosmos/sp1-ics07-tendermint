@@ -41,6 +41,11 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(
             clientState.latest_height.revision_height < mockFixture.targetHeight
         );
+
+        assert(
+            mockIcs07Tendermint.getConsensusState(mockFixture.targetHeight) ==
+                bytes32(0)
+        );
     }
 
     function loadFixture(
@@ -83,13 +88,12 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         vm.warp(output.env.now + 300);
 
         // run verify
-        ics07Tendermint.verifyIcs07UpdateClientProof(
-            fixture.proof,
-            fixture.publicValues
-        );
+        UpdateClientProgram.UpdateResult res = ics07Tendermint
+            .verifyIcs07UpdateClientProof(fixture.proof, fixture.publicValues);
 
         // to console
         console.log("UpdateClient gas used: ", vm.lastCallGas().gasTotalUsed);
+        assert(res == UpdateClientProgram.UpdateResult.Update);
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint
             .getClientState();
@@ -117,6 +121,34 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
+    // Confirm that submitting a real proof passes the verifier.
+    function test_ValidNoOpUpdateClient() public {
+        // set a correct timestamp
+        UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
+            fixture.publicValues,
+            (UpdateClientProgram.UpdateClientOutput)
+        );
+        vm.warp(output.env.now + 300);
+
+        // run verify
+        UpdateClientProgram.UpdateResult res = ics07Tendermint
+            .verifyIcs07UpdateClientProof(fixture.proof, fixture.publicValues);
+        assert(res == UpdateClientProgram.UpdateResult.Update);
+
+        // run verify again
+        res = ics07Tendermint.verifyIcs07UpdateClientProof(
+            fixture.proof,
+            fixture.publicValues
+        );
+
+        // to console
+        console.log(
+            "UpdateClient_NoOp gas used: ",
+            vm.lastCallGas().gasTotalUsed
+        );
+        assert(res == UpdateClientProgram.UpdateResult.NoOp);
+    }
+
     // Confirm that submitting an empty proof passes the mock verifier.
     function test_ValidMockUpdateClient() public {
         // set a correct timestamp
@@ -127,11 +159,10 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         vm.warp(output.env.now + 300);
 
         // run verify
-        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
-            bytes(""),
-            mockFixture.publicValues
-        );
+        UpdateClientProgram.UpdateResult res = mockIcs07Tendermint
+            .verifyIcs07UpdateClientProof(bytes(""), mockFixture.publicValues);
 
+        assert(res == UpdateClientProgram.UpdateResult.Update);
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
             .getClientState();
         assert(

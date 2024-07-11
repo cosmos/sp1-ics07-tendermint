@@ -33,4 +33,14 @@ contract UpdateClientProgram {
         /// Timestamp in seconds
         uint64 now;
     }
+
+    /// The result of an update operation
+    enum UpdateResult {
+        /// The update was successful
+        Update,
+        /// A misbehaviour was detected
+        Misbehaviour,
+        /// Client is already up to date
+        NoOp
+    }
 }

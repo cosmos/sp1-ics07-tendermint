@@ -82,7 +82,7 @@ contract SP1ICS07Tendermint {
     function verifyIcs07UpdateClientProof(
         bytes memory proof,
         bytes memory publicValues
-    ) public {
+    ) public returns (UpdateClientProgram.UpdateResult) {
         UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
             publicValues,
             (UpdateClientProgram.UpdateClientOutput)
@@ -91,14 +91,29 @@ contract SP1ICS07Tendermint {
         validateUpdateClientPublicValues(output);
 
         // TODO: Make sure that other checks have been made in the proof verification
-        // such as the consensus state not being outside the trusting period.
         verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
 
-        // adding the new consensus state to the mapping
-        clientState.latest_height = output.new_height;
-        consensusStateHashes[output.new_height.revision_height] = keccak256(
-            abi.encode(output.new_consensus_state)
+        UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(
+            output
         );
+        if (updateResult == UpdateClientProgram.UpdateResult.Update) {
+            // adding the new consensus state to the mapping
+            if (
+                output.new_height.revision_height >
+                clientState.latest_height.revision_height
+            ) {
+                clientState.latest_height = output.new_height;
+            }
+            consensusStateHashes[output.new_height.revision_height] = keccak256(
+                abi.encode(output.new_consensus_state)
+            );
+        } else if (
+            updateResult == UpdateClientProgram.UpdateResult.Misbehaviour
+        ) {
+            clientState.is_frozen = true;
+        } // else: NoOp
+
+        return updateResult;
     }
 
     /// @notice The entrypoint for verifying membership proof.
@@ -164,7 +179,7 @@ contract SP1ICS07Tendermint {
         bytes memory proof,
         bytes memory publicValues,
         bytes32[] memory kvPairHashes
-    ) public {
+    ) public returns (UpdateClientProgram.UpdateResult) {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput
             memory output = abi.decode(
                 publicValues,
@@ -172,13 +187,26 @@ contract SP1ICS07Tendermint {
             );
 
         validateUpdateClientPublicValues(output.update_client_output);
-        // adding the new consensus state to the mapping
-        clientState.latest_height = output.update_client_output.new_height;
-        consensusStateHashes[
-            output.update_client_output.new_height.revision_height
-        ] = keccak256(
-            abi.encode(output.update_client_output.new_consensus_state)
+
+        verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
+
+        UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(
+            output.update_client_output
         );
+        if (updateResult == UpdateClientProgram.UpdateResult.Update) {
+            // adding the new consensus state to the mapping
+            clientState.latest_height = output.update_client_output.new_height;
+            consensusStateHashes[
+                output.update_client_output.new_height.revision_height
+            ] = keccak256(
+                abi.encode(output.update_client_output.new_consensus_state)
+            );
+        } else if (
+            updateResult == UpdateClientProgram.UpdateResult.Misbehaviour
+        ) {
+            clientState.is_frozen = true;
+            return UpdateClientProgram.UpdateResult.Misbehaviour;
+        } // else: NoOp
 
         require(
             kvPairHashes.length != 0,
@@ -210,7 +238,7 @@ contract SP1ICS07Tendermint {
             abi.encode(output.update_client_output.new_consensus_state)
         );
 
-        verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
+        return updateResult;
     }
 
     /// @notice Validates the MembershipOutput public values.
@@ -222,6 +250,10 @@ contract SP1ICS07Tendermint {
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
     ) public view {
+        require(
+            clientState.is_frozen == false,
+            "SP1ICS07Tendermint: client is frozen"
+        );
         require(
             consensusStateHashes[proofHeight] ==
                 keccak256(trustedConsensusStateBz),
@@ -280,6 +312,32 @@ contract SP1ICS07Tendermint {
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );
         // TODO: Make sure that we don't need more checks.
+    }
+
+    /// @notice Checks for basic misbehaviour.
+    /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
+    /// @dev This function does not check timestamp misbehaviour (a niche case).
+    /// @param output The public values of the update client program.
+    function checkUpdateResult(
+        UpdateClientProgram.UpdateClientOutput memory output
+    ) public view returns (UpdateClientProgram.UpdateResult) {
+        bytes32 consensusStateHash = consensusStateHashes[
+            output.new_height.revision_height
+        ];
+        if (consensusStateHash == bytes32(0)) {
+            // No consensus state at the new height, so no misbehaviour
+            return UpdateClientProgram.UpdateResult.Update;
+        }
+        if (
+            consensusStateHash !=
+            keccak256(abi.encode(output.new_consensus_state))
+        ) {
+            // The consensus state at the new height is different than the one in the mapping
+            return UpdateClientProgram.UpdateResult.Misbehaviour;
+        } else {
+            // The consensus state at the new height is the same as the one in the mapping
+            return UpdateClientProgram.UpdateResult.NoOp;
+        }
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

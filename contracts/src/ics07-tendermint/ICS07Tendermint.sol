@@ -48,4 +48,14 @@ contract ICS07Tendermint {
         /// next validators hash
         bytes32 next_validators_hash;
     }
+
+    /// The result of an update operation
+    enum UpdateResult {
+        /// The update was successful
+        Update,
+        /// A misbehaviour was detected
+        Misbehaviour,
+        /// Client is already up to date
+        NoOp
+    }
 }

@@ -233,6 +233,10 @@ contract SP1ICS07Tendermint {
         bytes memory trustedConsensusStateBz
     ) public view {
         require(
+            clientState.is_frozen == false,
+            "SP1ICS07Tendermint: client is frozen"
+        );
+        require(
             consensusStateHashes[proofHeight] ==
                 keccak256(trustedConsensusStateBz),
             "SP1ICS07Tendermint: trusted consensus state mismatch"

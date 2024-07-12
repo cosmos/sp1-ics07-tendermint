@@ -80,8 +80,8 @@ contract SP1ICS07Tendermint {
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     function verifyIcs07UpdateClientProof(
-        bytes memory proof,
-        bytes memory publicValues
+        bytes calldata proof,
+        bytes calldata publicValues
     ) public returns (UpdateClientProgram.UpdateResult) {
         UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
             publicValues,
@@ -126,11 +126,11 @@ contract SP1ICS07Tendermint {
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
     /// @param kvPairHashes The hashes of the key-value pairs.
     function verifyIcs07MembershipProof(
-        bytes memory proof,
-        bytes memory publicValues,
+        bytes calldata proof,
+        bytes calldata publicValues,
         uint32 proofHeight,
-        bytes memory trustedConsensusStateBz,
-        bytes32[] memory kvPairHashes
+        bytes calldata trustedConsensusStateBz,
+        bytes32[] calldata kvPairHashes
     ) public view {
         MembershipProgram.MembershipOutput memory output = abi.decode(
             publicValues,
@@ -176,9 +176,9 @@ contract SP1ICS07Tendermint {
     /// @param publicValues The encoded public values.
     /// @param kvPairHashes The hashes of the key-value pairs.
     function verifyIcs07UcAndMembershipProof(
-        bytes memory proof,
-        bytes memory publicValues,
-        bytes32[] memory kvPairHashes
+        bytes calldata proof,
+        bytes calldata publicValues,
+        bytes32[] calldata kvPairHashes
     ) public returns (UpdateClientProgram.UpdateResult) {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput
             memory output = abi.decode(
@@ -249,7 +249,7 @@ contract SP1ICS07Tendermint {
         bytes32 outputCommitmentRoot,
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
-    ) public view {
+    ) private view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
@@ -273,7 +273,7 @@ contract SP1ICS07Tendermint {
     /// @param output The public values.
     function validateUpdateClientPublicValues(
         UpdateClientProgram.UpdateClientOutput memory output
-    ) public view {
+    ) private view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"

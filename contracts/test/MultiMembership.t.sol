@@ -44,7 +44,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[0] = bytes32(0); // skip validation of the first kvPair
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
-        ics07Tendermint.verifyIcs07MembershipProof(
+        ics07Tendermint.batchVerifyMembership(
             fixture.proof,
             fixture.publicValues,
             fixture.proofHeight,
@@ -65,7 +65,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[0] = keccak256(abi.encode(kvPairs()[0]));
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
-        ics07Tendermint.verifyIcs07MembershipProof(
+        ics07Tendermint.batchVerifyMembership(
             fixture.proof,
             fixture.publicValues,
             fixture.proofHeight,
@@ -86,7 +86,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
 
-        mockIcs07Tendermint.verifyIcs07MembershipProof(
+        mockIcs07Tendermint.batchVerifyMembership(
             mockFixture.proof,
             mockFixture.publicValues,
             mockFixture.proofHeight,
@@ -101,7 +101,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
         // Invalid proof
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07MembershipProof(
+        mockIcs07Tendermint.batchVerifyMembership(
             bytes("invalid"),
             mockFixture.publicValues,
             mockFixture.proofHeight,
@@ -111,7 +111,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
 
         // Invalid proof height
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07MembershipProof(
+        mockIcs07Tendermint.batchVerifyMembership(
             bytes(""),
             mockFixture.publicValues,
             1,
@@ -121,7 +121,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
 
         // Invalid trusted consensus state
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07MembershipProof(
+        mockIcs07Tendermint.batchVerifyMembership(
             bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
@@ -131,7 +131,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
 
         // Empty kvPairHashes length
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07MembershipProof(
+        mockIcs07Tendermint.batchVerifyMembership(
             bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
@@ -147,7 +147,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
 
         vm.expectRevert();
-        ics07Tendermint.verifyIcs07MembershipProof(
+        ics07Tendermint.batchVerifyMembership(
             bytes("invalid"),
             fixture.publicValues,
             fixture.proofHeight,

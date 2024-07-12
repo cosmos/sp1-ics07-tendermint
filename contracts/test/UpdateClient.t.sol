@@ -43,8 +43,9 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         );
 
         assert(
-            mockIcs07Tendermint.getConsensusState(mockFixture.targetHeight) ==
-                bytes32(0)
+            mockIcs07Tendermint.getConsensusStateHash(
+                mockFixture.targetHeight
+            ) == bytes32(0)
         );
     }
 
@@ -88,8 +89,10 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         vm.warp(output.env.now + 300);
 
         // run verify
-        UpdateClientProgram.UpdateResult res = ics07Tendermint
-            .verifyIcs07UpdateClientProof(fixture.proof, fixture.publicValues);
+        UpdateClientProgram.UpdateResult res = ics07Tendermint.updateClient(
+            fixture.proof,
+            fixture.publicValues
+        );
 
         // to console
         console.log("UpdateClient gas used: ", vm.lastCallGas().gasTotalUsed);
@@ -111,7 +114,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(
             fixture.targetHeight
         );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
@@ -131,15 +134,14 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         vm.warp(output.env.now + 300);
 
         // run verify
-        UpdateClientProgram.UpdateResult res = ics07Tendermint
-            .verifyIcs07UpdateClientProof(fixture.proof, fixture.publicValues);
-        assert(res == UpdateClientProgram.UpdateResult.Update);
-
-        // run verify again
-        res = ics07Tendermint.verifyIcs07UpdateClientProof(
+        UpdateClientProgram.UpdateResult res = ics07Tendermint.updateClient(
             fixture.proof,
             fixture.publicValues
         );
+        assert(res == UpdateClientProgram.UpdateResult.Update);
+
+        // run verify again
+        res = ics07Tendermint.updateClient(fixture.proof, fixture.publicValues);
 
         // to console
         console.log(
@@ -159,8 +161,10 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         vm.warp(output.env.now + 300);
 
         // run verify
-        UpdateClientProgram.UpdateResult res = mockIcs07Tendermint
-            .verifyIcs07UpdateClientProof(bytes(""), mockFixture.publicValues);
+        UpdateClientProgram.UpdateResult res = mockIcs07Tendermint.updateClient(
+            bytes(""),
+            mockFixture.publicValues
+        );
 
         assert(res == UpdateClientProgram.UpdateResult.Update);
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
@@ -180,7 +184,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(
             mockFixture.targetHeight
         );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
@@ -193,7 +197,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
     // Confirm that submitting a non-empty proof with the mock verifier fails.
     function test_Invalid_MockUpdateClient() public {
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07UpdateClientProof(
+        mockIcs07Tendermint.updateClient(
             bytes("invalid"),
             mockFixture.publicValues
         );
@@ -202,9 +206,6 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
     // Confirm that submitting a random proof with the real verifier fails.
     function test_Invalid_UpdateClient() public {
         vm.expectRevert();
-        ics07Tendermint.verifyIcs07UpdateClientProof(
-            bytes("invalid"),
-            fixture.publicValues
-        );
+        ics07Tendermint.updateClient(bytes("invalid"), fixture.publicValues);
     }
 }

@@ -88,7 +88,7 @@ abstract contract SP1ICS07TendermintTest is Test {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(
             clientState.latest_height.revision_height
         );
         assert(consensusHash == mockTrustedConsensusHash);

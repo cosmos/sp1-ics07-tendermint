@@ -62,7 +62,7 @@ contract SP1TendermintScript is Script {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(
             clientState.latest_height.revision_height
         );
         assert(consensusHash == keccak256(abi.encode(trustedConsensusState)));

@@ -83,7 +83,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let proof_as_bytes = hex::decode(&proof_data.proof.encoded_proof).unwrap();
 
         contract
-            .verifyIcs07UpdateClientProof(
+            .updateClient(
                 proof_as_bytes.into(),
                 proof_data.public_values.to_vec().into(),
             )

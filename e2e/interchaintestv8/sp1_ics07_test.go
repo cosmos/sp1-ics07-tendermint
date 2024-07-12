@@ -88,6 +88,20 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		s.contract, err = sp1ics07tendermint.NewContract(ethcommon.HexToAddress(contractAddress), client)
 		s.Require().NoError(err)
 	}))
+}
+
+// TestWithSP1ICS07TendermintTestSuite is the boilerplate code that allows the test suite to be run
+func TestWithSP1ICS07TendermintTestSuite(t *testing.T) {
+	suite.Run(t, new(SP1ICS07TendermintTestSuite))
+}
+
+// TestDeploy tests the deployment of the SP1ICS07Tendermint contract
+func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	_, simd := s.ChainA, s.ChainB
 
 	s.Require().True(s.Run("Verify deployment", func() {
 		clientState, err := s.contract.GetClientState(nil)
@@ -104,18 +118,6 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 
 		s.latestHeight = clientState.LatestHeight.RevisionHeight
 	}))
-}
-
-// TestWithSP1ICS07TendermintTestSuite is the boilerplate code that allows the test suite to be run
-func TestWithSP1ICS07TendermintTestSuite(t *testing.T) {
-	suite.Run(t, new(SP1ICS07TendermintTestSuite))
-}
-
-// TestDeploy tests the deployment of the SP1ICS07Tendermint contract
-func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
-	ctx := context.Background()
-
-	s.SetupSuite(ctx)
 }
 
 // TestUpdateClient tests the update client functionality

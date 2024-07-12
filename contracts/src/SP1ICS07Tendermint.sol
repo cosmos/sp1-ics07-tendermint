@@ -6,21 +6,22 @@ import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
 import {MembershipProgram} from "./ics07-tendermint/MembershipProgram.sol";
 import {UpdateClientAndMembershipProgram} from "./ics07-tendermint/UcAndMembershipProgram.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
+import {ISP1ICS07Tendermint} from "./ISP1ICS07Tendermint.sol";
 import "forge-std/console.sol";
 
-/// @title SP1ICS07Tendermint
+/// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
-/// @notice This contract implements an ICS07 IBC tendermint light client.
+/// @notice This contract implements an ICS07 IBC tendermint light client using SP1.
 /// @custom:poc This is a proof of concept implementation.
-contract SP1ICS07Tendermint {
+contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
-    bytes32 public immutable updateClientProgramVkey;
+    bytes32 private immutable updateClientProgramVkey;
     /// @notice The verification key for the verify (non)membership program.
-    bytes32 public immutable membershipProgramVkey;
+    bytes32 private immutable membershipProgramVkey;
     /// @notice The verification key for the update client and membership program.
-    bytes32 public immutable updateClientAndMembershipProgramVkey;
+    bytes32 private immutable updateClientAndMembershipProgramVkey;
     /// @notice The SP1 verifier contract.
-    ISP1Verifier public immutable verifier;
+    ISP1Verifier private immutable verifier;
 
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState private clientState;
@@ -28,7 +29,7 @@ contract SP1ICS07Tendermint {
     mapping(uint32 => bytes32) private consensusStateHashes;
 
     /// Allowed clock drift in seconds
-    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
+    uint16 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
     /// @param _updateClientProgramVkey The verification key for the update client program.
@@ -66,22 +67,38 @@ contract SP1ICS07Tendermint {
         return clientState;
     }
 
-    /// @notice Returns the consensus state at the given revision height.
+    /// @notice Returns the consensus state keccak256 hash at the given revision height.
     /// @param revisionHeight The revision height.
     /// @return The consensus state at the given revision height.
-    function getConsensusState(
+    function getConsensusStateHash(
         uint32 revisionHeight
     ) public view returns (bytes32) {
         return consensusStateHashes[revisionHeight];
+    }
+
+    /// @notice Returns the verifier information.
+    /// @return Returns the verifier contract address and the program verification keys.
+    function getVerifierInfo()
+        public
+        view
+        returns (address, bytes32, bytes32, bytes32)
+    {
+        return (
+            address(verifier),
+            updateClientProgramVkey,
+            membershipProgramVkey,
+            updateClientAndMembershipProgramVkey
+        );
     }
 
     /// @notice The entrypoint for updating the client.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
-    function verifyIcs07UpdateClientProof(
-        bytes memory proof,
-        bytes memory publicValues
+    /// @return The result of the update.
+    function updateClient(
+        bytes calldata proof,
+        bytes calldata publicValues
     ) public returns (UpdateClientProgram.UpdateResult) {
         UpdateClientProgram.UpdateClientOutput memory output = abi.decode(
             publicValues,
@@ -116,7 +133,7 @@ contract SP1ICS07Tendermint {
         return updateResult;
     }
 
-    /// @notice The entrypoint for verifying membership proof.
+    /// @notice The entrypoint for batch verifying (non)membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @dev It can validate a subset of the key-value pairs by providing their hashes.
     /// @dev This is useful for batch verification. Zero hashes are skipped.
@@ -125,12 +142,12 @@ contract SP1ICS07Tendermint {
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
     /// @param kvPairHashes The hashes of the key-value pairs.
-    function verifyIcs07MembershipProof(
-        bytes memory proof,
-        bytes memory publicValues,
+    function batchVerifyMembership(
+        bytes calldata proof,
+        bytes calldata publicValues,
         uint32 proofHeight,
-        bytes memory trustedConsensusStateBz,
-        bytes32[] memory kvPairHashes
+        bytes calldata trustedConsensusStateBz,
+        bytes32[] calldata kvPairHashes
     ) public view {
         MembershipProgram.MembershipOutput memory output = abi.decode(
             publicValues,
@@ -175,10 +192,11 @@ contract SP1ICS07Tendermint {
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @param kvPairHashes The hashes of the key-value pairs.
-    function verifyIcs07UcAndMembershipProof(
-        bytes memory proof,
-        bytes memory publicValues,
-        bytes32[] memory kvPairHashes
+    /// @return The result of the update.
+    function updateClientAndBatchVerifyMembership(
+        bytes calldata proof,
+        bytes calldata publicValues,
+        bytes32[] calldata kvPairHashes
     ) public returns (UpdateClientProgram.UpdateResult) {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput
             memory output = abi.decode(
@@ -249,7 +267,7 @@ contract SP1ICS07Tendermint {
         bytes32 outputCommitmentRoot,
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
-    ) public view {
+    ) private view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
@@ -273,7 +291,7 @@ contract SP1ICS07Tendermint {
     /// @param output The public values.
     function validateUpdateClientPublicValues(
         UpdateClientProgram.UpdateClientOutput memory output
-    ) public view {
+    ) private view {
         require(
             clientState.is_frozen == false,
             "SP1ICS07Tendermint: client is frozen"
@@ -320,7 +338,7 @@ contract SP1ICS07Tendermint {
     /// @param output The public values of the update client program.
     function checkUpdateResult(
         UpdateClientProgram.UpdateClientOutput memory output
-    ) public view returns (UpdateClientProgram.UpdateResult) {
+    ) private view returns (UpdateClientProgram.UpdateResult) {
         bytes32 consensusStateHash = consensusStateHashes[
             output.new_height.revision_height
         ];

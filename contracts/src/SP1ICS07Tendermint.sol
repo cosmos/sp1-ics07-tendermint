@@ -15,13 +15,13 @@ import "forge-std/console.sol";
 /// @custom:poc This is a proof of concept implementation.
 contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
-    bytes32 public immutable updateClientProgramVkey;
+    bytes32 private immutable updateClientProgramVkey;
     /// @notice The verification key for the verify (non)membership program.
-    bytes32 public immutable membershipProgramVkey;
+    bytes32 private immutable membershipProgramVkey;
     /// @notice The verification key for the update client and membership program.
-    bytes32 public immutable updateClientAndMembershipProgramVkey;
+    bytes32 private immutable updateClientAndMembershipProgramVkey;
     /// @notice The SP1 verifier contract.
-    ISP1Verifier public immutable verifier;
+    ISP1Verifier private immutable verifier;
 
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState private clientState;
@@ -76,10 +76,26 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         return consensusStateHashes[revisionHeight];
     }
 
+    /// @notice Returns the verifier information.
+    /// @return Returns the verifier contract address and the program verification keys.
+    function getVerifierInfo()
+        public
+        view
+        returns (address, bytes32, bytes32, bytes32)
+    {
+        return (
+            address(verifier),
+            updateClientProgramVkey,
+            membershipProgramVkey,
+            updateClientAndMembershipProgramVkey
+        );
+    }
+
     /// @notice The entrypoint for updating the client.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
+    /// @return The result of the update.
     function updateClient(
         bytes calldata proof,
         bytes calldata publicValues
@@ -176,6 +192,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @param kvPairHashes The hashes of the key-value pairs.
+    /// @return The result of the update.
     function updateClientAndBatchVerifyMembership(
         bytes calldata proof,
         bytes calldata publicValues,

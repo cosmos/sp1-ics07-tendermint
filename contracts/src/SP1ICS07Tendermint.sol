@@ -80,7 +80,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
-    function verifyIcs07UpdateClientProof(
+    function updateClient(
         bytes calldata proof,
         bytes calldata publicValues
     ) public returns (UpdateClientProgram.UpdateResult) {

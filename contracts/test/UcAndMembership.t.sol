@@ -59,7 +59,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         bytes memory trustedConsensusState = json.readBytes(
             ".trustedConsensusState"
         );
-        bytes memory targetConsensusState = json.readBytes(
+        bytes memory targetConsensusStateHash = json.readBytes(
             ".targetConsensusState"
         );
         uint32 targetHeight = uint32(json.readUint(".targetHeight"));
@@ -71,7 +71,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
             memory fix = SP1ICS07UcAndMemberhsipFixtureJson({
                 trustedClientState: trustedClientState,
                 trustedConsensusState: trustedConsensusState,
-                targetConsensusState: targetConsensusState,
+                targetConsensusState: targetConsensusStateHash,
                 targetHeight: targetHeight,
                 publicValues: publicValues,
                 proof: proof,
@@ -124,7 +124,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(
             fixture.targetHeight
         );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
@@ -168,7 +168,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusState(
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(
             mockFixture.targetHeight
         );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(
@@ -220,7 +220,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         assert(clientState.unbonding_period == 1_209_600);
         assert(clientState.is_frozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusState(
+        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(
             fixture.targetHeight
         );
         ICS07Tendermint.ConsensusState memory expConsensusState = abi.decode(

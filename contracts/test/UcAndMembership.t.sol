@@ -96,7 +96,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
         // run verify
-        ics07Tendermint.verifyIcs07UcAndMembershipProof(
+        ics07Tendermint.updateClientAndBatchVerifyMembership(
             fixture.proof,
             fixture.publicValues,
             kvPairHashes
@@ -146,7 +146,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
 
-        mockIcs07Tendermint.verifyIcs07UcAndMembershipProof(
+        mockIcs07Tendermint.updateClientAndBatchVerifyMembership(
             bytes(""),
             mockFixture.publicValues,
             kvPairHashes
@@ -192,7 +192,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         kvPairHashes[1] = bytes32(0);
 
         // run verify
-        ics07Tendermint.verifyIcs07UcAndMembershipProof(
+        ics07Tendermint.updateClientAndBatchVerifyMembership(
             fixture.proof,
             fixture.publicValues,
             kvPairHashes
@@ -237,7 +237,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
 
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07UcAndMembershipProof(
+        mockIcs07Tendermint.updateClientAndBatchVerifyMembership(
             bytes("invalid"),
             mockFixture.publicValues,
             kvPairHashes
@@ -246,7 +246,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         // wrong hash
         kvPairHashes[0] = keccak256("random");
         vm.expectRevert();
-        mockIcs07Tendermint.verifyIcs07UcAndMembershipProof(
+        mockIcs07Tendermint.updateClientAndBatchVerifyMembership(
             bytes(""),
             mockFixture.publicValues,
             kvPairHashes
@@ -260,7 +260,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
         vm.expectRevert();
-        ics07Tendermint.verifyIcs07UcAndMembershipProof(
+        ics07Tendermint.updateClientAndBatchVerifyMembership(
             bytes("invalid"),
             fixture.publicValues,
             kvPairHashes

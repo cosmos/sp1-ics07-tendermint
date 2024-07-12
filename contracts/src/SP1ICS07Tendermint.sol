@@ -176,7 +176,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @param kvPairHashes The hashes of the key-value pairs.
-    function verifyIcs07UcAndMembershipProof(
+    function updateClientAndBatchVerifyMembership(
         bytes calldata proof,
         bytes calldata publicValues,
         bytes32[] calldata kvPairHashes
@@ -321,7 +321,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @param output The public values of the update client program.
     function checkUpdateResult(
         UpdateClientProgram.UpdateClientOutput memory output
-    ) public view returns (UpdateClientProgram.UpdateResult) {
+    ) private view returns (UpdateClientProgram.UpdateResult) {
         bytes32 consensusStateHash = consensusStateHashes[
             output.new_height.revision_height
         ];

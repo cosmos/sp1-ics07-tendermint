@@ -117,7 +117,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         return updateResult;
     }
 
-    /// @notice The entrypoint for verifying membership proof.
+    /// @notice The entrypoint for batch verifying (non)membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @dev It can validate a subset of the key-value pairs by providing their hashes.
     /// @dev This is useful for batch verification. Zero hashes are skipped.
@@ -126,7 +126,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @param proofHeight The height of the proof.
     /// @param trustedConsensusStateBz The encoded trusted consensus state.
     /// @param kvPairHashes The hashes of the key-value pairs.
-    function verifyIcs07MembershipProof(
+    function batchVerifyMembership(
         bytes calldata proof,
         bytes calldata publicValues,
         uint32 proofHeight,

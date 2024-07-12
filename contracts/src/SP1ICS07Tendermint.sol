@@ -29,7 +29,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     mapping(uint32 => bytes32) private consensusStateHashes;
 
     /// Allowed clock drift in seconds
-    uint64 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
+    uint16 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
     /// @param _updateClientProgramVkey The verification key for the update client program.

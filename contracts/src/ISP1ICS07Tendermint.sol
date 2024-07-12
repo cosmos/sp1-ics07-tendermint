@@ -8,6 +8,9 @@ import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
 /// @author srdtrk
 /// @notice This interface is used to interact with the SP1 ICS07 Tendermint Light Client
 interface ISP1ICS07Tendermint {
+    /// @notice The allowed clock drift between the prover and the verifier in seconds.
+    function ALLOWED_SP1_CLOCK_DRIFT() external view returns (uint16);
+
     /// @notice Get the client state
     function getClientState()
         external

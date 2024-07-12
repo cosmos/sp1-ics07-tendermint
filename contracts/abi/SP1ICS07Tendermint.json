@@ -42,8 +42,8 @@
     "outputs": [
       {
         "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "stateMutability": "view"
@@ -235,6 +235,39 @@
   },
   {
     "type": "function",
+    "name": "batchVerifyMembership",
+    "inputs": [
+      {
+        "name": "proof",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "publicValues",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "proofHeight",
+        "type": "uint32",
+        "internalType": "uint32"
+      },
+      {
+        "name": "trustedConsensusStateBz",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "kvPairHashes",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getClientState",
     "inputs": [],
     "outputs": [
@@ -304,7 +337,7 @@
   },
   {
     "type": "function",
-    "name": "getConsensusState",
+    "name": "getConsensusStateHash",
     "inputs": [
       {
         "name": "revisionHeight",
@@ -323,214 +356,35 @@
   },
   {
     "type": "function",
-    "name": "membershipProgramVkey",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "updateClientAndMembershipProgramVkey",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "updateClientProgramVkey",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "validateMembershipOutput",
-    "inputs": [
-      {
-        "name": "outputCommitmentRoot",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "proofHeight",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
-        "name": "trustedConsensusStateBz",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "validateUpdateClientPublicValues",
-    "inputs": [
-      {
-        "name": "output",
-        "type": "tuple",
-        "internalType": "struct UpdateClientProgram.UpdateClientOutput",
-        "components": [
-          {
-            "name": "trusted_consensus_state",
-            "type": "tuple",
-            "internalType": "struct ICS07Tendermint.ConsensusState",
-            "components": [
-              {
-                "name": "timestamp",
-                "type": "uint64",
-                "internalType": "uint64"
-              },
-              {
-                "name": "root",
-                "type": "bytes32",
-                "internalType": "bytes32"
-              },
-              {
-                "name": "next_validators_hash",
-                "type": "bytes32",
-                "internalType": "bytes32"
-              }
-            ]
-          },
-          {
-            "name": "new_consensus_state",
-            "type": "tuple",
-            "internalType": "struct ICS07Tendermint.ConsensusState",
-            "components": [
-              {
-                "name": "timestamp",
-                "type": "uint64",
-                "internalType": "uint64"
-              },
-              {
-                "name": "root",
-                "type": "bytes32",
-                "internalType": "bytes32"
-              },
-              {
-                "name": "next_validators_hash",
-                "type": "bytes32",
-                "internalType": "bytes32"
-              }
-            ]
-          },
-          {
-            "name": "env",
-            "type": "tuple",
-            "internalType": "struct UpdateClientProgram.Env",
-            "components": [
-              {
-                "name": "chain_id",
-                "type": "string",
-                "internalType": "string"
-              },
-              {
-                "name": "trust_threshold",
-                "type": "tuple",
-                "internalType": "struct ICS07Tendermint.TrustThreshold",
-                "components": [
-                  {
-                    "name": "numerator",
-                    "type": "uint8",
-                    "internalType": "uint8"
-                  },
-                  {
-                    "name": "denominator",
-                    "type": "uint8",
-                    "internalType": "uint8"
-                  }
-                ]
-              },
-              {
-                "name": "trusting_period",
-                "type": "uint32",
-                "internalType": "uint32"
-              },
-              {
-                "name": "now",
-                "type": "uint64",
-                "internalType": "uint64"
-              }
-            ]
-          },
-          {
-            "name": "trusted_height",
-            "type": "tuple",
-            "internalType": "struct ICS07Tendermint.Height",
-            "components": [
-              {
-                "name": "revision_number",
-                "type": "uint32",
-                "internalType": "uint32"
-              },
-              {
-                "name": "revision_height",
-                "type": "uint32",
-                "internalType": "uint32"
-              }
-            ]
-          },
-          {
-            "name": "new_height",
-            "type": "tuple",
-            "internalType": "struct ICS07Tendermint.Height",
-            "components": [
-              {
-                "name": "revision_number",
-                "type": "uint32",
-                "internalType": "uint32"
-              },
-              {
-                "name": "revision_height",
-                "type": "uint32",
-                "internalType": "uint32"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "verifier",
+    "name": "getVerifierInfo",
     "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "address",
-        "internalType": "contract ISP1Verifier"
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "verifyIcs07MembershipProof",
+    "name": "updateClient",
     "inputs": [
       {
         "name": "proof",
@@ -541,52 +395,20 @@
         "name": "publicValues",
         "type": "bytes",
         "internalType": "bytes"
-      },
-      {
-        "name": "proofHeight",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
-        "name": "trustedConsensusStateBz",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "kvPairHashes",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]"
       }
     ],
-    "outputs": [],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "verifyIcs07UcAndMembershipProof",
-    "inputs": [
+    "outputs": [
       {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "publicValues",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "kvPairHashes",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]"
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum UpdateClientProgram.UpdateResult"
       }
     ],
-    "outputs": [],
     "stateMutability": "nonpayable"
   },
   {
     "type": "function",
-    "name": "verifyIcs07UpdateClientProof",
+    "name": "updateClientAndBatchVerifyMembership",
     "inputs": [
       {
         "name": "proof",
@@ -597,9 +419,20 @@
         "name": "publicValues",
         "type": "bytes",
         "internalType": "bytes"
+      },
+      {
+        "name": "kvPairHashes",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum UpdateClientProgram.UpdateResult"
+      }
+    ],
     "stateMutability": "nonpayable"
   }
 ]

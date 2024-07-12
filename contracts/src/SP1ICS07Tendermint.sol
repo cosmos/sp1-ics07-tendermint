@@ -6,13 +6,14 @@ import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
 import {MembershipProgram} from "./ics07-tendermint/MembershipProgram.sol";
 import {UpdateClientAndMembershipProgram} from "./ics07-tendermint/UcAndMembershipProgram.sol";
 import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
+import {ISP1ICS07Tendermint} from "./ISP1ICS07Tendermint.sol";
 import "forge-std/console.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client using SP1.
 /// @custom:poc This is a proof of concept implementation.
-contract SP1ICS07Tendermint {
+contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
     bytes32 public immutable updateClientProgramVkey;
     /// @notice The verification key for the verify (non)membership program.
@@ -66,10 +67,10 @@ contract SP1ICS07Tendermint {
         return clientState;
     }
 
-    /// @notice Returns the consensus state at the given revision height.
+    /// @notice Returns the consensus state keccak256 hash at the given revision height.
     /// @param revisionHeight The revision height.
     /// @return The consensus state at the given revision height.
-    function getConsensusState(
+    function getConsensusStateHash(
         uint32 revisionHeight
     ) public view returns (bytes32) {
         return consensusStateHashes[revisionHeight];

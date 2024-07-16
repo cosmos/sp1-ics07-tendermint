@@ -11,6 +11,8 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
 - [SP1 ICS07-Tendermint IBC Light Client](#sp1-ics07-tendermint-ibc-light-client)
     - [Table of Contents](#table-of-contents)
     - [Overview](#overview)
+        - [Project Structure](#project-structure)
+        - [Programs](#programs)
     - [Requirements](#requirements)
     - [Build the programs](#build-the-programs)
     - [Run ICS-07 Tendermint Light Client End to End](#run-ics-07-tendermint-light-client-end-to-end)
@@ -22,17 +24,26 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
 
 ## Overview
 
-This, `sp1-ics07-tendermint`, is an example of a ZK IBC tendermint light client on Ethereum. It's goal is to demonstrate how to use SP1 to generate proofs for:
-- Updating the light client state (including historical headers) - implemented in `programs/update-client`
-- Verify membership (for IBC) - implemented in `programs/membership`
-- Verify non-membership (for IBC packets) - in `programs/membership`
-- Misbehaviour detection (freezing the light client) - not implemented yet
+`sp1-ics07-tendermint` is an example ZK IBC tendermint light client on Ethereum.
+
+### Project Structure
 
 This project is structured as a cargo workspace with the following directories:
 * The `contracts` directory contains a Solidity contract that implements the ICS-07 Tendermint light client which can verify SP1 proofs. This is a [`foundry`](https://github.com/foundry-rs/foundry) project, and not a part of the cargo workspace.
 * The `operator` directory contains a Rust program that interacts with the Solidity contract. It fetches the latest header (although it could also fetch historical headers) and generates a proof of the update using `ibc-rs`, and then updates the contract with the proof. It also contains several scripts to generate fixtures and proofs for testing.
 * The `programs` directory contains the SP1 programs that are compiled to RiscV and run on the SP1's zkVM.
 * The `packages` directory contains a shared rust library that is used by the `operator` and `programs` directories.
+
+### Programs
+
+This project contains the following programs
+
+|     **Programs**    |                                                                                                                                     **Description**                                                                                                                                     | **Status** |
+|:-------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|
+|   `update-client`   | Once the initial client state and consensus state are submitted, future consensus states can be added to the client by submitting IBC Headers. These headers contain all necessary information to run the Comet BFT Light Client protocol. Also supports partial misbehavior check.     |      ✅     |
+|     `membership`    | As consensus states are added to the client, they can be used for proof verification by relayers wishing to prove packet flow messages against a particular height on the counterparty. This uses the `verify_membership` and `verify_non_membership` methods on the tendermint client. |      ✅     |
+| `uc-and-membership` | This is a program that combines `update-client` and `membership` to update the client, and prove membership of packet flow messages against the new consensus state.                                                                                                                    |      ✅     |
+|    `misbehaviour`   | In case, the malicious subset of the validators exceeds the trust level of the client; then the client can be deceived into accepting invalid blocks and the connection is no longer secure. The tendermint client has some mitigations in place to prevent this.                       |      ⏳     |
 
 ## Requirements
 

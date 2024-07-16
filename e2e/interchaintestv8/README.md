@@ -12,8 +12,8 @@ To run the tests locally, run the following commands from this directory:
 go test -v . -run=$TEST_SUITE_FN/$TEST_NAME
 ```
 
-where `$TEST_NAME` is one of the test names of the `$TEST_SUITE_FN`. For example, to run the `TestBasic` test, you would run:
+where `$TEST_NAME` is one of the test names of the `$TEST_SUITE_FN`. For example, to run the `TestDeploy` test, you would run:
 
 ```text
-go test -v . -run=TestWithBasicTestSuite/TestBasic
+go test -v . -run=TestWithSP1ICS07TendermintTestSuite/TestDeploy
 ```

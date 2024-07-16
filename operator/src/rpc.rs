@@ -13,6 +13,11 @@ use tendermint_rpc::{Client, HttpClient, Paging, Url};
 /// obtaining light blocks.
 pub trait TendermintRpcExt {
     /// Creates a new instance of the Tendermint RPC client from the environment variables.
+    ///
+    /// # Panics
+    /// Panics if the `TENDERMINT_RPC_URL` environment variable is not set or if the URL is
+    /// invalid.
+    #[must_use]
     fn from_env() -> Self;
     /// Gets a light block for a specific block height.
     /// If `block_height` is `None`, the latest block is fetched.
@@ -23,12 +28,6 @@ pub trait TendermintRpcExt {
 }
 
 impl TendermintRpcExt for HttpClient {
-    /// Creates a new instance of the Tendermint RPC client from the environment variables.
-    ///
-    /// # Panics
-    /// Panics if the `TENDERMINT_RPC_URL` environment variable is not set or if the URL is
-    /// invalid.
-    #[must_use]
     fn from_env() -> Self {
         Self::new::<Url>(
             Url::from_str(&env::var("TENDERMINT_RPC_URL").expect("TENDERMINT_RPC_URL not set"))
@@ -37,11 +36,6 @@ impl TendermintRpcExt for HttpClient {
         .expect("Failed to create HTTP client")
     }
 
-    /// Gets a light block for a specific block height.
-    /// If `block_height` is `None`, the latest block is fetched.
-    ///
-    /// # Errors
-    /// Returns an error if the RPC request fails or if the response cannot be parsed.
     async fn get_light_block(&self, block_height: Option<u32>) -> Result<LightBlock> {
         let peer_id = self.status().await?.node_info.id;
         let commit_response;

@@ -2,7 +2,7 @@
 
 use crate::{
     cli::command::fixtures::MembershipCmd,
-    helpers::light_block::LightBlockWrapper,
+    helpers::light_block::LightBlockExt,
     programs::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
     },
@@ -54,11 +54,9 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = HttpClient::from_env();
     let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 
-    let trusted_light_block = LightBlockWrapper::new(
-        tm_rpc_client
-            .get_light_block(Some(args.trusted_block))
-            .await?,
-    );
+    let trusted_light_block = tm_rpc_client
+        .get_light_block(Some(args.trusted_block))
+        .await?;
 
     let trusted_client_state = trusted_light_block.to_sol_client_state()?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state();

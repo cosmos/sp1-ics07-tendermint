@@ -2,7 +2,7 @@
 
 use crate::{
     cli::command::fixtures::UpdateClientAndMembershipCmd,
-    helpers::light_block::LightBlockWrapper,
+    helpers::light_block::LightBlockExt,
     programs::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
     },
@@ -55,20 +55,16 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = HttpClient::from_env();
     let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
 
-    let trusted_light_block = LightBlockWrapper::new(
-        tm_rpc_client
-            .get_light_block(Some(args.trusted_block))
-            .await?,
-    );
-    let target_light_block = LightBlockWrapper::new(
-        tm_rpc_client
-            .get_light_block(Some(args.target_block))
-            .await?,
-    );
+    let trusted_light_block = tm_rpc_client
+        .get_light_block(Some(args.trusted_block))
+        .await?;
+    let target_light_block = tm_rpc_client
+        .get_light_block(Some(args.target_block))
+        .await?;
 
     let trusted_client_state = trusted_light_block.to_sol_client_state()?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
-    let proposed_header = target_light_block.into_header(trusted_light_block.as_light_block());
+    let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {
         chain_id: trusted_light_block.chain_id()?.to_string(),
         trust_threshold: trusted_client_state.trust_level.clone(),

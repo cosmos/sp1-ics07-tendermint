@@ -2,7 +2,7 @@
 
 use crate::{
     cli::command::genesis::Args,
-    helpers::light_block::LightBlockWrapper,
+    helpers::light_block::LightBlockExt,
     programs::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
     },
@@ -40,15 +40,13 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
 
     let tendermint_rpc_client = HttpClient::from_env();
 
-    let trusted_light_block = LightBlockWrapper::new(
-        tendermint_rpc_client
-            .get_light_block(args.trusted_block)
-            .await?,
-    );
+    let trusted_light_block = tendermint_rpc_client
+        .get_light_block(args.trusted_block)
+        .await?;
     if args.trusted_block.is_none() {
         log::info!(
             "Latest block height: {}",
-            trusted_light_block.as_light_block().height().value()
+            trusted_light_block.height().value()
         );
     }
 

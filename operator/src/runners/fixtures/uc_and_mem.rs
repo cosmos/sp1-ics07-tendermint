@@ -7,7 +7,7 @@ use crate::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
     },
     prover::SP1ICS07TendermintProver,
-    rpc::TendermintRPCClient,
+    rpc::TendermintRpcExt,
 };
 use alloy_sol_types::SolValue;
 use ibc_core_commitment_types::merkle::MerkleProof;
@@ -16,7 +16,7 @@ use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UcAndMembershipOu
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
-use tendermint_rpc::Client;
+use tendermint_rpc::{Client, HttpClient};
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -52,7 +52,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         "The target block must be greater than the trusted block"
     );
 
-    let tm_rpc_client = TendermintRPCClient::default();
+    let tm_rpc_client = HttpClient::from_env();
     let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
 
     let trusted_light_block = LightBlockWrapper::new(
@@ -81,7 +81,6 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let kv_proofs: Vec<(String, MerkleProof, Vec<u8>)> =
         futures::future::try_join_all(args.key_paths.into_iter().map(|key_path| async {
             let res = tm_rpc_client
-                .as_tm_client()
                 .abci_query(
                     Some("store/ibc/key".to_string()),
                     key_path.as_bytes(),

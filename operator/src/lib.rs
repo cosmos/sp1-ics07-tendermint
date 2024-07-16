@@ -5,5 +5,5 @@ pub mod cli;
 pub mod helpers;
 pub mod programs;
 pub mod prover;
-pub mod rpc;
+pub(crate) mod rpc;
 pub mod runners;

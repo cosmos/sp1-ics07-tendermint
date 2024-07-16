@@ -7,13 +7,14 @@ use crate::{
     helpers::{self, light_block::LightBlockWrapper},
     programs::UpdateClientProgram,
     prover::SP1ICS07TendermintProver,
-    rpc::TendermintRPCClient,
+    rpc::TendermintRpcExt,
 };
 use alloy::providers::ProviderBuilder;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
+use tendermint_rpc::HttpClient;
 
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint
 /// light client and generate a proof of the transition from the latest block in the contract to the
@@ -37,7 +38,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         .on_http(Url::parse(rpc_url.as_str())?);
 
     let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
-    let tendermint_rpc_client = TendermintRPCClient::default();
+    let tendermint_rpc_client = HttpClient::from_env();
     let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     loop {

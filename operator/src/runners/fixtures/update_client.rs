@@ -7,13 +7,14 @@ use crate::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
     },
     prover::SP1ICS07TendermintProver,
-    rpc::TendermintRPCClient,
+    rpc::TendermintRpcExt,
 };
 use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UpdateClientOutput};
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
+use tendermint_rpc::HttpClient;
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -47,7 +48,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         "The target block must be greater than the trusted block"
     );
 
-    let tendermint_rpc_client = TendermintRPCClient::default();
+    let tendermint_rpc_client = HttpClient::from_env();
     let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     let trusted_light_block = LightBlockWrapper::new(

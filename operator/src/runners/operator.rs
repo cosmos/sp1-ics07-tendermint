@@ -4,16 +4,17 @@ use std::env;
 
 use crate::{
     cli::command::operator::Args,
-    helpers::{self, light_block::LightBlockWrapper},
+    helpers::{self, light_block::LightBlockExt},
     programs::UpdateClientProgram,
     prover::SP1ICS07TendermintProver,
-    rpc::TendermintRPCClient,
+    rpc::TendermintRpcExt,
 };
 use alloy::providers::ProviderBuilder;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
 use sp1_sdk::utils::setup_logger;
+use tendermint_rpc::HttpClient;
 
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint
 /// light client and generate a proof of the transition from the latest block in the contract to the
@@ -37,7 +38,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         .on_http(Url::parse(rpc_url.as_str())?);
 
     let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
-    let tendermint_rpc_client = TendermintRPCClient::default();
+    let tendermint_rpc_client = HttpClient::from_env();
     let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
     loop {
@@ -50,21 +51,18 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
             "No trusted height found on the contract. Something is wrong with the contract."
         );
 
-        let trusted_light_block = LightBlockWrapper::new(
-            tendermint_rpc_client
-                .get_light_block(Some(trusted_block_height))
-                .await?,
-        );
+        let trusted_light_block = tendermint_rpc_client
+            .get_light_block(Some(trusted_block_height))
+            .await?;
 
         // Get trusted consensus state from the trusted light block.
         let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
 
-        let target_light_block =
-            LightBlockWrapper::new(tendermint_rpc_client.get_light_block(None).await?);
-        let target_height = target_light_block.as_light_block().height().value();
+        let target_light_block = tendermint_rpc_client.get_light_block(None).await?;
+        let target_height = target_light_block.height().value();
 
         // Get the proposed header from the target light block.
-        let proposed_header = target_light_block.into_header(trusted_light_block.as_light_block());
+        let proposed_header = target_light_block.into_header(&trusted_light_block);
 
         let contract_env = Env {
             chain_id: trusted_light_block.chain_id()?.to_string(),

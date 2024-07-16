@@ -24,17 +24,45 @@ pub enum Commands {
 
 /// The cli interface for the genesis command.
 pub mod genesis {
+    use tendermint_light_client_verifier::types::TrustThreshold;
+
     use super::Parser;
 
     /// The arguments for the `genesis` executable.
     #[derive(Parser, Debug, Clone)]
     pub struct Args {
-        /// Trusted block.
+        /// Trusted block height. [default: latest]
         #[clap(long)]
         pub trusted_block: Option<u32>,
         /// Genesis path.
         #[clap(long, default_value = "../contracts/script")]
         pub genesis_path: String,
+        /// Trust level.
+        #[clap(
+            long,
+            default_value = "1/3",
+            value_parser = parse_trust_threshold,
+            help = "Trust level as a fraction, e.g. '2/3'",
+        )]
+        pub trust_level: TrustThreshold,
+    }
+
+    fn parse_trust_threshold(input: &str) -> anyhow::Result<TrustThreshold> {
+        let (num_part, denom_part) = input.split_once('/').ok_or_else(|| {
+            anyhow::anyhow!(
+                "invalid trust threshold fraction: expected format 'numerator/denominator'"
+            )
+        })?;
+        let numerator = num_part
+            .trim()
+            .parse()
+            .map_err(|_| anyhow::anyhow!("invalid numerator for the fraction"))?;
+        let denominator = denom_part
+            .trim()
+            .parse()
+            .map_err(|_| anyhow::anyhow!("invalid denominator for the fraction"))?;
+        TrustThreshold::new(numerator, denominator)
+            .map_err(|e| anyhow::anyhow!("invalid trust threshold: {}", e))
     }
 }
 

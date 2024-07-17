@@ -2,16 +2,17 @@
 
 use crate::{
     cli::command::genesis::Args,
-    helpers::light_block::LightBlockWrapper,
+    helpers::light_block::LightBlockExt,
     programs::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
     },
-    rpc::TendermintRPCClient,
+    rpc::TendermintRpcExt,
 };
 use alloy_sol_types::SolValue;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf};
+use tendermint_rpc::HttpClient;
 
 /// The genesis data for the SP1 ICS07 Tendermint contract.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
@@ -37,17 +38,15 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         log::warn!("No .env file found");
     }
 
-    let tendermint_rpc_client = TendermintRPCClient::default();
+    let tendermint_rpc_client = HttpClient::from_env();
 
-    let trusted_light_block = LightBlockWrapper::new(
-        tendermint_rpc_client
-            .get_light_block(args.trusted_block)
-            .await?,
-    );
+    let trusted_light_block = tendermint_rpc_client
+        .get_light_block(args.trusted_block)
+        .await?;
     if args.trusted_block.is_none() {
         log::info!(
             "Latest block height: {}",
-            trusted_light_block.as_light_block().height().value()
+            trusted_light_block.height().value()
         );
     }
 

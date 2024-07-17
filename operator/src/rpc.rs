@@ -29,7 +29,7 @@ pub trait TendermintRpcExt {
 
 impl TendermintRpcExt for HttpClient {
     fn from_env() -> Self {
-        Self::new::<Url>(
+        Self::new(
             Url::from_str(&env::var("TENDERMINT_RPC_URL").expect("TENDERMINT_RPC_URL not set"))
                 .expect("Failed to parse URL"),
         )

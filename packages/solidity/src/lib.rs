@@ -40,6 +40,17 @@ impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
     }
 }
 
+impl TryFrom<TendermintTrustThreshold> for sp1_ics07_tendermint::TrustThreshold {
+    type Error = <u64 as TryInto<u32>>::Error;
+
+    fn try_from(trust_threshold: TendermintTrustThreshold) -> Result<Self, Self::Error> {
+        Ok(Self {
+            numerator: trust_threshold.numerator().try_into()?,
+            denominator: trust_threshold.denominator().try_into()?,
+        })
+    }
+}
+
 #[allow(clippy::fallible_impl_from)]
 impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusState {
     fn from(ics07_tendermint_consensus_state: ICS07TendermintConsensusState) -> Self {

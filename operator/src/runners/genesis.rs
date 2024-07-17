@@ -50,7 +50,8 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         );
     }
 
-    let trusted_client_state = trusted_light_block.to_sol_client_state()?;
+    let trusted_client_state =
+        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?)?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state();
     let genesis = SP1ICS07TendermintGenesis {
         trusted_consensus_state: hex::encode(

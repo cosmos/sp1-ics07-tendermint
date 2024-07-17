@@ -56,11 +56,10 @@ contract SP1TendermintScript is Script {
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint
             .getClientState();
-        assert(clientState.trust_level.numerator == 1);
-        assert(clientState.trust_level.denominator == 3);
-        assert(clientState.trusting_period == 1_209_600);
-        assert(clientState.unbonding_period == 1_209_600);
-        assert(clientState.is_frozen == false);
+        assert(
+            keccak256(abi.encode(clientState)) ==
+                keccak256(genesis.trustedClientState)
+        );
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(
             clientState.latest_height.revision_height

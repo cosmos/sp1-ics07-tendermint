@@ -67,7 +67,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 	}))
 
 	s.Require().True(s.Run("Deploy contracts", func() {
-		s.Require().NoError(operator.RunGenesis())
+		s.Require().NoError(operator.RunGenesis("--trust-level", testvalues.DefaultTrustLevel.String()))
 
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
 			ContractRootDir:  "contracts",
@@ -108,8 +108,8 @@ func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
 		s.Require().NoError(err)
 
 		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
-		s.Require().Equal(uint8(1), clientState.TrustLevel.Numerator)
-		s.Require().Equal(uint8(3), clientState.TrustLevel.Denominator)
+		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Numerator), clientState.TrustLevel.Numerator)
+		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Denominator), clientState.TrustLevel.Denominator)
 		s.Require().Equal(uint32(1_209_600), clientState.TrustingPeriod)
 		s.Require().Equal(uint32(1_209_600), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
@@ -135,8 +135,8 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 		s.Require().NoError(err)
 
 		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
-		s.Require().Equal(uint8(1), clientState.TrustLevel.Numerator)
-		s.Require().Equal(uint8(3), clientState.TrustLevel.Denominator)
+		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Numerator), clientState.TrustLevel.Numerator)
+		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Denominator), clientState.TrustLevel.Denominator)
 		s.Require().Equal(uint32(1_209_600), clientState.TrustingPeriod)
 		s.Require().Equal(uint32(1_209_600), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)

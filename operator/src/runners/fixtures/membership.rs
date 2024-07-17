@@ -58,7 +58,8 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         .get_light_block(Some(args.trusted_block))
         .await?;
 
-    let trusted_client_state = trusted_light_block.to_sol_client_state()?;
+    let trusted_client_state =
+        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?)?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state();
     let commitment_root_bytes = trusted_consensus_state.root.as_bytes().to_vec();
 

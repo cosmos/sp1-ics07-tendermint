@@ -1,6 +1,7 @@
 //! Contains the command line interface for the application.
 
 use clap::{command, Parser};
+use tendermint_light_client_verifier::types::TrustThreshold;
 
 /// The command line interface for the operator.
 #[derive(Clone, Debug, Parser)]
@@ -29,12 +30,20 @@ pub mod genesis {
     /// The arguments for the `genesis` executable.
     #[derive(Parser, Debug, Clone)]
     pub struct Args {
-        /// Trusted block.
+        /// Trusted block height. [default: latest]
         #[clap(long)]
         pub trusted_block: Option<u32>,
         /// Genesis path.
         #[clap(long, default_value = "../contracts/script")]
         pub genesis_path: String,
+        /// Trust level.
+        #[clap(
+            long,
+            default_value = "1/3",
+            value_parser = super::parse_trust_threshold,
+            help = "Trust level as a fraction, e.g. '2/3'",
+        )]
+        pub trust_level: super::TrustThreshold,
     }
 }
 
@@ -89,6 +98,15 @@ pub mod fixtures {
         /// Fixture path.
         #[clap(long, short = 'o')]
         pub output_path: String,
+
+        /// Trust level.
+        #[clap(
+            long,
+            default_value = "1/3",
+            value_parser = super::parse_trust_threshold,
+            help = "Trust level as a fraction, e.g. '2/3'",
+        )]
+        pub trust_level: super::TrustThreshold,
     }
 
     /// The arguments for the `Membership` fixture executable.
@@ -106,6 +124,15 @@ pub mod fixtures {
         /// Fixture path.
         #[clap(long, short = 'o')]
         pub output_path: String,
+
+        /// Trust level.
+        #[clap(
+            long,
+            default_value = "1/3",
+            value_parser = super::parse_trust_threshold,
+            help = "Trust level as a fraction, e.g. '2/3'",
+        )]
+        pub trust_level: super::TrustThreshold,
     }
 
     /// The arguments for the `UpdateClientAndMembership` fixture executable.
@@ -127,5 +154,30 @@ pub mod fixtures {
         /// Fixture path.
         #[clap(long, short = 'o')]
         pub output_path: String,
+
+        /// Trust level.
+        #[clap(
+            long,
+            default_value = "1/3",
+            value_parser = super::parse_trust_threshold,
+            help = "Trust level as a fraction, e.g. '2/3'",
+        )]
+        pub trust_level: super::TrustThreshold,
     }
+}
+
+fn parse_trust_threshold(input: &str) -> anyhow::Result<TrustThreshold> {
+    let (num_part, denom_part) = input.split_once('/').ok_or_else(|| {
+        anyhow::anyhow!("invalid trust threshold fraction: expected format 'numerator/denominator'")
+    })?;
+    let numerator = num_part
+        .trim()
+        .parse()
+        .map_err(|_| anyhow::anyhow!("invalid numerator for the fraction"))?;
+    let denominator = denom_part
+        .trim()
+        .parse()
+        .map_err(|_| anyhow::anyhow!("invalid denominator for the fraction"))?;
+    TrustThreshold::new(numerator, denominator)
+        .map_err(|e| anyhow::anyhow!("invalid trust threshold: {}", e))
 }

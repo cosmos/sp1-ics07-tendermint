@@ -78,15 +78,9 @@ abstract contract SP1ICS07TendermintTest is Test {
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint
             .getClientState();
         assert(
-            keccak256(bytes(clientState.chain_id)) ==
-                keccak256(bytes("mocha-4"))
+            keccak256(abi.encode(clientState)) ==
+                keccak256(mockGenesisFixture.trustedClientState)
         );
-        assert(clientState.trust_level.numerator == 1);
-        assert(clientState.trust_level.denominator == 3);
-        assert(clientState.latest_height.revision_number == 4);
-        assert(clientState.trusting_period == 1_209_600);
-        assert(clientState.unbonding_period == 1_209_600);
-        assert(clientState.is_frozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(
             clientState.latest_height.revision_height

@@ -58,8 +58,16 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         .get_light_block(Some(args.trusted_block))
         .await?;
 
+    let unbonding_period = tm_rpc_client
+        .sdk_staking_params()
+        .await?
+        .unbonding_time
+        .ok_or_else(|| anyhow::anyhow!("No unbonding time found"))?
+        .seconds
+        .try_into()?;
+
     let trusted_client_state =
-        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?)?;
+        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?, unbonding_period)?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state();
     let commitment_root_bytes = trusted_consensus_state.root.as_bytes().to_vec();
 

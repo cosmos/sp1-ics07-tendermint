@@ -1476,6 +1476,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
 
 [[package]]
+name = "cosmos-sdk-proto"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57d1a42d9ef55bb4e84b48ce29860f55859e52e0088ebdb1371cedd62f2b78cc"
+dependencies = [
+ "prost",
+ "prost-types",
+ "tendermint-proto 0.37.0",
+]
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2882,7 +2893,7 @@ dependencies = [
  "serde",
  "tendermint",
  "tendermint-light-client-verifier",
- "tendermint-proto",
+ "tendermint-proto 0.36.0",
 ]
 
 [[package]]
@@ -3083,7 +3094,7 @@ dependencies = [
  "prost",
  "serde",
  "subtle-encoding",
- "tendermint-proto",
+ "tendermint-proto 0.36.0",
 ]
 
 [[package]]
@@ -5603,6 +5614,7 @@ dependencies = [
  "async-trait",
  "bincode",
  "clap",
+ "cosmos-sdk-proto",
  "dotenv",
  "futures",
  "hex",
@@ -6141,7 +6153,7 @@ dependencies = [
  "signature",
  "subtle",
  "subtle-encoding",
- "tendermint-proto",
+ "tendermint-proto 0.36.0",
  "time",
  "zeroize",
 ]
@@ -6190,6 +6202,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "tendermint-proto"
+version = "0.37.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc87024548c7f3da479885201e3da20ef29e85a3b13d04606b380ac4c7120d87"
+dependencies = [
+ "bytes",
+ "flex-error",
+ "prost",
+ "prost-types",
+ "serde",
+ "serde_bytes",
+ "subtle-encoding",
+ "time",
+]
+
+[[package]]
 name = "tendermint-rpc"
 version = "0.36.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6212,7 +6240,7 @@ dependencies = [
  "subtle-encoding",
  "tendermint",
  "tendermint-config",
- "tendermint-proto",
+ "tendermint-proto 0.36.0",
  "thiserror",
  "time",
  "tokio",

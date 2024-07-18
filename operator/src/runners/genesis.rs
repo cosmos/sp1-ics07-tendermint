@@ -38,11 +38,9 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         log::warn!("No .env file found");
     }
 
-    let tendermint_rpc_client = HttpClient::from_env();
+    let tm_rpc_client = HttpClient::from_env();
 
-    let trusted_light_block = tendermint_rpc_client
-        .get_light_block(args.trusted_block)
-        .await?;
+    let trusted_light_block = tm_rpc_client.get_light_block(args.trusted_block).await?;
     if args.trusted_block.is_none() {
         log::info!(
             "Latest block height: {}",
@@ -50,8 +48,16 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         );
     }
 
+    let unbonding_period = tm_rpc_client
+        .sdk_staking_params()
+        .await?
+        .unbonding_time
+        .ok_or_else(|| anyhow::anyhow!("No unbonding time found"))?
+        .seconds
+        .try_into()?;
+
     let trusted_client_state =
-        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?)?;
+        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?, unbonding_period)?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state();
     let genesis = SP1ICS07TendermintGenesis {
         trusted_consensus_state: hex::encode(

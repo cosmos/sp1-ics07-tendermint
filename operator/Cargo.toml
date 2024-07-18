@@ -8,21 +8,30 @@ license = { workspace = true }
 
 [dependencies]
 sp1-sdk = { workspace = true }
+
+tendermint = { workspace = true }
+tendermint-rpc = { workspace = true }
+tendermint-light-client-verifier = { workspace = true }
+cosmos-sdk-proto = { workspace = true }
+ibc-client-tendermint = { workspace = true }
+ibc-core-client-types = { workspace = true }
+ibc-core-commitment-types = { workspace = true }
+ibc-core-host-types = { workspace = true, features = ["std"] }
+ibc-proto = { workspace = true }
+
+sp1-ics07-tendermint-update-client = { workspace = true }
+sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }
+sp1-ics07-tendermint-utils = { workspace = true }
+
+alloy-sol-types = { workspace = true }
+alloy-primitives = { workspace = true }
+alloy = { workspace = true, features = ["full", "node-bindings"] }
+
 reqwest = { workspace = true }
 tokio = { workspace = true }
 futures = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
-tendermint = { workspace = true }
-tendermint-rpc = { workspace = true }
-tendermint-light-client-verifier = { workspace = true }
-ibc-client-tendermint = { workspace = true }
-ibc-core-client-types = { workspace = true }
-ibc-core-commitment-types = { workspace = true }
-ibc-core-host-types = { workspace = true, features = ["std"] }
-alloy-sol-types = { workspace = true }
-alloy-primitives = { workspace = true }
-alloy = { workspace = true, features = ["full", "node-bindings"] }
 bincode = { workspace = true }
 serde_cbor = { workspace = true }
 sha2 = { workspace = true }
@@ -33,7 +42,3 @@ clap = { workspace = true }
 log = { workspace = true }
 async-trait = { workspace = true }
 hex = { workspace = true }
-sp1-ics07-tendermint-update-client = { workspace = true }
-sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }
-sp1-ics07-tendermint-utils = { workspace = true }
-ibc-proto = { workspace = true }

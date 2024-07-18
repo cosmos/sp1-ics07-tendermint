@@ -7279,8 +7279,3 @@ dependencies = [
  "sha3",
  "subtle",
 ]
-
-[[patch.unused]]
-name = "curve25519-dalek"
-version = "4.1.1"
-source = "git+https://github.com/sp1-patches/curve25519-dalek?branch=patch-v4.1.1#c226f30522c9e4123ffce4302ed210075acf741e"

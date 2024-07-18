@@ -107,11 +107,14 @@ func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
 
+		stakingParams, err := simd.StakingQueryParams(ctx)
+		s.Require().NoError(err)
+
 		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Numerator), clientState.TrustLevel.Numerator)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Denominator), clientState.TrustLevel.Denominator)
-		s.Require().Equal(uint32(1_209_600), clientState.TrustingPeriod)
-		s.Require().Equal(uint32(1_209_600), clientState.UnbondingPeriod)
+		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.TrustingPeriod)
+		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
 		s.Require().Greater(clientState.LatestHeight.RevisionHeight, uint32(0))
@@ -134,11 +137,14 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
 
+		stakingParams, err := simd.StakingQueryParams(ctx)
+		s.Require().NoError(err)
+
 		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Numerator), clientState.TrustLevel.Numerator)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Denominator), clientState.TrustLevel.Denominator)
-		s.Require().Equal(uint32(1_209_600), clientState.TrustingPeriod)
-		s.Require().Equal(uint32(1_209_600), clientState.UnbondingPeriod)
+		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.TrustingPeriod)
+		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
 		s.Require().Greater(clientState.LatestHeight.RevisionHeight, s.latestHeight)

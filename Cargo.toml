@@ -47,6 +47,7 @@ sp1-ics07-tendermint-utils = { path = "./packages/utils/" }
 tendermint = { version = "0.36.0", default-features = false }
 tendermint-rpc = { version = "0.36.0", features = ["http-client"] }
 ibc-core-client-types = { version = "0.53.0", default-features = false }
+cosmos-sdk-proto = { version = "0.22.0", default-features = false }
 
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["full"] }

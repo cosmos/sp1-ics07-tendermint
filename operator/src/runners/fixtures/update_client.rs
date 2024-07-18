@@ -48,18 +48,26 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         "The target block must be greater than the trusted block"
     );
 
-    let tendermint_rpc_client = HttpClient::from_env();
+    let tm_rpc_client = HttpClient::from_env();
     let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
 
-    let trusted_light_block = tendermint_rpc_client
+    let trusted_light_block = tm_rpc_client
         .get_light_block(Some(args.trusted_block))
         .await?;
-    let target_light_block = tendermint_rpc_client
+    let target_light_block = tm_rpc_client
         .get_light_block(Some(args.target_block))
         .await?;
 
+    let unbonding_period = tm_rpc_client
+        .sdk_staking_params()
+        .await?
+        .unbonding_time
+        .ok_or_else(|| anyhow::anyhow!("No unbonding time found"))?
+        .seconds
+        .try_into()?;
+
     let trusted_client_state =
-        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?)?;
+        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?, unbonding_period)?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
     let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {

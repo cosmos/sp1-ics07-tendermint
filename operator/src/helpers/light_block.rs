@@ -16,7 +16,11 @@ pub trait LightBlockExt {
     ///
     /// # Errors
     /// Returns an error if the chain identifier or height cannot be parsed.
-    fn to_sol_client_state(&self, trust_level: TrustThreshold) -> anyhow::Result<ClientState>;
+    fn to_sol_client_state(
+        &self,
+        trust_level: TrustThreshold,
+        unbonding_period: u32,
+    ) -> anyhow::Result<ClientState>;
     /// Convert the [`LightBlock`] to a new [`ConsensusState`].
     #[must_use]
     fn to_consensus_state(&self) -> ConsensusState;
@@ -34,9 +38,12 @@ pub trait LightBlockExt {
 }
 
 impl LightBlockExt for LightBlock {
-    fn to_sol_client_state(&self, trust_level: TrustThreshold) -> anyhow::Result<ClientState> {
+    fn to_sol_client_state(
+        &self,
+        trust_level: TrustThreshold,
+        unbonding_period: u32,
+    ) -> anyhow::Result<ClientState> {
         let chain_id = ChainId::from_str(self.signed_header.header.chain_id.as_str())?;
-        let two_weeks_in_seconds = 14 * 24 * 60 * 60;
         Ok(ClientState {
             chain_id: chain_id.to_string(),
             trust_level,
@@ -45,8 +52,8 @@ impl LightBlockExt for LightBlock {
                 revision_height: self.height().value().try_into()?,
             },
             is_frozen: false,
-            trusting_period: two_weeks_in_seconds,
-            unbonding_period: two_weeks_in_seconds,
+            unbonding_period,
+            trusting_period: unbonding_period,
         })
     }
 

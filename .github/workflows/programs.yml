@@ -30,13 +30,13 @@ jobs:
       - name: Install SP1 toolchain
         run: |
           curl -L https://sp1.succinct.xyz | bash
-          ~/.config/.sp1/bin/sp1up 
-          ~/.config/.sp1/bin/cargo-prove prove --version
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
 
       - name: Build SP1 program
         run: |
           cd programs/update-client
-          ~/.config/.sp1/bin/cargo-prove prove build
+          ~/.sp1/bin/cargo-prove prove build
 
   membership:
     strategy:
@@ -58,13 +58,13 @@ jobs:
       - name: Install SP1 toolchain
         run: |
           curl -L https://sp1.succinct.xyz | bash
-          ~/.config/.sp1/bin/sp1up 
-          ~/.config/.sp1/bin/cargo-prove prove --version
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
 
       - name: Build SP1 program
         run: |
           cd programs/membership
-          ~/.config/.sp1/bin/cargo-prove prove build
+          ~/.sp1/bin/cargo-prove prove build
 
   uc-and-membership:
     strategy:
@@ -86,10 +86,10 @@ jobs:
       - name: Install SP1 toolchain
         run: |
           curl -L https://sp1.succinct.xyz | bash
-          ~/.config/.sp1/bin/sp1up 
-          ~/.config/.sp1/bin/cargo-prove prove --version
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
 
       - name: Build SP1 program
         run: |
           cd programs/uc-and-membership
-          ~/.config/.sp1/bin/cargo-prove prove build
+          ~/.sp1/bin/cargo-prove prove build

@@ -1,0 +1,3 @@
+@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
+forge-std/=node_modules/forge-std/src/
+@sp1-contracts/=node_modules/sp1-contracts/contracts/src/

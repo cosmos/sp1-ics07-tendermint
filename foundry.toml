@@ -1,0 +1,21 @@
+[profile.default]
+src = "contracts/src"
+out = "contracts/out"
+test = "contracts/test"
+script = "contracts/script"
+cache_path = "contracts/cache"
+broadcast = "contracts/broadcast"
+libs = ["node_modules", "contracts/lib"]
+fs_permissions = [{ access = "read-write", path = "./" },]
+
+[fmt]
+bracket_spacing = true
+int_types = "long"
+line_length = 120
+multiline_func_header = "all"
+number_underscore = "thousands"
+quote_style = "double"
+tab_width = 4
+wrap_comments = true
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

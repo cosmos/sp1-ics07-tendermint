@@ -10,31 +10,75 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  check:
-    strategy:
-      fail-fast: true
+  lint:
+    name: lint
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
 
+      - name: "Install Foundry"
+        uses: "foundry-rs/foundry-toolchain@v1"
+
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v1"
+
+      - name: "Install the Node.js dependencies"
+        run: "bun install"
+
+      - name: "Lint the code"
+        run: "bun run lint"
+
+      - name: "Add lint summary"
+        run: |
+          echo "## Lint result" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v1"
+
+      - name: "Install the Node.js dependencies"
+        run: "bun install"
+
+      - name: Run Forge build
+        run: |
+          forge --version
+          forge build --sizes
+
+      - name: "Add build summary"
+        run: |
+          echo "## Build result" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  test:
+    needs: ["lint", "build"]
     name: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
 
-      - name: Run Forge build
-        run: |
-          cd contracts
-          forge --version
-          forge build --sizes
-        id: build
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v1"
+
+      - name: "Install the Node.js dependencies"
+        run: "bun install"
 
       - name: Run Forge tests
         run: |
-          cd contracts
           forge test -vvv
-        id: test
+
+      - name: "Add test summary"
+        run: |
+          echo "## Tests result" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Passed" >> $GITHUB_STEP_SUMMARY

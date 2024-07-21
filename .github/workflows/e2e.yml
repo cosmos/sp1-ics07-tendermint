@@ -63,6 +63,10 @@ jobs:
         with:
           command: build
           args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features --release
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v1"
+      - name: "Install the Node.js dependencies"
+        run: "bun install"
       - name: Run Tests
         env:
           SP1_PRIVATE_KEY: ${{ secrets.SP1_PRIVATE_KEY }}

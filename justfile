@@ -79,3 +79,12 @@ operator:
 test-e2e testname:
   echo "Running {{testname}} test..."
   cd e2e/interchaintestv8 && go test -v -run=TestWithSP1ICS07TendermintTestSuite/{{testname}} -timeout 40m
+
+# Lint the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, and `golanci-lint` commands
+lint:
+  @echo "Linting the Rust code..."
+  cargo fmt
+  @echo "Linting the Solidity code..."
+  forge fmt
+  @echo "Linting the Go code..."
+  cd e2e/interchaintestv8 && golangci-lint run --fix

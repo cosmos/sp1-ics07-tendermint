@@ -53,7 +53,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         string memory fileName
     ) public view returns (SP1ICS07UcAndMemberhsipFixtureJson memory) {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/fixtures/", fileName);
+        string memory path = string.concat(root, "/contracts/fixtures/", fileName);
         string memory json = vm.readFile(path);
         bytes memory trustedClientState = json.readBytes(".trustedClientState");
         bytes memory trustedConsensusState = json.readBytes(

@@ -53,7 +53,7 @@ This project contains the following programs
 - [Bun](https://bun.sh/)
 - [Just](https://just.systems/man/en/) (recommended)
 
-Foundry typically uses git submodules to manage dependencies, but this template uses Node.js packages (via Bun) because submodules don't scale. You can install the contracts dependencies by running the following command:
+Foundry typically uses git submodules to manage contract dependencies, but this template uses Node.js packages (via Bun) because submodules don't scale. You can install the contracts dependencies by running the following command:
 
 ```sh
 bun install

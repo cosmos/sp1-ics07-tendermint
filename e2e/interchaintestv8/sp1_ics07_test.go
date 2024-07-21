@@ -70,8 +70,8 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		s.Require().NoError(operator.RunGenesis("--trust-level", testvalues.DefaultTrustLevel.String()))
 
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
-			ContractRootDir:  "contracts",
-			SolidityContract: "script/SP1ICS07Tendermint.s.sol",
+			ContractRootDir:  ".",
+			SolidityContract: "contracts/script/SP1ICS07Tendermint.s.sol",
 			RawOptions:       []string{"--json"},
 		})
 		s.Require().NoError(err)

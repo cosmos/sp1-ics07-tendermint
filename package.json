@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.1",
-    "forge-std": "github:foundry-rs/forge-std#v1.8.1",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.1",
     "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.5-testnet"
   },
   "devDependencies": {
@@ -29,7 +29,7 @@
   ],
   "private": true,
   "scripts": {
-    "clean": "rm -rf cache out",
+    "clean": "rm -rf contract/cache contract/out",
     "build": "forge build",
     "lint": "bun run lint:sol",
     "lint:sol": "forge fmt --check && bun solhint {script,src,test}/**/*.sol",

@@ -73,7 +73,7 @@ contract SP1TendermintScript is Script {
         string memory fileName
     ) public view returns (SP1ICS07TendermintGenesisJson memory) {
         string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/script/", fileName);
+        string memory path = string.concat(root, "/contracts/script/", fileName);
         string memory json = vm.readFile(path);
         bytes memory trustedClientState = json.readBytes(".trustedClientState");
         bytes memory trustedConsensusState = json.readBytes(

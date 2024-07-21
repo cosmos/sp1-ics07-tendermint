@@ -1,0 +1,40 @@
+{
+  "name": "@cosmos/sp1-ics07-tendermint",
+  "description": "This is a zero knowledge IBC tendermint light client written using SP1 and ibc-rs (WIP)",
+  "version": "1.0.0",
+  "author": {
+    "name": "srdtrk",
+    "url": "https://github.com/srdtrk"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "forge-std": "github:foundry-rs/forge-std#v1.8.1",
+    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.5-testnet"
+  },
+  "devDependencies": {
+    "solhint": "^3.6.2"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "forge",
+    "foundry",
+    "smart-contracts",
+    "solidity",
+    "template",
+    "ibc",
+    "cosmos",
+    "tendermint",
+    "light-client"
+  ],
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf cache out",
+    "build": "forge build",
+    "lint": "bun run lint:sol",
+    "lint:sol": "forge fmt --check && bun solhint {script,src,test}/**/*.sol",
+    "test": "forge test",
+    "test:coverage": "forge coverage",
+    "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"
+  }
+}

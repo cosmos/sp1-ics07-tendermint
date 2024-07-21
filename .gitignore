@@ -17,3 +17,9 @@ pgo-data.profdata
 
 # Env
 .env
+
+# Node
+node_modules
+
+# Solidity
+cache/

@@ -1,6 +1,11 @@
 # SP1 ICS07-Tendermint IBC Light Client
 
-[![Github Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![License: MIT][license-badge]][license]
+<div align="center">
+
+[![Github Actions][gha-badge]][gha]
+[![Foundry][foundry-badge]][foundry]
+[![License: MIT][license-badge]][license]
+</div>
 
 [gha]: https://github.com/cosmos/sp1-ics07-tendermint/actions
 [gha-badge]: https://github.com/cosmos/sp1-ics07-tendermint/actions/workflows/e2e.yml/badge.svg

@@ -1,5 +1,14 @@
 # SP1 ICS07-Tendermint IBC Light Client
 
+[![Github Actions][gha-badge]][gha] [![Foundry][foundry-badge]][foundry] [![License: MIT][license-badge]][license]
+
+[gha]: https://github.com/cosmos/sp1-ics07-tendermint/actions
+[gha-badge]: https://github.com/cosmos/sp1-ics07-tendermint/actions/workflows/e2e.yml/badge.svg
+[foundry]: https://getfoundry.sh/
+[foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
+[license]: https://opensource.org/licenses/MIT
+[license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
+
 This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
 
 ![Light Mode Diagram](./sp1-ics07-tendermint-light.svg#gh-light-mode-only)![Dark Mode Diagram](./sp1-ics07-tendermint-dark.svg#gh-dark-mode-only)

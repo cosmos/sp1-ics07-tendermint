@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
-import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
+import { ICS07Tendermint } from "./ics07-tendermint/ICS07Tendermint.sol";
+import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client Interface
 /// @author srdtrk
@@ -26,7 +26,10 @@ interface ISP1ICS07Tendermint {
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @return The result of the update.
-    function updateClient(bytes calldata proof, bytes calldata publicValues)
+    function updateClient(
+        bytes calldata proof,
+        bytes calldata publicValues
+    )
         external
         returns (UpdateClientProgram.UpdateResult);
 
@@ -45,7 +48,9 @@ interface ISP1ICS07Tendermint {
         uint32 proofHeight,
         bytes calldata trustedConsensusStateBz,
         bytes32[] calldata kvPairHashes
-    ) external view;
+    )
+        external
+        view;
 
     /// @notice The entrypoint for updating the client and membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
@@ -57,5 +62,7 @@ interface ISP1ICS07Tendermint {
         bytes calldata proof,
         bytes calldata publicValues,
         bytes32[] calldata kvPairHashes
-    ) external returns (UpdateClientProgram.UpdateResult);
+    )
+        external
+        returns (UpdateClientProgram.UpdateResult);
 }

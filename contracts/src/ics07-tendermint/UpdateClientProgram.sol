@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ICS07Tendermint} from "./ICS07Tendermint.sol";
+import { ICS07Tendermint } from "./ICS07Tendermint.sol";
 
 /// @title UpdateClientProgram
 /// @author srdtrk

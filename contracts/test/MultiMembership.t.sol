@@ -2,14 +2,14 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/console.sol";
-import {Test} from "forge-std/Test.sol";
-import {stdJson} from "forge-std/StdJson.sol";
-import {stdError} from "forge-std/StdError.sol";
-import {ICS07Tendermint} from "../src/ics07-tendermint/ICS07Tendermint.sol";
-import {SP1ICS07Tendermint} from "../src/SP1ICS07Tendermint.sol";
-import {SP1Verifier} from "@sp1-contracts/SP1Verifier.sol";
-import {SP1MockVerifier} from "@sp1-contracts/SP1MockVerifier.sol";
-import {MembershipTest} from "./MembershipTest.sol";
+import { Test } from "forge-std/Test.sol";
+import { stdJson } from "forge-std/StdJson.sol";
+import { stdError } from "forge-std/StdError.sol";
+import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
+import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
+import { SP1Verifier } from "@sp1-contracts/SP1Verifier.sol";
+import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
+import { MembershipTest } from "./MembershipTest.sol";
 
 // set constant string
 string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
@@ -19,10 +19,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
     using stdJson for string;
 
     function setUp() public {
-        setUpTestWithFixtures(
-            "memberships_fixture.json",
-            "mock_memberships_fixture.json"
-        );
+        setUpTestWithFixtures("memberships_fixture.json", "mock_memberships_fixture.json");
     }
 
     function test_ValidateFixtures() public view {
@@ -45,18 +42,11 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
         ics07Tendermint.batchVerifyMembership(
-            fixture.proof,
-            fixture.publicValues,
-            fixture.proofHeight,
-            fixture.trustedConsensusState,
-            kvPairHashes
+            fixture.proof, fixture.publicValues, fixture.proofHeight, fixture.trustedConsensusState, kvPairHashes
         );
 
         // to console
-        console.log(
-            "VerifyNonMembership gas used: ",
-            vm.lastCallGas().gasTotalUsed
-        );
+        console.log("VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
     // Confirm that submitting a real proof passes the verifier.
@@ -66,18 +56,11 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
 
         ics07Tendermint.batchVerifyMembership(
-            fixture.proof,
-            fixture.publicValues,
-            fixture.proofHeight,
-            fixture.trustedConsensusState,
-            kvPairHashes
+            fixture.proof, fixture.publicValues, fixture.proofHeight, fixture.trustedConsensusState, kvPairHashes
         );
 
         // to console
-        console.log(
-            "VerifyMultiMembership gas used: ",
-            vm.lastCallGas().gasTotalUsed
-        );
+        console.log("VerifyMultiMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
@@ -112,21 +95,13 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         // Invalid proof height
         vm.expectRevert();
         mockIcs07Tendermint.batchVerifyMembership(
-            bytes(""),
-            mockFixture.publicValues,
-            1,
-            mockFixture.trustedConsensusState,
-            kvPairHashes
+            bytes(""), mockFixture.publicValues, 1, mockFixture.trustedConsensusState, kvPairHashes
         );
 
         // Invalid trusted consensus state
         vm.expectRevert();
         mockIcs07Tendermint.batchVerifyMembership(
-            bytes(""),
-            mockFixture.publicValues,
-            mockFixture.proofHeight,
-            bytes("invalid"),
-            kvPairHashes
+            bytes(""), mockFixture.publicValues, mockFixture.proofHeight, bytes("invalid"), kvPairHashes
         );
 
         // Empty kvPairHashes length
@@ -148,11 +123,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
 
         vm.expectRevert();
         ics07Tendermint.batchVerifyMembership(
-            bytes("invalid"),
-            fixture.publicValues,
-            fixture.proofHeight,
-            fixture.trustedConsensusState,
-            kvPairHashes
+            bytes("invalid"), fixture.publicValues, fixture.proofHeight, fixture.trustedConsensusState, kvPairHashes
         );
     }
 }

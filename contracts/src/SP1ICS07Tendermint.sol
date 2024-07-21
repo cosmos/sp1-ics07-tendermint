@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {ICS07Tendermint} from "./ics07-tendermint/ICS07Tendermint.sol";
-import {UpdateClientProgram} from "./ics07-tendermint/UpdateClientProgram.sol";
-import {MembershipProgram} from "./ics07-tendermint/MembershipProgram.sol";
-import {UpdateClientAndMembershipProgram} from "./ics07-tendermint/UcAndMembershipProgram.sol";
-import {ISP1Verifier} from "@sp1-contracts/ISP1Verifier.sol";
-import {ISP1ICS07Tendermint} from "./ISP1ICS07Tendermint.sol";
+import { ICS07Tendermint } from "./ics07-tendermint/ICS07Tendermint.sol";
+import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol";
+import { MembershipProgram } from "./ics07-tendermint/MembershipProgram.sol";
+import { UpdateClientAndMembershipProgram } from "./ics07-tendermint/UcAndMembershipProgram.sol";
+import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
+import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 import "forge-std/console.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
@@ -79,7 +79,10 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @return The result of the update.
-    function updateClient(bytes calldata proof, bytes calldata publicValues)
+    function updateClient(
+        bytes calldata proof,
+        bytes calldata publicValues
+    )
         public
         returns (UpdateClientProgram.UpdateResult)
     {
@@ -120,7 +123,10 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         uint32 proofHeight,
         bytes calldata trustedConsensusStateBz,
         bytes32[] calldata kvPairHashes
-    ) public view {
+    )
+        public
+        view
+    {
         MembershipProgram.MembershipOutput memory output =
             abi.decode(publicValues, (MembershipProgram.MembershipOutput));
 
@@ -154,7 +160,10 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         bytes calldata proof,
         bytes calldata publicValues,
         bytes32[] calldata kvPairHashes
-    ) public returns (UpdateClientProgram.UpdateResult) {
+    )
+        public
+        returns (UpdateClientProgram.UpdateResult)
+    {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
             abi.decode(publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
 
@@ -205,7 +214,10 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         bytes32 outputCommitmentRoot,
         uint32 proofHeight,
         bytes memory trustedConsensusStateBz
-    ) private view {
+    )
+        private
+        view
+    {
         require(clientState.is_frozen == false, "SP1ICS07Tendermint: client is frozen");
         require(
             consensusStateHashes[proofHeight] == keccak256(trustedConsensusStateBz),
@@ -274,7 +286,10 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     function abiPublicTypes(
         MembershipProgram.MembershipOutput memory output,
         UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output2
-    ) public pure {
+    )
+        public
+        pure
+    {
         // This is a dummy function to generate the ABI for MembershipOutput
         // so that it can be used in the SP1 verifier contract.
         // The function is not used in the contract.

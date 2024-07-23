@@ -169,7 +169,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
 
         validateUpdateClientPublicValues(output.update_client_output);
 
-        verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
+        verifier.verifyProof(updateClientAndMembershipProgramVkey, publicValues, proof);
 
         UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(output.update_client_output);
         if (updateResult == UpdateClientProgram.UpdateResult.Update) {

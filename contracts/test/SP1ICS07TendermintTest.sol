@@ -21,6 +21,8 @@ struct SP1ICS07GenesisFixtureJson {
 abstract contract SP1ICS07TendermintTest is Test {
     using stdJson for string;
 
+    SP1Verifier public verifier;
+
     SP1ICS07Tendermint public ics07Tendermint;
     SP1ICS07Tendermint public mockIcs07Tendermint;
 
@@ -35,7 +37,7 @@ abstract contract SP1ICS07TendermintTest is Test {
 
         bytes32 trustedConsensusHash = keccak256(abi.encode(trustedConsensusState));
 
-        SP1Verifier verifier = new SP1Verifier();
+        verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,

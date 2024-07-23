@@ -68,7 +68,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
 
         mockIcs07Tendermint.batchVerifyMembership(
-            mockFixture.proof,
+            bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,

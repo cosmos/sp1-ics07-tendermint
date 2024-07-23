@@ -49,7 +49,7 @@ contract SP1ICS07VerifyMembershipTest is MembershipTest {
         kvPairHashes[0] = kvPairHash;
 
         mockIcs07Tendermint.batchVerifyMembership(
-            mockFixture.proof,
+            bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,

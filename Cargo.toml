@@ -16,8 +16,8 @@ authors       = ["srdtrk <srdtrk@hotmail.com>"]
 
 [workspace.dependencies]
 # Used by the programs
-sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.0-rc.1" }
-sp1-helper = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.0-rc.1" }
+sp1-zkvm = "1.0.1"
+sp1-helper = "1.0.1"
 
 sp1-ics07-tendermint-solidity = { path = "./packages/solidity/" }
 sp1-ics07-tendermint-update-client = { path = "./programs/update-client/" }
@@ -40,7 +40,7 @@ serde_cbor = "0.11.2"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 
 # Used by the operator
-sp1-sdk = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.0-rc.1" }
+sp1-sdk = "1.0.1"
 
 sp1-ics07-tendermint-utils = { path = "./packages/utils/" }
 

@@ -77,12 +77,9 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let proof_data =
             prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
-        // Construct the on-chain call and relay the proof to the contract.
-        let proof_as_bytes = hex::decode(&proof_data.proof.encoded_proof).unwrap();
-
         contract
             .updateClient(
-                proof_as_bytes.into(),
+                proof_data.bytes().into(),
                 proof_data.public_values.to_vec().into(),
             )
             .send()

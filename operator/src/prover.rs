@@ -78,6 +78,7 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
         let proof = self
             .prover_client
             .prove(&self.pkey, stdin)
+            .plonk()
             .run()
             .expect("proving failed");
 
@@ -119,6 +120,7 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
         let proof = self
             .prover_client
             .prove(&self.pkey, stdin)
+            .plonk()
             .run()
             .expect("proving failed");
 
@@ -175,6 +177,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         let proof = self
             .prover_client
             .prove(&self.pkey, stdin)
+            .plonk()
             .run()
             .expect("proving failed");
 

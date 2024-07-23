@@ -91,8 +91,15 @@ just build-programs
 
     This will be used when you run the operator in step 5. So add this to your `.env` file.
 
-4. Run the Tendermint operator.
+    ```.env
+    CONTRACT_ADDRESS=<CONTRACT_ADDRESS>
+    ```
 
+4. Run the Tendermint operator.
+    
+    To run the operator, you need to select the prover type for SP1. This is set in the `.env` file with the `SP1_PROVER` value (`network|local|mock`).
+    If you run the operator with the `network` prover, you need to provide your SP1 network private key in `.env`.
+    
     ```sh
     just operator
     ```
@@ -108,7 +115,8 @@ Here, I will show you how to generate a proof to be used in the fixtures for the
 just fixtures local
 ```
 
-To use the SP1 prover network, provide your SP1 network private key to `.env`. After this, you can run the following command:
+To use the SP1 prover network, set `SP1_PROVER=network` and provide your SP1 network private key with `SP1_PRIVATE_KEY="0xyourprivatekey` in the `.env` file. 
+After this, you can run the following command:
 
 ```sh
 just fixtures network
@@ -125,6 +133,15 @@ just test-foundry
 ## End to End Testing
 
 There are several end-to-end tests in the `e2e/interchaintestv8` directory. These tests are written in Go and use the [`interchaintest`](https://github.com/strangelove-ventures/interchaintest) library. It spins up a local Ethereum and a Tendermint network and runs the tests found in [`e2e/interchaintestv8/sp1_ics07_test.go`](e2e/interchaintestv8/sp1_ics07_test.go). Some of the tests use the prover network to generate the proofs, so you need to provide your SP1 network private key to `.env` for these tests to pass.
+
+> If you are running on a mac with an M chip, you will need to do the following:
+> - Set up Rosetta
+> - Enable Rosetta for Docker (in Docker Desktop: Settings -> General -> enable "Use Rosetta for x86_64/amd64 emulation on Apple Silicon")
+> - Pull the foundry image with the following command:
+> 
+>     ```sh
+>     docker pull --platform=linux/amd64 ghcr.io/foundry-rs/foundry:latest
+>     ```
 
 To run the tests, run the following command:
 

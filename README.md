@@ -98,7 +98,7 @@ just build-programs
 4. Run the Tendermint operator.
     
     To run the operator, you need to select the prover type for SP1. This is set in the `.env` file with the `SP1_PROVER` value (`network|local|mock`).
-    If you run the operator with the `network` prover, you need to provide your SP1 network private key in `.env`.
+    If you run the operator with the `network` prover, you need to provide your SP1 network private key with `SP1_PRIVATE_KEY=0xyourprivatekey` in `.env`.
     
     ```sh
     just operator

@@ -7,8 +7,6 @@ import { stdJson } from "forge-std/StdJson.sol";
 import { stdError } from "forge-std/StdError.sol";
 import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
-import { SP1Verifier } from "@sp1-contracts/SP1Verifier.sol";
-import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 import { MembershipTest } from "./MembershipTest.sol";
 
 // set constant string
@@ -70,7 +68,7 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
 
         mockIcs07Tendermint.batchVerifyMembership(
-            mockFixture.proof,
+            bytes(""),
             mockFixture.publicValues,
             mockFixture.proofHeight,
             mockFixture.trustedConsensusState,

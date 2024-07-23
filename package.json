@@ -9,7 +9,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.1",
-    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.5-testnet"
+    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.0-rc"
   },
   "devDependencies": {
     "solhint": "^3.6.2"

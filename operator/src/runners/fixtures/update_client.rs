@@ -94,8 +94,8 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         update_client_vkey: uc_prover.vkey.bytes32(),
         membership_vkey: MembershipProgram::get_vkey().bytes32(),
         uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
-        public_values: proof_data.public_values.bytes(),
-        proof: proof_data.bytes(),
+        public_values: proof_data.public_values.raw(),
+        proof: format!("0x{}", hex::encode(proof_data.bytes())),
     };
 
     // Save the proof data to the file path.

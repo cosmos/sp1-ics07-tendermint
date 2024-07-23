@@ -113,8 +113,8 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
         membership_vkey: verify_mem_prover.vkey.bytes32(),
         uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
-        public_values: proof_data.public_values.bytes(),
-        proof: proof_data.bytes(),
+        public_values: proof_data.public_values.raw(),
+        proof: format!("0x{}", hex::encode(proof_data.bytes())),
         kv_pairs: hex::encode(output.kv_pairs.abi_encode()),
     };
 

@@ -9,7 +9,7 @@ use ibc_proto::Protobuf;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     ConsensusState as SolConsensusState, Env,
 };
-use sp1_sdk::{ProverClient, SP1PlonkBn254Proof, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
+use sp1_sdk::{ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
 /// A prover for for [`SP1Program`] programs.
 #[allow(clippy::module_name_repetitions)]
@@ -58,7 +58,7 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
         trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
         contract_env: &Env,
-    ) -> SP1PlonkBn254Proof {
+    ) -> SP1ProofWithPublicValues {
         // Encode the inputs into our program.
         // NOTE: We are using SolConsensusState because I'm failing to serialize the
         // ConsensusState struct properly. It always seems modified when deserialized.
@@ -77,12 +77,14 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
         let proof = self
             .prover_client
-            .prove_plonk(&self.pkey, stdin)
+            .prove(&self.pkey, stdin)
+            .plonk()
+            .run()
             .expect("proving failed");
 
         // Verify proof.
         self.prover_client
-            .verify_plonk(&proof, &self.vkey)
+            .verify(&proof, &self.vkey)
             .expect("Verification failed");
 
         // Return the proof.
@@ -100,7 +102,7 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
         &self,
         commitment_root: &[u8],
         kv_proofs: Vec<(String, MerkleProof, Vec<u8>)>,
-    ) -> SP1PlonkBn254Proof {
+    ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
 
@@ -117,12 +119,14 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
         // network proof.
         let proof = self
             .prover_client
-            .prove_plonk(&self.pkey, stdin)
+            .prove(&self.pkey, stdin)
+            .plonk()
+            .run()
             .expect("proving failed");
 
         // Verify proof.
         self.prover_client
-            .verify_plonk(&proof, &self.vkey)
+            .verify(&proof, &self.vkey)
             .expect("Verification failed");
 
         // Return the proof.
@@ -145,7 +149,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         proposed_header: &Header,
         contract_env: &Env,
         kv_proofs: Vec<(String, MerkleProof, Vec<u8>)>,
-    ) -> SP1PlonkBn254Proof {
+    ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
         // Encode the inputs into our program.
@@ -172,12 +176,14 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
         let proof = self
             .prover_client
-            .prove_plonk(&self.pkey, stdin)
+            .prove(&self.pkey, stdin)
+            .plonk()
+            .run()
             .expect("proving failed");
 
         // Verify proof.
         self.prover_client
-            .verify_plonk(&proof, &self.vkey)
+            .verify(&proof, &self.vkey)
             .expect("Verification failed");
 
         // Return the proof.

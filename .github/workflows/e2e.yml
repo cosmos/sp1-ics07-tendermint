@@ -67,6 +67,11 @@ jobs:
         uses: "oven-sh/setup-bun@v1"
       - name: "Install the Node.js dependencies"
         run: "bun install"
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
       - name: Run Tests
         env:
           SP1_PRIVATE_KEY: ${{ secrets.SP1_PRIVATE_KEY }}

@@ -9,8 +9,6 @@ import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { MembershipTest } from "./MembershipTest.sol";
 import { MembershipProgram } from "../src/ics07-tendermint/MembershipProgram.sol";
-import { SP1Verifier } from "@sp1-contracts/SP1Verifier.sol";
-import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 
 // set constant string
 string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";

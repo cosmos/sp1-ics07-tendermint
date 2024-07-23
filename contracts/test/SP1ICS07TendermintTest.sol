@@ -7,7 +7,7 @@ import { stdJson } from "forge-std/StdJson.sol";
 import { stdError } from "forge-std/StdError.sol";
 import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
-import { SP1Verifier } from "@sp1-contracts/SP1Verifier.sol";
+import { SP1Verifier } from "@sp1-contracts/v1.0.0-rc1/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 
 struct SP1ICS07GenesisFixtureJson {

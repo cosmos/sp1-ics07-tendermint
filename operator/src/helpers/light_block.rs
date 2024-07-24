@@ -20,6 +20,7 @@ pub trait LightBlockExt {
         &self,
         trust_level: TrustThreshold,
         unbonding_period: u32,
+        trusting_period: u32,
     ) -> anyhow::Result<ClientState>;
     /// Convert the [`LightBlock`] to a new [`ConsensusState`].
     #[must_use]
@@ -42,6 +43,7 @@ impl LightBlockExt for LightBlock {
         &self,
         trust_level: TrustThreshold,
         unbonding_period: u32,
+        trusting_period: u32,
     ) -> anyhow::Result<ClientState> {
         let chain_id = ChainId::from_str(self.signed_header.header.chain_id.as_str())?;
         Ok(ClientState {
@@ -53,7 +55,7 @@ impl LightBlockExt for LightBlock {
             },
             is_frozen: false,
             unbonding_period,
-            trusting_period: unbonding_period,
+            trusting_period,
         })
     }
 

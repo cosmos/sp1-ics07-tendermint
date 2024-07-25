@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25;
 
-import "forge-std/console.sol";
 import { Script } from "forge-std/Script.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
@@ -20,8 +19,6 @@ contract SP1TendermintScript is Script {
     using stdJson for string;
 
     SP1ICS07Tendermint public ics07Tendermint;
-
-    function setUp() public { }
 
     // Deploy the SP1 Tendermint contract with the supplied initialization parameters.
     function run() public returns (address) {
@@ -50,7 +47,7 @@ contract SP1TendermintScript is Script {
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(genesis.trustedClientState));
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(clientState.latest_height.revision_height);
+        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
         assert(consensusHash == keccak256(abi.encode(trustedConsensusState)));
 
         return address(ics07Tendermint);

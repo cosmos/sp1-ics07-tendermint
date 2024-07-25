@@ -30,7 +30,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         setUpTest("update_client_fixture.json", "mock_update_client_fixture.json");
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(clientState.latest_height.revision_height < mockFixture.targetHeight);
+        assert(clientState.latestHeight.revisionHeight < mockFixture.targetHeight);
 
         assert(mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight) == bytes32(0));
     }
@@ -73,9 +73,9 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(res == UpdateClientProgram.UpdateResult.Update);
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(keccak256(bytes(clientState.chain_id)) == keccak256(bytes("mocha-4")));
-        assert(clientState.latest_height.revision_height == fixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
+        assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =
@@ -114,8 +114,8 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
 
         assert(res == UpdateClientProgram.UpdateResult.Update);
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(clientState.latest_height.revision_height == mockFixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(clientState.latestHeight.revisionHeight == mockFixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =

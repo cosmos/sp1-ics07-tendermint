@@ -35,7 +35,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         setUpTest("uc_and_memberships_fixture.json", "mock_uc_and_memberships_fixture.json");
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(clientState.latest_height.revision_height < mockFixture.targetHeight);
+        assert(clientState.latestHeight.revisionHeight < mockFixture.targetHeight);
     }
 
     function loadFixture(string memory fileName) public view returns (SP1ICS07UcAndMemberhsipFixtureJson memory) {
@@ -68,7 +68,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
             abi.decode(fixture.publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
         // set a correct timestamp
-        vm.warp(output.update_client_output.env.now + 300);
+        vm.warp(output.updateClientOutput.env.now + 300);
 
         bytes32[] memory kvPairHashes = new bytes32[](2);
         kvPairHashes[0] = keccak256(abi.encode(kvPairs()[0]));
@@ -81,8 +81,8 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         console.log("UpdateClientAndMultiMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(clientState.latest_height.revision_height == fixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =
@@ -93,7 +93,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
     function test_ValidMockUpdateClientAndMultiMembership() public {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
             abi.decode(mockFixture.publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
-        vm.warp(output.update_client_output.env.now + 300);
+        vm.warp(output.updateClientOutput.env.now + 300);
 
         bytes32[] memory kvPairHashes = new bytes32[](2);
         kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
@@ -102,9 +102,9 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         mockIcs07Tendermint.updateClientAndBatchVerifyMembership(bytes(""), mockFixture.publicValues, kvPairHashes);
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(keccak256(bytes(clientState.chain_id)) == keccak256(bytes("mocha-4")));
-        assert(clientState.latest_height.revision_height == fixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
+        assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =
@@ -116,7 +116,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
             abi.decode(fixture.publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
         // set a correct timestamp
-        vm.warp(output.update_client_output.env.now + 300);
+        vm.warp(output.updateClientOutput.env.now + 300);
 
         bytes32[] memory kvPairHashes = new bytes32[](2);
         kvPairHashes[0] = keccak256(abi.encode(kvPairs()[0]));
@@ -129,9 +129,9 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         console.log("UpdateClientAndVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(keccak256(bytes(clientState.chain_id)) == keccak256(bytes("mocha-4")));
-        assert(clientState.latest_height.revision_height == fixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
+        assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =

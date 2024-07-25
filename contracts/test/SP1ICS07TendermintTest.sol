@@ -67,7 +67,7 @@ abstract contract SP1ICS07TendermintTest is Test {
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(mockGenesisFixture.trustedClientState));
 
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latest_height.revision_height);
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
         assert(consensusHash == mockTrustedConsensusHash);
     }
 

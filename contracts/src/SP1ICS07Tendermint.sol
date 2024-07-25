@@ -67,10 +67,15 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         return consensusStateHashes[revisionHeight];
     }
 
-    /// @notice Returns the VERIFIER information.
-    /// @return Returns the VERIFIER contract address and the program verification keys.
+    /// @notice Returns the verifier information.
+    /// @return Returns the verifier contract address and the program verification keys.
     function getVerifierInfo() public view returns (address, bytes32, bytes32, bytes32) {
-        return (address(VERIFIER), UPDATE_CLIENT_PROGRAM_VKEY, MEMBERSHIP_PROGRAM_VKEY, UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY);
+        return (
+            address(VERIFIER),
+            UPDATE_CLIENT_PROGRAM_VKEY,
+            MEMBERSHIP_PROGRAM_VKEY,
+            UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY
+        );
     }
 
     /// @notice The entrypoint for updating the client.

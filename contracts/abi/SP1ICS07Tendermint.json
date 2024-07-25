@@ -3,22 +3,22 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "_updateClientProgramVkey",
+        "name": "updateClientProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
       {
-        "name": "_membershipProgramVkey",
+        "name": "membershipProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
       {
-        "name": "_updateClientAndMembershipProgramVkey",
+        "name": "updateClientAndMembershipProgramVkey",
         "type": "bytes32",
         "internalType": "bytes32"
       },
       {
-        "name": "_verifier",
+        "name": "verifier",
         "type": "address",
         "internalType": "address"
       },
@@ -58,12 +58,12 @@
         "internalType": "struct MembershipProgram.MembershipOutput",
         "components": [
           {
-            "name": "commitment_root",
+            "name": "commitmentRoot",
             "type": "bytes32",
             "internalType": "bytes32"
           },
           {
-            "name": "kv_pairs",
+            "name": "kvPairs",
             "type": "tuple[]",
             "internalType": "struct MembershipProgram.KVPair[]",
             "components": [
@@ -87,12 +87,12 @@
         "internalType": "struct UpdateClientAndMembershipProgram.UcAndMembershipOutput",
         "components": [
           {
-            "name": "update_client_output",
+            "name": "updateClientOutput",
             "type": "tuple",
             "internalType": "struct UpdateClientProgram.UpdateClientOutput",
             "components": [
               {
-                "name": "trusted_consensus_state",
+                "name": "trustedConsensusState",
                 "type": "tuple",
                 "internalType": "struct ICS07Tendermint.ConsensusState",
                 "components": [
@@ -107,14 +107,14 @@
                     "internalType": "bytes32"
                   },
                   {
-                    "name": "next_validators_hash",
+                    "name": "nextValidatorsHash",
                     "type": "bytes32",
                     "internalType": "bytes32"
                   }
                 ]
               },
               {
-                "name": "new_consensus_state",
+                "name": "newConsensusState",
                 "type": "tuple",
                 "internalType": "struct ICS07Tendermint.ConsensusState",
                 "components": [
@@ -129,7 +129,7 @@
                     "internalType": "bytes32"
                   },
                   {
-                    "name": "next_validators_hash",
+                    "name": "nextValidatorsHash",
                     "type": "bytes32",
                     "internalType": "bytes32"
                   }
@@ -141,12 +141,12 @@
                 "internalType": "struct UpdateClientProgram.Env",
                 "components": [
                   {
-                    "name": "chain_id",
+                    "name": "chainId",
                     "type": "string",
                     "internalType": "string"
                   },
                   {
-                    "name": "trust_threshold",
+                    "name": "trustThreshold",
                     "type": "tuple",
                     "internalType": "struct ICS07Tendermint.TrustThreshold",
                     "components": [
@@ -163,7 +163,7 @@
                     ]
                   },
                   {
-                    "name": "trusting_period",
+                    "name": "trustingPeriod",
                     "type": "uint32",
                     "internalType": "uint32"
                   },
@@ -175,34 +175,34 @@
                 ]
               },
               {
-                "name": "trusted_height",
+                "name": "trustedHeight",
                 "type": "tuple",
                 "internalType": "struct ICS07Tendermint.Height",
                 "components": [
                   {
-                    "name": "revision_number",
+                    "name": "revisionNumber",
                     "type": "uint32",
                     "internalType": "uint32"
                   },
                   {
-                    "name": "revision_height",
+                    "name": "revisionHeight",
                     "type": "uint32",
                     "internalType": "uint32"
                   }
                 ]
               },
               {
-                "name": "new_height",
+                "name": "newHeight",
                 "type": "tuple",
                 "internalType": "struct ICS07Tendermint.Height",
                 "components": [
                   {
-                    "name": "revision_number",
+                    "name": "revisionNumber",
                     "type": "uint32",
                     "internalType": "uint32"
                   },
                   {
-                    "name": "revision_height",
+                    "name": "revisionHeight",
                     "type": "uint32",
                     "internalType": "uint32"
                   }
@@ -211,7 +211,7 @@
             ]
           },
           {
-            "name": "kv_pairs",
+            "name": "kvPairs",
             "type": "tuple[]",
             "internalType": "struct MembershipProgram.KVPair[]",
             "components": [
@@ -277,12 +277,12 @@
         "internalType": "struct ICS07Tendermint.ClientState",
         "components": [
           {
-            "name": "chain_id",
+            "name": "chainId",
             "type": "string",
             "internalType": "string"
           },
           {
-            "name": "trust_level",
+            "name": "trustLevel",
             "type": "tuple",
             "internalType": "struct ICS07Tendermint.TrustThreshold",
             "components": [
@@ -299,34 +299,34 @@
             ]
           },
           {
-            "name": "latest_height",
+            "name": "latestHeight",
             "type": "tuple",
             "internalType": "struct ICS07Tendermint.Height",
             "components": [
               {
-                "name": "revision_number",
+                "name": "revisionNumber",
                 "type": "uint32",
                 "internalType": "uint32"
               },
               {
-                "name": "revision_height",
+                "name": "revisionHeight",
                 "type": "uint32",
                 "internalType": "uint32"
               }
             ]
           },
           {
-            "name": "trusting_period",
+            "name": "trustingPeriod",
             "type": "uint32",
             "internalType": "uint32"
           },
           {
-            "name": "unbonding_period",
+            "name": "unbondingPeriod",
             "type": "uint32",
             "internalType": "uint32"
           },
           {
-            "name": "is_frozen",
+            "name": "isFrozen",
             "type": "bool",
             "internalType": "bool"
           }

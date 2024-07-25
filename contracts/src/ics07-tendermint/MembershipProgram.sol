@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
-
-import { ICS07Tendermint } from "./ICS07Tendermint.sol";
+pragma solidity >=0.8.25;
 
 /// @title MembershipProgram
 /// @author srdtrk
@@ -9,8 +7,8 @@ import { ICS07Tendermint } from "./ICS07Tendermint.sol";
 contract MembershipProgram {
     /// @notice The public value output for the sp1 verify (non)membership program.
     struct MembershipOutput {
-        bytes32 commitment_root;
-        KVPair[] kv_pairs;
+        bytes32 commitmentRoot;
+        KVPair[] kvPairs;
     }
 
     /// @notice The key-value pair.

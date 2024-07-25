@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
 import { ICS07Tendermint } from "./ICS07Tendermint.sol";
 
@@ -10,26 +10,26 @@ contract UpdateClientProgram {
     /// @notice The public value output for the sp1 update client program.
     struct UpdateClientOutput {
         /// The trusted consensus state.
-        ICS07Tendermint.ConsensusState trusted_consensus_state;
+        ICS07Tendermint.ConsensusState trustedConsensusState;
         /// The new consensus state with the verified header.
-        ICS07Tendermint.ConsensusState new_consensus_state;
+        ICS07Tendermint.ConsensusState newConsensusState;
         /// The validation environment.
         Env env;
         /// trusted height
-        ICS07Tendermint.Height trusted_height;
+        ICS07Tendermint.Height trustedHeight;
         /// new height
-        ICS07Tendermint.Height new_height;
+        ICS07Tendermint.Height newHeight;
     }
 
     /// @notice The environment output for the sp1 program.
     struct Env {
         /// The chain ID of the chain that the client is tracking.
-        string chain_id;
+        string chainId;
         /// Fraction of validator overlap needed to update header
-        ICS07Tendermint.TrustThreshold trust_threshold;
+        ICS07Tendermint.TrustThreshold trustThreshold;
         /// Duration of the period since the `LatestTimestamp` during which the
         /// submitted headers are valid for upgrade in seconds.
-        uint32 trusting_period;
+        uint32 trustingPeriod;
         /// Timestamp in seconds
         uint64 now;
     }

@@ -45,15 +45,15 @@ impl LightBlockExt for LightBlock {
     ) -> anyhow::Result<ClientState> {
         let chain_id = ChainId::from_str(self.signed_header.header.chain_id.as_str())?;
         Ok(ClientState {
-            chain_id: chain_id.to_string(),
-            trust_level,
-            latest_height: Height {
-                revision_number: chain_id.revision_number().try_into()?,
-                revision_height: self.height().value().try_into()?,
+            chainId: chain_id.to_string(),
+            trustLevel: trust_level,
+            latestHeight: Height {
+                revisionNumber: chain_id.revision_number().try_into()?,
+                revisionHeight: self.height().value().try_into()?,
             },
-            is_frozen: false,
-            unbonding_period,
-            trusting_period: unbonding_period,
+            isFrozen: false,
+            unbondingPeriod: unbonding_period,
+            trustingPeriod: unbonding_period,
         })
     }
 

@@ -33,7 +33,7 @@ pub fn update_client_and_membership(
     let mem_output = sp1_ics07_tendermint_membership::membership(app_hash, request_iter);
 
     UcAndMembershipOutput {
-        update_client_output: uc_output,
-        kv_pairs: mem_output.kv_pairs,
+        updateClientOutput: uc_output,
+        kvPairs: mem_output.kvPairs,
     }
 }

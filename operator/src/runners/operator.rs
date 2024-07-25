@@ -45,7 +45,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let contract_client_state = contract.getClientState().call().await?._0;
 
         // Read the existing trusted header hash from the contract.
-        let trusted_block_height = contract_client_state.latest_height.revision_height;
+        let trusted_block_height = contract_client_state.latestHeight.revisionHeight;
         assert!(
             trusted_block_height != 0,
             "No trusted height found on the contract. Something is wrong with the contract."
@@ -65,9 +65,9 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let proposed_header = target_light_block.into_header(&trusted_light_block);
 
         let contract_env = Env {
-            chain_id: trusted_light_block.chain_id()?.to_string(),
-            trust_threshold: contract_client_state.trust_level,
-            trusting_period: contract_client_state.trusting_period,
+            chainId: trusted_light_block.chain_id()?.to_string(),
+            trustThreshold: contract_client_state.trustLevel,
+            trustingPeriod: contract_client_state.trustingPeriod,
             now: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)?
                 .as_secs(),

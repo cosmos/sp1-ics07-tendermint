@@ -68,7 +68,7 @@ impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusStat
             #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             timestamp: ics07_tendermint_consensus_state.timestamp.unix_timestamp() as u64,
             root: root.into(),
-            next_validators_hash: next_validators_hash.into(),
+            nextValidatorsHash: next_validators_hash.into(),
         }
     }
 }
@@ -86,7 +86,7 @@ impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusStat
             root: CommitmentRoot::from_bytes(&consensus_state.root.0),
             next_validators_hash: Hash::from_bytes(
                 Algorithm::Sha256,
-                &consensus_state.next_validators_hash.0,
+                &consensus_state.nextValidatorsHash.0,
             )
             .unwrap(),
         }

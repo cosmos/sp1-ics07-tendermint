@@ -53,7 +53,7 @@ pub fn membership(
         .collect();
 
     MembershipOutput {
-        commitment_root: app_hash.into(),
-        kv_pairs,
+        commitmentRoot: app_hash.into(),
+        kvPairs: kv_pairs,
     }
 }

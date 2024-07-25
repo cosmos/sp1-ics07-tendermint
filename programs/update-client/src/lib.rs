@@ -24,10 +24,10 @@ pub fn update_client(
     env: Env,
 ) -> UpdateClientOutput {
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
-    let chain_id = ChainId::from_str(&env.chain_id).unwrap();
+    let chain_id = ChainId::from_str(&env.chainId).unwrap();
     let options = Options {
-        trust_threshold: env.trust_threshold.clone().into(),
-        trusting_period: Duration::from_secs(env.trusting_period.into()),
+        trust_threshold: env.trustThreshold.clone().into(),
+        trusting_period: Duration::from_secs(env.trustingPeriod.into()),
         clock_drift: Duration::default(),
     };
 
@@ -44,24 +44,24 @@ pub fn update_client(
     .unwrap();
 
     let trusted_height = sp1_ics07_tendermint::Height {
-        revision_number: proposed_header
+        revisionNumber: proposed_header
             .trusted_height
             .revision_number()
             .try_into()
             .unwrap(),
-        revision_height: proposed_header
+        revisionHeight: proposed_header
             .trusted_height
             .revision_height()
             .try_into()
             .unwrap(),
     };
     let new_height = sp1_ics07_tendermint::Height {
-        revision_number: proposed_header
+        revisionNumber: proposed_header
             .height()
             .revision_number()
             .try_into()
             .unwrap(),
-        revision_height: proposed_header
+        revisionHeight: proposed_header
             .height()
             .revision_height()
             .try_into()
@@ -70,10 +70,10 @@ pub fn update_client(
     let new_consensus_state = ConsensusState::from(proposed_header);
 
     UpdateClientOutput {
-        trusted_consensus_state: trusted_consensus_state.into(),
-        new_consensus_state: new_consensus_state.into(),
+        trustedConsensusState: trusted_consensus_state.into(),
+        newConsensusState: new_consensus_state.into(),
         env,
-        trusted_height,
-        new_height,
+        trustedHeight: trusted_height,
+        newHeight: new_height,
     }
 }

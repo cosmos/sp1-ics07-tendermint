@@ -53,9 +53,9 @@ impl LightBlockExt for LightBlock {
                 revisionNumber: chain_id.revision_number().try_into()?,
                 revisionHeight: self.height().value().try_into()?,
             },
-            is_frozen: false,
-            unbonding_period: unbonding_period,
-            trusting_period: trusting_period,
+            isFrozen: false,
+            unbondingPeriod: unbonding_period,
+            trustingPeriod: trusting_period,
         })
     }
 

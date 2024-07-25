@@ -251,6 +251,9 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         );
         require(output.env.trustingPeriod == clientState.trustingPeriod, "SP1ICS07Tendermint: trusting period mismatch");
         require(
+            output.env.trustingPeriod <= clientState.unbondingPeriod, "SP1ICS07Tendermint: trusting period longer than unbonding period"
+        );
+        require(
             consensusStateHashes[output.trustedHeight.revisionHeight]
                 == keccak256(abi.encode(output.trustedConsensusState)),
             "SP1ICS07Tendermint: trusted consensus state mismatch"

@@ -70,8 +70,8 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         .seconds
         .try_into()?;
 
-    // It is recommended that TrustingPeriod should be set as 2/3 of the UnbondingPeriod
-    let trusting_period = 2 * (unbonding_period / 3);
+    // Defaults to the recommended TrustingPeriod: 2/3 of the UnbondingPeriod
+    let trusting_period = args.trusting_period.unwrap_or(2 * (unbonding_period / 3));
 
     let trusted_client_state =
         trusted_light_block.to_sol_client_state(args.trust_level.try_into()?, unbonding_period, trusting_period)?;

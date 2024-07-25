@@ -44,6 +44,9 @@ pub mod genesis {
             help = "Trust level as a fraction, e.g. '2/3'",
         )]
         pub trust_level: super::TrustThreshold,
+        /// Trusting period. [default: 2/3 of unbonding period]
+        #[clap(long)]
+        pub trusting_period: Option<u32>,
     }
 }
 
@@ -107,6 +110,10 @@ pub mod fixtures {
             help = "Trust level as a fraction, e.g. '2/3'",
         )]
         pub trust_level: super::TrustThreshold,
+
+        /// Trusting period. [default: 2/3 of unbonding period]
+        #[clap(long)]
+        pub trusting_period: Option<u32>,
     }
 
     /// The arguments for the `Membership` fixture executable.
@@ -133,6 +140,10 @@ pub mod fixtures {
             help = "Trust level as a fraction, e.g. '2/3'",
         )]
         pub trust_level: super::TrustThreshold,
+
+        /// Trusting period. [default: 2/3 of unbonding period]
+        #[clap(long)]
+        pub trusting_period: Option<u32>,
     }
 
     /// The arguments for the `UpdateClientAndMembership` fixture executable.
@@ -163,6 +174,10 @@ pub mod fixtures {
             help = "Trust level as a fraction, e.g. '2/3'",
         )]
         pub trust_level: super::TrustThreshold,
+
+        /// Trusting period. [default: 2/3 of unbonding period]
+        #[clap(long)]
+        pub trusting_period: Option<u32>,
     }
 }
 

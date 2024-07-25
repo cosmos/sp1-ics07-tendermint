@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
 import { ICS07Tendermint } from "./ics07-tendermint/ICS07Tendermint.sol";
 import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol";
@@ -7,7 +7,6 @@ import { MembershipProgram } from "./ics07-tendermint/MembershipProgram.sol";
 import { UpdateClientAndMembershipProgram } from "./ics07-tendermint/UcAndMembershipProgram.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
-import "forge-std/console.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -26,7 +25,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
-    mapping(uint32 => bytes32) private consensusStateHashes;
+    mapping(uint32 height => bytes32 hash) private consensusStateHashes;
 
     /// Allowed clock drift in seconds
     uint16 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds

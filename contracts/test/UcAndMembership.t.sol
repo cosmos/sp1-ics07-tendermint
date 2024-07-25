@@ -1,16 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
+// solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
-import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { stdError } from "forge-std/StdError.sol";
 import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
-import { UpdateClientProgram } from "../src/ics07-tendermint/UpdateClientProgram.sol";
 import { UpdateClientAndMembershipProgram } from "../src/ics07-tendermint/UcAndMembershipProgram.sol";
 import { MembershipProgram } from "../src/ics07-tendermint/MembershipProgram.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
-import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 
 struct SP1ICS07UcAndMemberhsipFixtureJson {
     bytes trustedClientState;

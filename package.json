@@ -32,7 +32,7 @@
     "clean": "rm -rf contract/cache contract/out",
     "build": "forge build",
     "lint": "bun run lint:sol",
-    "lint:sol": "forge fmt --check && bun solhint 'contracts/**/*.sol'",
+    "lint:sol": "forge fmt --check && bun solhint -c .solhint.json 'contracts/**/*.sol'",
     "test": "forge test",
     "test:coverage": "forge coverage",
     "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"

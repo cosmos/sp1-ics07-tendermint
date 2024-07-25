@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
 import { ICS07Tendermint } from "./ics07-tendermint/ICS07Tendermint.sol";
 import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol";
@@ -7,7 +7,6 @@ import { MembershipProgram } from "./ics07-tendermint/MembershipProgram.sol";
 import { UpdateClientAndMembershipProgram } from "./ics07-tendermint/UcAndMembershipProgram.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
-import "forge-std/console.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -15,44 +14,44 @@ import "forge-std/console.sol";
 /// @custom:poc This is a proof of concept implementation.
 contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
-    bytes32 private immutable updateClientProgramVkey;
+    bytes32 private immutable UPDATE_CLIENT_PROGRAM_VKEY;
     /// @notice The verification key for the verify (non)membership program.
-    bytes32 private immutable membershipProgramVkey;
+    bytes32 private immutable MEMBERSHIP_PROGRAM_VKEY;
     /// @notice The verification key for the update client and membership program.
-    bytes32 private immutable updateClientAndMembershipProgramVkey;
+    bytes32 private immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
     /// @notice The SP1 verifier contract.
-    ISP1Verifier private immutable verifier;
+    ISP1Verifier private immutable VERIFIER;
 
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
-    mapping(uint32 => bytes32) private consensusStateHashes;
+    mapping(uint32 height => bytes32 hash) private consensusStateHashes;
 
     /// Allowed clock drift in seconds
     uint16 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
-    /// @param _updateClientProgramVkey The verification key for the update client program.
-    /// @param _membershipProgramVkey The verification key for the verify (non)membership program.
-    /// @param _updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
-    /// @param _verifier The address of the SP1 verifier contract.
+    /// @param updateClientProgramVkey The verification key for the update client program.
+    /// @param membershipProgramVkey The verification key for the verify (non)membership program.
+    /// @param updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
+    /// @param verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
     constructor(
-        bytes32 _updateClientProgramVkey,
-        bytes32 _membershipProgramVkey,
-        bytes32 _updateClientAndMembershipProgramVkey,
-        address _verifier,
+        bytes32 updateClientProgramVkey,
+        bytes32 membershipProgramVkey,
+        bytes32 updateClientAndMembershipProgramVkey,
+        address verifier,
         bytes memory _clientState,
         bytes32 _consensusState
     ) {
-        updateClientProgramVkey = _updateClientProgramVkey;
-        membershipProgramVkey = _membershipProgramVkey;
-        updateClientAndMembershipProgramVkey = _updateClientAndMembershipProgramVkey;
-        verifier = ISP1Verifier(_verifier);
+        UPDATE_CLIENT_PROGRAM_VKEY = updateClientProgramVkey;
+        MEMBERSHIP_PROGRAM_VKEY = membershipProgramVkey;
+        UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY = updateClientAndMembershipProgramVkey;
+        VERIFIER = ISP1Verifier(verifier);
 
         clientState = abi.decode(_clientState, (ICS07Tendermint.ClientState));
-        consensusStateHashes[clientState.latest_height.revision_height] = _consensusState;
+        consensusStateHashes[clientState.latestHeight.revisionHeight] = _consensusState;
     }
 
     /// @notice Returns the client state.
@@ -71,7 +70,12 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice Returns the verifier information.
     /// @return Returns the verifier contract address and the program verification keys.
     function getVerifierInfo() public view returns (address, bytes32, bytes32, bytes32) {
-        return (address(verifier), updateClientProgramVkey, membershipProgramVkey, updateClientAndMembershipProgramVkey);
+        return (
+            address(VERIFIER),
+            UPDATE_CLIENT_PROGRAM_VKEY,
+            MEMBERSHIP_PROGRAM_VKEY,
+            UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY
+        );
     }
 
     /// @notice The entrypoint for updating the client.
@@ -92,17 +96,17 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         validateUpdateClientPublicValues(output);
 
         // TODO: Make sure that other checks have been made in the proof verification
-        verifier.verifyProof(updateClientProgramVkey, publicValues, proof);
+        VERIFIER.verifyProof(UPDATE_CLIENT_PROGRAM_VKEY, publicValues, proof);
 
         UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(output);
         if (updateResult == UpdateClientProgram.UpdateResult.Update) {
             // adding the new consensus state to the mapping
-            if (output.new_height.revision_height > clientState.latest_height.revision_height) {
-                clientState.latest_height = output.new_height;
+            if (output.newHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
+                clientState.latestHeight = output.newHeight;
             }
-            consensusStateHashes[output.new_height.revision_height] = keccak256(abi.encode(output.new_consensus_state));
+            consensusStateHashes[output.newHeight.revisionHeight] = keccak256(abi.encode(output.newConsensusState));
         } else if (updateResult == UpdateClientProgram.UpdateResult.Misbehaviour) {
-            clientState.is_frozen = true;
+            clientState.isFrozen = true;
         } // else: NoOp
 
         return updateResult;
@@ -132,7 +136,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
 
         require(kvPairHashes.length != 0, "SP1ICS07Tendermint: kvPairs length is zero");
 
-        require(kvPairHashes.length <= output.kv_pairs.length, "SP1ICS07Tendermint: kvPairs length mismatch");
+        require(kvPairHashes.length <= output.kvPairs.length, "SP1ICS07Tendermint: kvPairs length mismatch");
 
         // loop through the key-value pairs and validate them
         for (uint8 i = 0; i < kvPairHashes.length; i++) {
@@ -142,12 +146,12 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
                 continue;
             }
 
-            require(kvPairHash == keccak256(abi.encode(output.kv_pairs[i])), "SP1ICS07Tendermint: kvPair hash mismatch");
+            require(kvPairHash == keccak256(abi.encode(output.kvPairs[i])), "SP1ICS07Tendermint: kvPair hash mismatch");
         }
 
-        validateMembershipOutput(output.commitment_root, proofHeight, trustedConsensusStateBz);
+        validateMembershipOutput(output.commitmentRoot, proofHeight, trustedConsensusStateBz);
 
-        verifier.verifyProof(membershipProgramVkey, publicValues, proof);
+        VERIFIER.verifyProof(MEMBERSHIP_PROGRAM_VKEY, publicValues, proof);
     }
 
     /// @notice The entrypoint for updating the client and membership proof.
@@ -167,24 +171,24 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
             abi.decode(publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
 
-        validateUpdateClientPublicValues(output.update_client_output);
+        validateUpdateClientPublicValues(output.updateClientOutput);
 
-        verifier.verifyProof(updateClientAndMembershipProgramVkey, publicValues, proof);
+        VERIFIER.verifyProof(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, publicValues, proof);
 
-        UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(output.update_client_output);
+        UpdateClientProgram.UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
         if (updateResult == UpdateClientProgram.UpdateResult.Update) {
             // adding the new consensus state to the mapping
-            clientState.latest_height = output.update_client_output.new_height;
-            consensusStateHashes[output.update_client_output.new_height.revision_height] =
-                keccak256(abi.encode(output.update_client_output.new_consensus_state));
+            clientState.latestHeight = output.updateClientOutput.newHeight;
+            consensusStateHashes[output.updateClientOutput.newHeight.revisionHeight] =
+                keccak256(abi.encode(output.updateClientOutput.newConsensusState));
         } else if (updateResult == UpdateClientProgram.UpdateResult.Misbehaviour) {
-            clientState.is_frozen = true;
+            clientState.isFrozen = true;
             return UpdateClientProgram.UpdateResult.Misbehaviour;
         } // else: NoOp
 
         require(kvPairHashes.length != 0, "SP1ICS07Tendermint: kvPairs length is zero");
 
-        require(kvPairHashes.length <= output.kv_pairs.length, "SP1ICS07Tendermint: kvPairs length mismatch");
+        require(kvPairHashes.length <= output.kvPairs.length, "SP1ICS07Tendermint: kvPairs length mismatch");
 
         // loop through the key-value pairs and validate them
         for (uint8 i = 0; i < kvPairHashes.length; i++) {
@@ -194,13 +198,13 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
                 continue;
             }
 
-            require(kvPairHash == keccak256(abi.encode(output.kv_pairs[i])), "SP1ICS07Tendermint: kvPair hash mismatch");
+            require(kvPairHash == keccak256(abi.encode(output.kvPairs[i])), "SP1ICS07Tendermint: kvPair hash mismatch");
         }
 
         validateMembershipOutput(
-            output.update_client_output.new_consensus_state.root,
-            output.update_client_output.new_height.revision_height,
-            abi.encode(output.update_client_output.new_consensus_state)
+            output.updateClientOutput.newConsensusState.root,
+            output.updateClientOutput.newHeight.revisionHeight,
+            abi.encode(output.updateClientOutput.newConsensusState)
         );
 
         return updateResult;
@@ -218,7 +222,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         private
         view
     {
-        require(clientState.is_frozen == false, "SP1ICS07Tendermint: client is frozen");
+        require(clientState.isFrozen == false, "SP1ICS07Tendermint: client is frozen");
         require(
             consensusStateHashes[proofHeight] == keccak256(trustedConsensusStateBz),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
@@ -233,24 +237,22 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
     function validateUpdateClientPublicValues(UpdateClientProgram.UpdateClientOutput memory output) private view {
-        require(clientState.is_frozen == false, "SP1ICS07Tendermint: client is frozen");
+        require(clientState.isFrozen == false, "SP1ICS07Tendermint: client is frozen");
         require(block.timestamp >= output.env.now, "SP1ICS07Tendermint: proof is in the future");
         require(block.timestamp - output.env.now <= ALLOWED_SP1_CLOCK_DRIFT, "SP1ICS07Tendermint: proof is too old");
         require(
-            keccak256(bytes(output.env.chain_id)) == keccak256(bytes(clientState.chain_id)),
+            keccak256(bytes(output.env.chainId)) == keccak256(bytes(clientState.chainId)),
             "SP1ICS07Tendermint: chain ID mismatch"
         );
         require(
-            output.env.trust_threshold.numerator == clientState.trust_level.numerator
-                && output.env.trust_threshold.denominator == clientState.trust_level.denominator,
+            output.env.trustThreshold.numerator == clientState.trustLevel.numerator
+                && output.env.trustThreshold.denominator == clientState.trustLevel.denominator,
             "SP1ICS07Tendermint: trust threshold mismatch"
         );
+        require(output.env.trustingPeriod == clientState.trustingPeriod, "SP1ICS07Tendermint: trusting period mismatch");
         require(
-            output.env.trusting_period == clientState.trusting_period, "SP1ICS07Tendermint: trusting period mismatch"
-        );
-        require(
-            consensusStateHashes[output.trusted_height.revision_height]
-                == keccak256(abi.encode(output.trusted_consensus_state)),
+            consensusStateHashes[output.trustedHeight.revisionHeight]
+                == keccak256(abi.encode(output.trustedConsensusState)),
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );
         // TODO: Make sure that we don't need more checks.
@@ -265,12 +267,12 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
         view
         returns (UpdateClientProgram.UpdateResult)
     {
-        bytes32 consensusStateHash = consensusStateHashes[output.new_height.revision_height];
+        bytes32 consensusStateHash = consensusStateHashes[output.newHeight.revisionHeight];
         if (consensusStateHash == bytes32(0)) {
             // No consensus state at the new height, so no misbehaviour
             return UpdateClientProgram.UpdateResult.Update;
         }
-        if (consensusStateHash != keccak256(abi.encode(output.new_consensus_state))) {
+        if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
             // The consensus state at the new height is different than the one in the mapping
             return UpdateClientProgram.UpdateResult.Misbehaviour;
         } else {
@@ -286,6 +288,7 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     )
         public
         pure
+    // solhint-disable-next-line no-empty-blocks
     {
         // This is a dummy function to generate the ABI for MembershipOutput
         // so that it can be used in the SP1 verifier contract.

@@ -78,9 +78,9 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
     let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {
-        chain_id: trusted_light_block.chain_id()?.to_string(),
-        trust_threshold: trusted_client_state.trust_level.clone(),
-        trusting_period: trusted_client_state.trusting_period,
+        chainId: trusted_light_block.chain_id()?.to_string(),
+        trustThreshold: trusted_client_state.trustLevel.clone(),
+        trustingPeriod: trusted_client_state.trustingPeriod,
         now: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)?
             .as_secs(),
@@ -126,7 +126,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         trusted_consensus_state: hex::encode(trusted_consensus_state.abi_encode()),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
         target_consensus_state: hex::encode(
-            output.update_client_output.new_consensus_state.abi_encode(),
+            output.updateClientOutput.newConsensusState.abi_encode(),
         ),
         target_height: args.target_block,
         update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
@@ -134,7 +134,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         uc_and_membership_vkey: uc_mem_prover.vkey.bytes32(),
         public_values: proof_data.public_values.raw(),
         proof: format!("0x{}", hex::encode(proof_data.bytes())),
-        kv_pairs: hex::encode(output.kv_pairs.abi_encode()),
+        kv_pairs: hex::encode(output.kvPairs.abi_encode()),
     };
 
     // Save the proof data to the file path.

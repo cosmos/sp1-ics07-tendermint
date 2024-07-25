@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
 import { ICS07Tendermint } from "./ics07-tendermint/ICS07Tendermint.sol";
 import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol";

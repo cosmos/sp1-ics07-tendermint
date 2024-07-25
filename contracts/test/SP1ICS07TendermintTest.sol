@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
+// solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
 import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { stdError } from "forge-std/StdError.sol";
 import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
-import { SP1Verifier } from "@sp1-contracts/v1.0.0-rc1/SP1Verifier.sol";
+import { SP1Verifier } from "@sp1-contracts/v1.0.1/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 
 struct SP1ICS07GenesisFixtureJson {
@@ -67,7 +67,7 @@ abstract contract SP1ICS07TendermintTest is Test {
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(mockGenesisFixture.trustedClientState));
 
-        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latest_height.revision_height);
+        bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
         assert(consensusHash == mockTrustedConsensusHash);
     }
 

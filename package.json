@@ -9,10 +9,10 @@
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.1",
-    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.0-rc"
+    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.1"
   },
   "devDependencies": {
-    "solhint": "^3.6.2"
+    "solhint": "^5.0.1"
   },
   "keywords": [
     "blockchain",
@@ -32,7 +32,7 @@
     "clean": "rm -rf contract/cache contract/out",
     "build": "forge build",
     "lint": "bun run lint:sol",
-    "lint:sol": "forge fmt --check && bun solhint {script,src,test}/**/*.sol",
+    "lint:sol": "forge fmt --check && bun solhint -c .solhint.json 'contracts/**/*.sol'",
     "test": "forge test",
     "test:coverage": "forge coverage",
     "test:coverage:report": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage"

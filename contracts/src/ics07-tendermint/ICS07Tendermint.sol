@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
 /// @title ICS07Tendermint
 /// @author srdtrk
@@ -8,9 +8,9 @@ contract ICS07Tendermint {
     /// @notice Height of the counterparty chain
     struct Height {
         /// Previously known as "epoch"
-        uint32 revision_number;
+        uint32 revisionNumber;
         /// The height of a block
-        uint32 revision_height;
+        uint32 revisionHeight;
     }
 
     /// Fraction of validator overlap needed to update header
@@ -24,18 +24,18 @@ contract ICS07Tendermint {
     /// @notice Defines the ICS07Tendermint ClientState for ibc-lite
     struct ClientState {
         /// Chain ID
-        string chain_id;
+        string chainId;
         /// Fraction of validator overlap needed to update header
-        TrustThreshold trust_level;
+        TrustThreshold trustLevel;
         /// Latest height the client was updated to
-        Height latest_height;
+        Height latestHeight;
         /// duration of the period since the LatestTimestamp during which the
         /// submitted headers are valid for upgrade in seconds
-        uint32 trusting_period;
+        uint32 trustingPeriod;
         /// duration of the staking unbonding period in seconds
-        uint32 unbonding_period;
+        uint32 unbondingPeriod;
         /// whether or not client is frozen (due to misbehavior)
-        bool is_frozen;
+        bool isFrozen;
     }
 
     /// Defines the Tendermint light client's consensus state at some height.
@@ -46,6 +46,6 @@ contract ICS07Tendermint {
         /// commitment root (i.e app hash)
         bytes32 root;
         /// next validators hash
-        bytes32 next_validators_hash;
+        bytes32 nextValidatorsHash;
     }
 }

@@ -74,9 +74,9 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
     let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {
-        chain_id: trusted_light_block.chain_id()?.to_string(),
-        trust_threshold: trusted_client_state.trust_level.clone(),
-        trusting_period: trusted_client_state.trusting_period,
+        chainId: trusted_light_block.chain_id()?.to_string(),
+        trustThreshold: trusted_client_state.trustLevel.clone(),
+        trustingPeriod: trusted_client_state.trustingPeriod,
         now: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)?
             .as_secs(),
@@ -92,7 +92,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let fixture = SP1ICS07UpdateClientFixture {
         trusted_consensus_state: hex::encode(trusted_consensus_state.abi_encode()),
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
-        target_consensus_state: hex::encode(output.new_consensus_state.abi_encode()),
+        target_consensus_state: hex::encode(output.newConsensusState.abi_encode()),
         target_height: args.target_block,
         update_client_vkey: uc_prover.vkey.bytes32(),
         membership_vkey: MembershipProgram::get_vkey().bytes32(),

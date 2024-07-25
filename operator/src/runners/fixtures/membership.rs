@@ -104,7 +104,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
 
     let bytes = proof_data.public_values.as_slice();
     let output = MembershipOutput::abi_decode(bytes, true).unwrap();
-    assert_eq!(output.commitment_root.as_slice(), &commitment_root_bytes);
+    assert_eq!(output.commitmentRoot.as_slice(), &commitment_root_bytes);
 
     let fixture = SP1ICS07MembershipFixture {
         trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
@@ -118,7 +118,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
         public_values: proof_data.public_values.raw(),
         proof: format!("0x{}", hex::encode(proof_data.bytes())),
-        kv_pairs: hex::encode(output.kv_pairs.abi_encode()),
+        kv_pairs: hex::encode(output.kvPairs.abi_encode()),
     };
 
     // Save the proof data to the file path.

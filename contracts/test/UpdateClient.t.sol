@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity >=0.8.25;
 
+// solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
-import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { stdError } from "forge-std/StdError.sol";
 import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
 import { UpdateClientProgram } from "../src/ics07-tendermint/UpdateClientProgram.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
-import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 
 struct SP1ICS07UpdateClientFixtureJson {
     bytes trustedClientState;
@@ -32,7 +30,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         setUpTest("update_client_fixture.json", "mock_update_client_fixture.json");
 
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(clientState.latest_height.revision_height < mockFixture.targetHeight);
+        assert(clientState.latestHeight.revisionHeight < mockFixture.targetHeight);
 
         assert(mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight) == bytes32(0));
     }
@@ -75,9 +73,9 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(res == UpdateClientProgram.UpdateResult.Update);
 
         ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(keccak256(bytes(clientState.chain_id)) == keccak256(bytes("mocha-4")));
-        assert(clientState.latest_height.revision_height == fixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
+        assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =
@@ -116,8 +114,8 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
 
         assert(res == UpdateClientProgram.UpdateResult.Update);
         ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(clientState.latest_height.revision_height == mockFixture.targetHeight);
-        assert(clientState.is_frozen == false);
+        assert(clientState.latestHeight.revisionHeight == mockFixture.targetHeight);
+        assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight);
         ICS07Tendermint.ConsensusState memory expConsensusState =

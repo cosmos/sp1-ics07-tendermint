@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -67,7 +68,10 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 	}))
 
 	s.Require().True(s.Run("Deploy contracts", func() {
-		s.Require().NoError(operator.RunGenesis("--trust-level", testvalues.DefaultTrustLevel.String()))
+		s.Require().NoError(operator.RunGenesis(
+			"--trust-level", testvalues.DefaultTrustLevel.String(),
+			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+		))
 
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
 			ContractRootDir:  ".",
@@ -110,12 +114,10 @@ func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
 		stakingParams, err := simd.StakingQueryParams(ctx)
 		s.Require().NoError(err)
 
-		expectedTrustingPeriod := (stakingParams.UnbondingTime.Seconds() / 3) * 2
-
 		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Numerator), clientState.TrustLevel.Numerator)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Denominator), clientState.TrustLevel.Denominator)
-		s.Require().Equal(uint32(expectedTrustingPeriod), clientState.TrustingPeriod)
+		s.Require().Equal(uint32(testvalues.DefaultTrustPeriod), clientState.TrustingPeriod)
 		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
@@ -142,12 +144,10 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 		stakingParams, err := simd.StakingQueryParams(ctx)
 		s.Require().NoError(err)
 
-		expectedTrustingPeriod := (stakingParams.UnbondingTime.Seconds() / 3) * 2
-
 		s.Require().Equal(simd.Config().ChainID, clientState.ChainId)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Numerator), clientState.TrustLevel.Numerator)
 		s.Require().Equal(uint8(testvalues.DefaultTrustLevel.Denominator), clientState.TrustLevel.Denominator)
-		s.Require().Equal(uint32(expectedTrustingPeriod), clientState.TrustingPeriod)
+		s.Require().Equal(uint32(testvalues.DefaultTrustPeriod), clientState.TrustingPeriod)
 		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)

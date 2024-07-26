@@ -56,8 +56,17 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         .seconds
         .try_into()?;
 
-    let trusted_client_state =
-        trusted_light_block.to_sol_client_state(args.trust_level.try_into()?, unbonding_period)?;
+    // Defaults to the recommended TrustingPeriod: 2/3 of the UnbondingPeriod
+    let trusting_period = args
+        .trust_options
+        .trusting_period
+        .unwrap_or(2 * (unbonding_period / 3));
+
+    let trusted_client_state = trusted_light_block.to_sol_client_state(
+        args.trust_options.trust_level.try_into()?,
+        unbonding_period,
+        trusting_period,
+    )?;
     let trusted_consensus_state = trusted_light_block.to_consensus_state();
     let genesis = SP1ICS07TendermintGenesis {
         trusted_consensus_state: hex::encode(

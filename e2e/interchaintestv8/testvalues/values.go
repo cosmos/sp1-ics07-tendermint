@@ -41,4 +41,7 @@ var (
 
 	// DefaultTrustLevel is the trust level used by the SP1ICS07Tendermint contract.
 	DefaultTrustLevel = ibctm.Fraction{Numerator: 2, Denominator: 3}.ToTendermint()
+
+	// DefaultTrustPeriod is the trust period used by the SP1ICS07Tendermint contract.
+	DefaultTrustPeriod = 1209669
 )

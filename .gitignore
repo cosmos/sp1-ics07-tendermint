@@ -11,6 +11,10 @@ pgo-data.profdata
 # MacOS nuisances
 .DS_Store
 
+# IDE files
+.idea/
+*.iml
+
 # Proofs
 **/proof-with-pis.json
 **/proof-with-io.json

@@ -23,6 +23,23 @@ pub enum Commands {
     Fixtures(fixtures::Cmd),
 }
 
+/// The trust options for client operations.
+#[derive(Clone, Debug, Parser)]
+pub struct TrustOptions {
+    /// Trust level.
+    #[clap(
+        long,
+        default_value = "1/3",
+        value_parser = parse_trust_threshold,
+        help = "Trust level as a fraction, e.g. '2/3'",
+    )]
+    pub trust_level: TrustThreshold,
+
+    /// Trusting period. [default: 2/3 of unbonding period]
+    #[clap(long)]
+    pub trusting_period: Option<u32>,
+}
+
 /// The cli interface for the genesis command.
 pub mod genesis {
     use super::Parser;
@@ -33,23 +50,21 @@ pub mod genesis {
         /// Trusted block height. [default: latest]
         #[clap(long)]
         pub trusted_block: Option<u32>,
+
         /// Genesis path.
         #[clap(long, default_value = "../contracts/script")]
         pub genesis_path: String,
-        /// Trust level.
-        #[clap(
-            long,
-            default_value = "1/3",
-            value_parser = super::parse_trust_threshold,
-            help = "Trust level as a fraction, e.g. '2/3'",
-        )]
-        pub trust_level: super::TrustThreshold,
+
+        /// Trust options
+        #[clap(flatten)]
+        pub trust_options: super::TrustOptions,
     }
 }
 
 /// The cli interface for the operator.
 pub mod operator {
     use super::Parser;
+
     /// Command line arguments for the operator.
     #[derive(Parser, Debug, Clone)]
     pub struct Args {
@@ -99,14 +114,9 @@ pub mod fixtures {
         #[clap(long, short = 'o')]
         pub output_path: String,
 
-        /// Trust level.
-        #[clap(
-            long,
-            default_value = "1/3",
-            value_parser = super::parse_trust_threshold,
-            help = "Trust level as a fraction, e.g. '2/3'",
-        )]
-        pub trust_level: super::TrustThreshold,
+        /// Trust options
+        #[clap(flatten)]
+        pub trust_options: super::TrustOptions,
     }
 
     /// The arguments for the `Membership` fixture executable.
@@ -125,14 +135,9 @@ pub mod fixtures {
         #[clap(long, short = 'o')]
         pub output_path: String,
 
-        /// Trust level.
-        #[clap(
-            long,
-            default_value = "1/3",
-            value_parser = super::parse_trust_threshold,
-            help = "Trust level as a fraction, e.g. '2/3'",
-        )]
-        pub trust_level: super::TrustThreshold,
+        /// Trust options
+        #[clap(flatten)]
+        pub trust_options: super::TrustOptions,
     }
 
     /// The arguments for the `UpdateClientAndMembership` fixture executable.
@@ -155,14 +160,9 @@ pub mod fixtures {
         #[clap(long, short = 'o')]
         pub output_path: String,
 
-        /// Trust level.
-        #[clap(
-            long,
-            default_value = "1/3",
-            value_parser = super::parse_trust_threshold,
-            help = "Trust level as a fraction, e.g. '2/3'",
-        )]
-        pub trust_level: super::TrustThreshold,
+        /// Trust options
+        #[clap(flatten)]
+        pub trust_options: super::TrustOptions,
     }
 }
 

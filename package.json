@@ -30,7 +30,7 @@
   ],
   "private": true,
   "scripts": {
-    "clean": "rm -rf contract/cache contract/out",
+    "clean": "rm -rf contracts/cache contracts/out",
     "build": "forge build",
     "lint": "bun run lint:sol",
     "lint:sol": "forge fmt --check && bun solhint -c .solhint.json 'contracts/**/*.sol'",

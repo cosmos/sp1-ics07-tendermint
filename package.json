@@ -9,7 +9,8 @@
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.1",
-    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.1"
+    "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.0.1",
+    "solidity-ibc": "github.com:srdtrk/solidity-ibc-eureka#9c66ebf2fdc159b7ab954fe6849572b3f6f1073d"
   },
   "devDependencies": {
     "solhint": "^5.0.1"

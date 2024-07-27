@@ -46,7 +46,7 @@ pub fn membership(
             }
 
             KVPair {
-                key: path_str,
+                path: path_str.into(),
                 value: value.into(),
             }
         })

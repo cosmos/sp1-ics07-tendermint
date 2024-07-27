@@ -66,7 +66,7 @@ This project contains the following programs
 - [SP1](https://succinctlabs.github.io/sp1/getting-started/install.html)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh/)
-- [Just](https://just.systems/man/en/) (recommended)
+- [Just](https://just.systems/man/en/)
 
 Foundry typically uses git submodules to manage contract dependencies, but this template uses Node.js packages (via Bun) because submodules don't scale. You can install the contracts dependencies by running the following command:
 

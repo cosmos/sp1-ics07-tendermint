@@ -4,9 +4,6 @@ pragma solidity >=0.8.25;
 // solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
-import { UpdateClientAndMembershipProgram } from "../src/ics07-tendermint/UcAndMembershipProgram.sol";
-import { MembershipProgram } from "../src/ics07-tendermint/MembershipProgram.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
 
 struct SP1ICS07UcAndMemberhsipFixtureJson {
@@ -34,7 +31,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
 
         setUpTest("uc_and_memberships_fixture.json", "mock_uc_and_memberships_fixture.json");
 
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
+        ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(clientState.latestHeight.revisionHeight < mockFixture.targetHeight);
     }
 
@@ -65,8 +62,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
 
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidUpdateClientAndMultiMembership() public {
-        UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
-            abi.decode(fixture.publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
+        UcAndMembershipOutput memory output = abi.decode(fixture.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
         vm.warp(output.updateClientOutput.env.now + 300);
 
@@ -80,19 +76,17 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         // to console
         console.log("UpdateClientAndMultiMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
-        ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
+        ClientState memory clientState = ics07Tendermint.getClientState();
         assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
         assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
-        ICS07Tendermint.ConsensusState memory expConsensusState =
-            abi.decode(fixture.targetConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory expConsensusState = abi.decode(fixture.targetConsensusState, (ConsensusState));
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     function test_ValidMockUpdateClientAndMultiMembership() public {
-        UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
-            abi.decode(mockFixture.publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
+        UcAndMembershipOutput memory output = abi.decode(mockFixture.publicValues, (UcAndMembershipOutput));
         vm.warp(output.updateClientOutput.env.now + 300);
 
         bytes32[] memory kvPairHashes = new bytes32[](2);
@@ -101,20 +95,18 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
 
         mockIcs07Tendermint.updateClientAndBatchVerifyMembership(bytes(""), mockFixture.publicValues, kvPairHashes);
 
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
+        ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
         assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
         assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight);
-        ICS07Tendermint.ConsensusState memory expConsensusState =
-            abi.decode(mockFixture.targetConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory expConsensusState = abi.decode(mockFixture.targetConsensusState, (ConsensusState));
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     function test_ValidUpdateClientAndVerifyMembership() public {
-        UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output =
-            abi.decode(fixture.publicValues, (UpdateClientAndMembershipProgram.UcAndMembershipOutput));
+        UcAndMembershipOutput memory output = abi.decode(fixture.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
         vm.warp(output.updateClientOutput.env.now + 300);
 
@@ -128,14 +120,13 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         // to console
         console.log("UpdateClientAndVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
-        ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
+        ClientState memory clientState = ics07Tendermint.getClientState();
         assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
         assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
         assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
-        ICS07Tendermint.ConsensusState memory expConsensusState =
-            abi.decode(fixture.targetConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory expConsensusState = abi.decode(fixture.targetConsensusState, (ConsensusState));
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
@@ -166,11 +157,11 @@ contract SP1ICS07UpdateClientAndMembershipTest is SP1ICS07TendermintTest {
         ics07Tendermint.updateClientAndBatchVerifyMembership(bytes("invalid"), fixture.publicValues, kvPairHashes);
     }
 
-    function kvPairs() public view returns (MembershipProgram.KVPair[] memory) {
-        return abi.decode(fixture.kvPairsBz, (MembershipProgram.KVPair[]));
+    function kvPairs() public view returns (KVPair[] memory) {
+        return abi.decode(fixture.kvPairsBz, (KVPair[]));
     }
 
-    function mockKvPairs() public view returns (MembershipProgram.KVPair[] memory) {
-        return abi.decode(mockFixture.kvPairsBz, (MembershipProgram.KVPair[]));
+    function mockKvPairs() public view returns (KVPair[] memory) {
+        return abi.decode(mockFixture.kvPairsBz, (KVPair[]));
     }
 }

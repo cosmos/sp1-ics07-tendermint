@@ -5,7 +5,6 @@ pragma solidity >=0.8.25;
 import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
-import { MembershipProgram } from "../src/ics07-tendermint/MembershipProgram.sol";
 
 struct SP1ICS07MembershipFixtureJson {
     uint32 proofHeight;
@@ -30,12 +29,12 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
         setUpTest(fileName, mockFileName);
     }
 
-    function kvPairs() public view returns (MembershipProgram.KVPair[] memory) {
-        return abi.decode(fixture.kvPairsBz, (MembershipProgram.KVPair[]));
+    function kvPairs() public view returns (KVPair[] memory) {
+        return abi.decode(fixture.kvPairsBz, (KVPair[]));
     }
 
-    function mockKvPairs() public view returns (MembershipProgram.KVPair[] memory) {
-        return abi.decode(mockFixture.kvPairsBz, (MembershipProgram.KVPair[]));
+    function mockKvPairs() public view returns (KVPair[] memory) {
+        return abi.decode(mockFixture.kvPairsBz, (KVPair[]));
     }
 
     function loadFixture(string memory fileName) public view returns (SP1ICS07MembershipFixtureJson memory) {

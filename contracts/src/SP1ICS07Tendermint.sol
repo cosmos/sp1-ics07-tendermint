@@ -12,7 +12,12 @@ import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client using SP1.
 /// @custom:poc This is a proof of concept implementation.
-contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembershipMsgs, IUpdateClientAndMembershipMsgs{
+contract SP1ICS07Tendermint is
+    IICS07TendermintMsgs,
+    IUpdateClientMsgs,
+    IMembershipMsgs,
+    IUpdateClientAndMembershipMsgs
+{
     /// @notice The verification key for the update client program.
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
     /// @notice The verification key for the verify (non)membership program.
@@ -72,15 +77,8 @@ contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembers
     /// @param proof The encoded proof.
     /// @param publicValues The encoded public values.
     /// @return The result of the update.
-    function updateClient(
-        bytes calldata proof,
-        bytes calldata publicValues
-    )
-        public
-        returns (UpdateResult)
-    {
-        UpdateClientOutput memory output =
-            abi.decode(publicValues, (UpdateClientOutput));
+    function updateClient(bytes calldata proof, bytes calldata publicValues) public returns (UpdateResult) {
+        UpdateClientOutput memory output = abi.decode(publicValues, (UpdateClientOutput));
 
         validateUpdateClientPublicValues(output);
 
@@ -120,8 +118,7 @@ contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembers
         public
         view
     {
-        MembershipOutput memory output =
-            abi.decode(publicValues, (MembershipOutput));
+        MembershipOutput memory output = abi.decode(publicValues, (MembershipOutput));
 
         require(kvPairHashes.length != 0, "SP1ICS07Tendermint: kvPairs length is zero");
 
@@ -157,8 +154,7 @@ contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembers
         public
         returns (UpdateResult)
     {
-        UcAndMembershipOutput memory output =
-            abi.decode(publicValues, (UcAndMembershipOutput));
+        UcAndMembershipOutput memory output = abi.decode(publicValues, (UcAndMembershipOutput));
 
         validateUpdateClientPublicValues(output.updateClientOutput);
 
@@ -217,8 +213,7 @@ contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembers
             "SP1ICS07Tendermint: trusted consensus state mismatch"
         );
 
-        ConsensusState memory trustedConsensusState =
-            abi.decode(trustedConsensusStateBz, (ConsensusState));
+        ConsensusState memory trustedConsensusState = abi.decode(trustedConsensusStateBz, (ConsensusState));
 
         require(outputCommitmentRoot == trustedConsensusState.root, "SP1ICS07Tendermint: invalid commitment root");
     }
@@ -255,11 +250,7 @@ contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembers
     /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
     /// @dev This function does not check timestamp misbehaviour (a niche case).
     /// @param output The public values of the update client program.
-    function checkUpdateResult(UpdateClientOutput memory output)
-        private
-        view
-        returns (UpdateResult)
-    {
+    function checkUpdateResult(UpdateClientOutput memory output) private view returns (UpdateResult) {
         bytes32 consensusStateHash = consensusStateHashes[output.newHeight.revisionHeight];
         if (consensusStateHash == bytes32(0)) {
             // No consensus state at the new height, so no misbehaviour
@@ -275,12 +266,7 @@ contract SP1ICS07Tendermint is IICS07TendermintMsgs, IUpdateClientMsgs, IMembers
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.
-    function abiPublicTypes(
-        MembershipOutput memory output,
-        UcAndMembershipOutput memory output2
-    )
-        public
-        pure
+    function abiPublicTypes(MembershipOutput memory output, UcAndMembershipOutput memory output2) public pure 
     // solhint-disable-next-line no-empty-blocks
     {
         // This is a dummy function to generate the ABI for MembershipOutput

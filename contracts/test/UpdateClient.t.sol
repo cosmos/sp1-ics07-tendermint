@@ -4,8 +4,6 @@ pragma solidity >=0.8.25;
 // solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
-import { UpdateClientProgram } from "../src/ics07-tendermint/UpdateClientProgram.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
 
 struct SP1ICS07UpdateClientFixtureJson {
@@ -29,7 +27,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
 
         setUpTest("update_client_fixture.json", "mock_update_client_fixture.json");
 
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
+        ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(clientState.latestHeight.revisionHeight < mockFixture.targetHeight);
 
         assert(mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight) == bytes32(0));
@@ -61,65 +59,60 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidUpdateClient() public {
         // set a correct timestamp
-        UpdateClientProgram.UpdateClientOutput memory output =
-            abi.decode(fixture.publicValues, (UpdateClientProgram.UpdateClientOutput));
+        UpdateClientOutput memory output = abi.decode(fixture.publicValues, (UpdateClientOutput));
         vm.warp(output.env.now + 300);
 
         // run verify
-        UpdateClientProgram.UpdateResult res = ics07Tendermint.updateClient(fixture.proof, fixture.publicValues);
+        UpdateResult res = ics07Tendermint.updateClient(fixture.proof, fixture.publicValues);
 
         // to console
         console.log("UpdateClient gas used: ", vm.lastCallGas().gasTotalUsed);
-        assert(res == UpdateClientProgram.UpdateResult.Update);
+        assert(res == UpdateResult.Update);
 
-        ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
+        ClientState memory clientState = ics07Tendermint.getClientState();
         assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
         assert(clientState.latestHeight.revisionHeight == fixture.targetHeight);
         assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(fixture.targetHeight);
-        ICS07Tendermint.ConsensusState memory expConsensusState =
-            abi.decode(fixture.targetConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory expConsensusState = abi.decode(fixture.targetConsensusState, (ConsensusState));
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidNoOpUpdateClient() public {
         // set a correct timestamp
-        UpdateClientProgram.UpdateClientOutput memory output =
-            abi.decode(fixture.publicValues, (UpdateClientProgram.UpdateClientOutput));
+        UpdateClientOutput memory output = abi.decode(fixture.publicValues, (UpdateClientOutput));
         vm.warp(output.env.now + 300);
 
         // run verify
-        UpdateClientProgram.UpdateResult res = ics07Tendermint.updateClient(fixture.proof, fixture.publicValues);
-        assert(res == UpdateClientProgram.UpdateResult.Update);
+        UpdateResult res = ics07Tendermint.updateClient(fixture.proof, fixture.publicValues);
+        assert(res == UpdateResult.Update);
 
         // run verify again
         res = ics07Tendermint.updateClient(fixture.proof, fixture.publicValues);
 
         // to console
         console.log("UpdateClient_NoOp gas used: ", vm.lastCallGas().gasTotalUsed);
-        assert(res == UpdateClientProgram.UpdateResult.NoOp);
+        assert(res == UpdateResult.NoOp);
     }
 
     // Confirm that submitting an empty proof passes the mock verifier.
     function test_ValidMockUpdateClient() public {
         // set a correct timestamp
-        UpdateClientProgram.UpdateClientOutput memory output =
-            abi.decode(mockFixture.publicValues, (UpdateClientProgram.UpdateClientOutput));
+        UpdateClientOutput memory output = abi.decode(mockFixture.publicValues, (UpdateClientOutput));
         vm.warp(output.env.now + 300);
 
         // run verify
-        UpdateClientProgram.UpdateResult res = mockIcs07Tendermint.updateClient(bytes(""), mockFixture.publicValues);
+        UpdateResult res = mockIcs07Tendermint.updateClient(bytes(""), mockFixture.publicValues);
 
-        assert(res == UpdateClientProgram.UpdateResult.Update);
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
+        assert(res == UpdateResult.Update);
+        ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(clientState.latestHeight.revisionHeight == mockFixture.targetHeight);
         assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(mockFixture.targetHeight);
-        ICS07Tendermint.ConsensusState memory expConsensusState =
-            abi.decode(fixture.targetConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory expConsensusState = abi.decode(fixture.targetConsensusState, (ConsensusState));
         assert(consensusHash == keccak256(abi.encode(expConsensusState)));
     }
 

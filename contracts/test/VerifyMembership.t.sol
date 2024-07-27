@@ -15,11 +15,11 @@ contract SP1ICS07VerifyMembershipTest is MembershipTest {
 
     function test_ValidateFixtures() public view {
         assertEq(kvPairs().length, 1);
-        assertEq(kvPairs()[0].key, verifyMembershipPath);
+        assertEq(string(kvPairs()[0].path), verifyMembershipPath);
         assert(kvPairs()[0].value.length != 0);
 
         assertEq(mockKvPairs().length, 1);
-        assertEq(mockKvPairs()[0].key, verifyMembershipPath);
+        assertEq(string(mockKvPairs()[0].path), verifyMembershipPath);
         assert(mockKvPairs()[0].value.length != 0);
     }
 

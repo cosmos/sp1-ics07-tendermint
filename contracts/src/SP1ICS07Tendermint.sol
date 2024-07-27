@@ -6,21 +6,21 @@ import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol"
 import { MembershipProgram } from "./ics07-tendermint/MembershipProgram.sol";
 import { UpdateClientAndMembershipProgram } from "./ics07-tendermint/UcAndMembershipProgram.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
-import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
+import { ILightClient } from "ibc-solidity-interfaces/ILightClient.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
 /// @notice This contract implements an ICS07 IBC tendermint light client using SP1.
 /// @custom:poc This is a proof of concept implementation.
-contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
+contract SP1ICS07Tendermint {
     /// @notice The verification key for the update client program.
-    bytes32 private immutable UPDATE_CLIENT_PROGRAM_VKEY;
+    bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
     /// @notice The verification key for the verify (non)membership program.
-    bytes32 private immutable MEMBERSHIP_PROGRAM_VKEY;
+    bytes32 public immutable MEMBERSHIP_PROGRAM_VKEY;
     /// @notice The verification key for the update client and membership program.
-    bytes32 private immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
+    bytes32 public immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
     /// @notice The SP1 verifier contract.
-    ISP1Verifier private immutable VERIFIER;
+    ISP1Verifier public immutable VERIFIER;
 
     /// @notice The ICS07Tendermint client state
     ICS07Tendermint.ClientState private clientState;
@@ -65,17 +65,6 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @return The consensus state at the given revision height.
     function getConsensusStateHash(uint32 revisionHeight) public view returns (bytes32) {
         return consensusStateHashes[revisionHeight];
-    }
-
-    /// @notice Returns the verifier information.
-    /// @return Returns the verifier contract address and the program verification keys.
-    function getVerifierInfo() public view returns (address, bytes32, bytes32, bytes32) {
-        return (
-            address(VERIFIER),
-            UPDATE_CLIENT_PROGRAM_VKEY,
-            MEMBERSHIP_PROGRAM_VKEY,
-            UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY
-        );
     }
 
     /// @notice The entrypoint for updating the client.

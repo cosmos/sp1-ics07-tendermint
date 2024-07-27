@@ -50,12 +50,64 @@
   },
   {
     "type": "function",
+    "name": "MEMBERSHIP_PROGRAM_VKEY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "UPDATE_CLIENT_PROGRAM_VKEY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "VERIFIER",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract ISP1Verifier"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "abiPublicTypes",
     "inputs": [
       {
         "name": "output",
         "type": "tuple",
-        "internalType": "struct MembershipProgram.MembershipOutput",
+        "internalType": "struct IMembershipMsgs.MembershipOutput",
         "components": [
           {
             "name": "commitmentRoot",
@@ -65,12 +117,12 @@
           {
             "name": "kvPairs",
             "type": "tuple[]",
-            "internalType": "struct MembershipProgram.KVPair[]",
+            "internalType": "struct ILightClientMsgs.KVPair[]",
             "components": [
               {
-                "name": "key",
-                "type": "string",
-                "internalType": "string"
+                "name": "path",
+                "type": "bytes",
+                "internalType": "bytes"
               },
               {
                 "name": "value",
@@ -84,17 +136,17 @@
       {
         "name": "output2",
         "type": "tuple",
-        "internalType": "struct UpdateClientAndMembershipProgram.UcAndMembershipOutput",
+        "internalType": "struct IUpdateClientAndMembershipMsgs.UcAndMembershipOutput",
         "components": [
           {
             "name": "updateClientOutput",
             "type": "tuple",
-            "internalType": "struct UpdateClientProgram.UpdateClientOutput",
+            "internalType": "struct IUpdateClientMsgs.UpdateClientOutput",
             "components": [
               {
                 "name": "trustedConsensusState",
                 "type": "tuple",
-                "internalType": "struct ICS07Tendermint.ConsensusState",
+                "internalType": "struct IICS07TendermintMsgs.ConsensusState",
                 "components": [
                   {
                     "name": "timestamp",
@@ -116,7 +168,7 @@
               {
                 "name": "newConsensusState",
                 "type": "tuple",
-                "internalType": "struct ICS07Tendermint.ConsensusState",
+                "internalType": "struct IICS07TendermintMsgs.ConsensusState",
                 "components": [
                   {
                     "name": "timestamp",
@@ -138,7 +190,7 @@
               {
                 "name": "env",
                 "type": "tuple",
-                "internalType": "struct UpdateClientProgram.Env",
+                "internalType": "struct IUpdateClientMsgs.Env",
                 "components": [
                   {
                     "name": "chainId",
@@ -148,7 +200,7 @@
                   {
                     "name": "trustThreshold",
                     "type": "tuple",
-                    "internalType": "struct ICS07Tendermint.TrustThreshold",
+                    "internalType": "struct IICS07TendermintMsgs.TrustThreshold",
                     "components": [
                       {
                         "name": "numerator",
@@ -177,7 +229,7 @@
               {
                 "name": "trustedHeight",
                 "type": "tuple",
-                "internalType": "struct ICS07Tendermint.Height",
+                "internalType": "struct IICS02ClientMsgs.Height",
                 "components": [
                   {
                     "name": "revisionNumber",
@@ -194,7 +246,7 @@
               {
                 "name": "newHeight",
                 "type": "tuple",
-                "internalType": "struct ICS07Tendermint.Height",
+                "internalType": "struct IICS02ClientMsgs.Height",
                 "components": [
                   {
                     "name": "revisionNumber",
@@ -213,12 +265,12 @@
           {
             "name": "kvPairs",
             "type": "tuple[]",
-            "internalType": "struct MembershipProgram.KVPair[]",
+            "internalType": "struct ILightClientMsgs.KVPair[]",
             "components": [
               {
-                "name": "key",
-                "type": "string",
-                "internalType": "string"
+                "name": "path",
+                "type": "bytes",
+                "internalType": "bytes"
               },
               {
                 "name": "value",
@@ -274,7 +326,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct ICS07Tendermint.ClientState",
+        "internalType": "struct IICS07TendermintMsgs.ClientState",
         "components": [
           {
             "name": "chainId",
@@ -284,7 +336,7 @@
           {
             "name": "trustLevel",
             "type": "tuple",
-            "internalType": "struct ICS07Tendermint.TrustThreshold",
+            "internalType": "struct IICS07TendermintMsgs.TrustThreshold",
             "components": [
               {
                 "name": "numerator",
@@ -301,7 +353,7 @@
           {
             "name": "latestHeight",
             "type": "tuple",
-            "internalType": "struct ICS07Tendermint.Height",
+            "internalType": "struct IICS02ClientMsgs.Height",
             "components": [
               {
                 "name": "revisionNumber",
@@ -356,34 +408,6 @@
   },
   {
     "type": "function",
-    "name": "getVerifierInfo",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "updateClient",
     "inputs": [
       {
@@ -401,7 +425,7 @@
       {
         "name": "",
         "type": "uint8",
-        "internalType": "enum UpdateClientProgram.UpdateResult"
+        "internalType": "enum ILightClientMsgs.UpdateResult"
       }
     ],
     "stateMutability": "nonpayable"
@@ -430,7 +454,7 @@
       {
         "name": "",
         "type": "uint8",
-        "internalType": "enum UpdateClientProgram.UpdateResult"
+        "internalType": "enum ILightClientMsgs.UpdateResult"
       }
     ],
     "stateMutability": "nonpayable"

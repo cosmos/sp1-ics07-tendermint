@@ -1,18 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25;
 
-/// @title ICS07Tendermint
+import { IICS02ClientMsgs } from "solidity-ibc/msgs/IICS02ClientMsgs.sol";
+
+/// @title ICS07 Tendermint Messages
 /// @author srdtrk
 /// @notice Defines shared types for ICS07Tendermint implementations.
-contract ICS07Tendermint {
-    /// @notice Height of the counterparty chain
-    struct Height {
-        /// Previously known as "epoch"
-        uint32 revisionNumber;
-        /// The height of a block
-        uint32 revisionHeight;
-    }
-
+interface IICS07TendermintMsgs is IICS02ClientMsgs {
     /// Fraction of validator overlap needed to update header
     struct TrustThreshold {
         /// Numerator of the fraction

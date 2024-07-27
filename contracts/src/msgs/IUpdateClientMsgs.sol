@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25;
 
-import { ICS07Tendermint } from "./ICS07Tendermint.sol";
+import { IICS07TendermintMsgs } from "./IICS07TendermintMsgs.sol";
 
-/// @title UpdateClientProgram
+/// @title Update Client Program Messages
 /// @author srdtrk
 /// @notice Defines shared types for the update client program.
-contract UpdateClientProgram {
+interface IUpdateClientMsgs is IICS07TendermintMsgs {
     /// @notice The public value output for the sp1 update client program.
     struct UpdateClientOutput {
         /// The trusted consensus state.
-        ICS07Tendermint.ConsensusState trustedConsensusState;
+        ConsensusState trustedConsensusState;
         /// The new consensus state with the verified header.
-        ICS07Tendermint.ConsensusState newConsensusState;
+        ConsensusState newConsensusState;
         /// The validation environment.
         Env env;
         /// trusted height
-        ICS07Tendermint.Height trustedHeight;
+        Height trustedHeight;
         /// new height
-        ICS07Tendermint.Height newHeight;
+        Height newHeight;
     }
 
     /// @notice The environment output for the sp1 program.
@@ -26,21 +26,11 @@ contract UpdateClientProgram {
         /// The chain ID of the chain that the client is tracking.
         string chainId;
         /// Fraction of validator overlap needed to update header
-        ICS07Tendermint.TrustThreshold trustThreshold;
+        TrustThreshold trustThreshold;
         /// Duration of the period since the `LatestTimestamp` during which the
         /// submitted headers are valid for upgrade in seconds.
         uint32 trustingPeriod;
         /// Timestamp in seconds
         uint64 now;
-    }
-
-    /// The result of an update operation
-    enum UpdateResult {
-        /// The update was successful
-        Update,
-        /// A misbehaviour was detected
-        Misbehaviour,
-        /// Client is already up to date
-        NoOp
     }
 }

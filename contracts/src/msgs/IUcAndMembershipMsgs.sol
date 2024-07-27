@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25;
 
-import { MembershipProgram } from "./MembershipProgram.sol";
-import { UpdateClientProgram } from "./UpdateClientProgram.sol";
+import { IMembershipMsgs } from "./IMembershipMsgs.sol";
+import { IUpdateClientMsgs } from "./IUpdateClientMsgs.sol";
 
 /// @title UpdateClientAndMembershipProgram
 /// @author srdtrk
 /// @notice Defines shared types for the update client and membership program.
-contract UpdateClientAndMembershipProgram {
+contract UpdateClientAndMembershipProgram is IUpdateClientMsgs, IMembershipMsgs {
     /// @notice The public value output for the sp1 update client and membership program.
     struct UcAndMembershipOutput {
         /// Update client program output.
-        UpdateClientProgram.UpdateClientOutput updateClientOutput;
+        UpdateClientOutput updateClientOutput;
         /// The key-value pairs verified by the membership program in the proposed header.
-        MembershipProgram.KVPair[] kvPairs;
+        KVPair[] kvPairs;
     }
 }

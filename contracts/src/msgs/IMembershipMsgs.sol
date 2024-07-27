@@ -1,19 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25;
 
-/// @title MembershipProgram
+import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
+
+/// @title Membership Program Messages
 /// @author srdtrk
 /// @notice Defines shared types for the verify (non)membership program.
-contract MembershipProgram {
+interface IMembershipMsgs is ILightClientMsgs {
     /// @notice The public value output for the sp1 verify (non)membership program.
     struct MembershipOutput {
         bytes32 commitmentRoot;
         KVPair[] kvPairs;
-    }
-
-    /// @notice The key-value pair.
-    struct KVPair {
-        string key;
-        bytes value;
     }
 }

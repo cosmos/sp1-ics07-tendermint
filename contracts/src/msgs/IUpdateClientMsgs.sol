@@ -2,11 +2,18 @@
 pragma solidity >=0.8.25;
 
 import { IICS07TendermintMsgs } from "./IICS07TendermintMsgs.sol";
+import { ISP1Msgs } from "./ISP1Msgs.sol";
 
 /// @title Update Client Program Messages
 /// @author srdtrk
 /// @notice Defines shared types for the update client program.
-interface IUpdateClientMsgs is IICS07TendermintMsgs {
+interface IUpdateClientMsgs is IICS07TendermintMsgs, ISP1Msgs {
+    /// @notice The message that is submitted to the updateClient function.
+    struct MsgUpdateClient {
+        /// SP1 proof for updating the client.
+        SP1Proof sp1Proof;
+    }
+
     /// @notice The public value output for the sp1 update client program.
     struct UpdateClientOutput {
         /// The trusted consensus state.

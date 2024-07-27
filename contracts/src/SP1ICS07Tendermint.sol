@@ -6,6 +6,7 @@ import { IUpdateClientMsgs } from "./msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "./msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "./msgs/IUcAndMembershipMsgs.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
+import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.sol";
 // import { ILightClient } from "ibc-solidity-interfaces/ILightClient.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
@@ -16,7 +17,8 @@ contract SP1ICS07Tendermint is
     IICS07TendermintMsgs,
     IUpdateClientMsgs,
     IMembershipMsgs,
-    IUpdateClientAndMembershipMsgs
+    IUpdateClientAndMembershipMsgs,
+    ISP1ICS07TendermintErrors
 {
     /// @notice The verification key for the update client program.
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
@@ -69,21 +71,26 @@ contract SP1ICS07Tendermint is
     /// @param revisionHeight The revision height.
     /// @return The consensus state at the given revision height.
     function getConsensusStateHash(uint32 revisionHeight) public view returns (bytes32) {
-        return consensusStateHashes[revisionHeight];
+        bytes32 hash = consensusStateHashes[revisionHeight];
+        if (hash == 0) {
+            revert ConsensusStateNotFound();
+        }
+        return hash;
     }
 
     /// @notice The entrypoint for updating the client.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
-    /// @param proof The encoded proof.
-    /// @param publicValues The encoded public values.
+    /// @param updateMsg The encoded update message.
     /// @return The result of the update.
-    function updateClient(bytes calldata proof, bytes calldata publicValues) public returns (UpdateResult) {
-        UpdateClientOutput memory output = abi.decode(publicValues, (UpdateClientOutput));
+    function updateClient(bytes calldata updateMsg) public returns (UpdateResult) {
+        MsgUpdateClient memory msgUpdateClient = abi.decode(updateMsg, (MsgUpdateClient));
+        if (msgUpdateClient.sp1Proof.vKey != UPDATE_CLIENT_PROGRAM_VKEY) {
+            revert VerificationKeyMismatch(UPDATE_CLIENT_PROGRAM_VKEY, msgUpdateClient.sp1Proof.vKey);
+        }
+
+        UpdateClientOutput memory output = abi.decode(msgUpdateClient.sp1Proof.publicValues, (UpdateClientOutput));
 
         validateUpdateClientPublicValues(output);
-
-        // TODO: Make sure that other checks have been made in the proof verification
-        VERIFIER.verifyProof(UPDATE_CLIENT_PROGRAM_VKEY, publicValues, proof);
 
         UpdateResult updateResult = checkUpdateResult(output);
         if (updateResult == UpdateResult.Update) {
@@ -94,7 +101,11 @@ contract SP1ICS07Tendermint is
             consensusStateHashes[output.newHeight.revisionHeight] = keccak256(abi.encode(output.newConsensusState));
         } else if (updateResult == UpdateResult.Misbehaviour) {
             clientState.isFrozen = true;
-        } // else: NoOp
+        } else if (updateResult == UpdateResult.NoOp) {
+            return UpdateResult.NoOp;
+        }
+
+        verifySP1Proof(msgUpdateClient.sp1Proof);
 
         return updateResult;
     }
@@ -221,29 +232,41 @@ contract SP1ICS07Tendermint is
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
     function validateUpdateClientPublicValues(UpdateClientOutput memory output) private view {
-        require(clientState.isFrozen == false, "SP1ICS07Tendermint: client is frozen");
-        require(block.timestamp >= output.env.now, "SP1ICS07Tendermint: proof is in the future");
-        require(block.timestamp - output.env.now <= ALLOWED_SP1_CLOCK_DRIFT, "SP1ICS07Tendermint: proof is too old");
-        require(
-            keccak256(bytes(output.env.chainId)) == keccak256(bytes(clientState.chainId)),
-            "SP1ICS07Tendermint: chain ID mismatch"
-        );
-        require(
-            output.env.trustThreshold.numerator == clientState.trustLevel.numerator
-                && output.env.trustThreshold.denominator == clientState.trustLevel.denominator,
-            "SP1ICS07Tendermint: trust threshold mismatch"
-        );
-        require(output.env.trustingPeriod == clientState.trustingPeriod, "SP1ICS07Tendermint: trusting period mismatch");
-        require(
-            output.env.trustingPeriod <= clientState.unbondingPeriod,
-            "SP1ICS07Tendermint: trusting period longer than unbonding period"
-        );
-        require(
-            consensusStateHashes[output.trustedHeight.revisionHeight]
-                == keccak256(abi.encode(output.trustedConsensusState)),
-            "SP1ICS07Tendermint: trusted consensus state mismatch"
-        );
-        // TODO: Make sure that we don't need more checks.
+        if (clientState.isFrozen) {
+            revert FrozenClientState();
+        }
+        if (output.env.now > block.timestamp) {
+            revert ProofIsInTheFuture(block.timestamp, output.env.now);
+        }
+        if (block.timestamp - output.env.now > ALLOWED_SP1_CLOCK_DRIFT) {
+            revert ProofIsTooOld(block.timestamp, output.env.now);
+        }
+        if (keccak256(bytes(output.env.chainId)) != keccak256(bytes(clientState.chainId))) {
+            revert ChainIdMismatch(clientState.chainId, output.env.chainId);
+        }
+        if (
+            output.env.trustThreshold.numerator != clientState.trustLevel.numerator
+                || output.env.trustThreshold.denominator != clientState.trustLevel.denominator
+        ) {
+            revert TrustThresholdMismatch(
+                clientState.trustLevel.numerator,
+                clientState.trustLevel.denominator,
+                output.env.trustThreshold.numerator,
+                output.env.trustThreshold.denominator
+            );
+        }
+        if (output.env.trustingPeriod != clientState.trustingPeriod) {
+            revert TrustingPeriodMismatch(clientState.trustingPeriod, output.env.trustingPeriod);
+        }
+        if (output.env.trustingPeriod > clientState.unbondingPeriod) {
+            revert TrustingPeriodTooLong(output.env.trustingPeriod, clientState.unbondingPeriod);
+        }
+
+        bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
+        bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
+        if (outputConsensusStateHash != trustedConsensusStateHash) {
+            revert ConsensusStateHashMismatch(trustedConsensusStateHash, outputConsensusStateHash);
+        }
     }
 
     /// @notice Checks for basic misbehaviour.
@@ -263,6 +286,10 @@ contract SP1ICS07Tendermint is
             // The consensus state at the new height is the same as the one in the mapping
             return UpdateResult.NoOp;
         }
+    }
+
+    function verifySP1Proof(SP1Proof memory proof) private view {
+        VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

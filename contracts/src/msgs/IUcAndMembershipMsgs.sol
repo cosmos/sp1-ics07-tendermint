@@ -4,10 +4,10 @@ pragma solidity >=0.8.25;
 import { IMembershipMsgs } from "./IMembershipMsgs.sol";
 import { IUpdateClientMsgs } from "./IUpdateClientMsgs.sol";
 
-/// @title UpdateClientAndMembershipProgram
+/// @title Update Client and Membership Program Messages
 /// @author srdtrk
 /// @notice Defines shared types for the update client and membership program.
-contract UpdateClientAndMembershipProgram is IUpdateClientMsgs, IMembershipMsgs {
+interface IUpdateClientAndMembershipMsgs is IUpdateClientMsgs, IMembershipMsgs {
     /// @notice The public value output for the sp1 update client and membership program.
     struct UcAndMembershipOutput {
         /// Update client program output.

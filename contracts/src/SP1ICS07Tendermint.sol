@@ -7,6 +7,7 @@ import { IMembershipMsgs } from "./msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "./msgs/IUcAndMembershipMsgs.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.sol";
+import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 // import { ILightClient } from "ibc-solidity-interfaces/ILightClient.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
@@ -18,7 +19,8 @@ contract SP1ICS07Tendermint is
     IUpdateClientMsgs,
     IMembershipMsgs,
     IUpdateClientAndMembershipMsgs,
-    ISP1ICS07TendermintErrors
+    ISP1ICS07TendermintErrors,
+    ILightClientMsgs
 {
     /// @notice The verification key for the update client program.
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
@@ -110,45 +112,43 @@ contract SP1ICS07Tendermint is
         return updateResult;
     }
 
-    /// @notice The entrypoint for batch verifying (non)membership proof.
-    /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
-    /// @dev It can validate a subset of the key-value pairs by providing their hashes.
-    /// @dev This is useful for batch verification. Zero hashes are skipped.
-    /// @param proof The encoded proof.
-    /// @param publicValues The encoded public values.
-    /// @param proofHeight The height of the proof.
-    /// @param trustedConsensusStateBz The encoded trusted consensus state.
-    /// @param kvPairHashes The hashes of the key-value pairs.
-    function batchVerifyMembership(
-        bytes calldata proof,
-        bytes calldata publicValues,
-        uint32 proofHeight,
-        bytes calldata trustedConsensusStateBz,
-        bytes32[] calldata kvPairHashes
-    )
-        public
-        view
-    {
-        MembershipOutput memory output = abi.decode(publicValues, (MembershipOutput));
+    /// @notice The entrypoint for verifying (non)membership proof.
+    /// @param msgMembership The membership message.
+    function membership(MsgMembership memory msgMembership) public view {
+        MembershipProof memory proof = abi.decode(msgMembership.proof, (MembershipProof));
+        if (proof.sp1Proof.vKey != MEMBERSHIP_PROGRAM_VKEY) {
+            revert VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
+        }
 
-        require(kvPairHashes.length != 0, "SP1ICS07Tendermint: kvPairs length is zero");
-
-        require(kvPairHashes.length <= output.kvPairs.length, "SP1ICS07Tendermint: kvPairs length mismatch");
+        MembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (MembershipOutput));
+        if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
+            revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
+        }
 
         // loop through the key-value pairs and validate them
-        for (uint8 i = 0; i < kvPairHashes.length; i++) {
-            bytes32 kvPairHash = kvPairHashes[i];
-            if (kvPairHash == 0) {
-                // skip the empty hash
+        bool found = false;
+        for (uint8 i = 0; i < output.kvPairs.length; i++) {
+            bytes memory path = output.kvPairs[i].path;
+            if (keccak256(path) != keccak256(msgMembership.path)) {
                 continue;
             }
 
-            require(kvPairHash == keccak256(abi.encode(output.kvPairs[i])), "SP1ICS07Tendermint: kvPair hash mismatch");
+            bytes memory value = output.kvPairs[i].value;
+            if (keccak256(value) != keccak256(msgMembership.value)) {
+                revert MembershipProofValueMismatch(msgMembership.value, value);
+            }
+
+            found = true;
+        }
+        if (!found) {
+            revert MembershipProofKeyNotFound(msgMembership.path);
         }
 
-        validateMembershipOutput(output.commitmentRoot, proofHeight, trustedConsensusStateBz);
+        validateMembershipOutput(
+            output.commitmentRoot, msgMembership.proofHeight.revisionHeight, proof.trustedConsensusState
+        );
 
-        VERIFIER.verifyProof(MEMBERSHIP_PROGRAM_VKEY, publicValues, proof);
+        verifySP1Proof(proof.sp1Proof);
     }
 
     /// @notice The entrypoint for updating the client and membership proof.
@@ -200,7 +200,7 @@ contract SP1ICS07Tendermint is
         validateMembershipOutput(
             output.updateClientOutput.newConsensusState.root,
             output.updateClientOutput.newHeight.revisionHeight,
-            abi.encode(output.updateClientOutput.newConsensusState)
+            output.updateClientOutput.newConsensusState
         );
 
         return updateResult;
@@ -209,24 +209,25 @@ contract SP1ICS07Tendermint is
     /// @notice Validates the MembershipOutput public values.
     /// @param outputCommitmentRoot The commitment root of the output.
     /// @param proofHeight The height of the proof.
-    /// @param trustedConsensusStateBz The encoded trusted consensus state.
+    /// @param trustedConsensusState The trusted consensus state.
     function validateMembershipOutput(
         bytes32 outputCommitmentRoot,
         uint32 proofHeight,
-        bytes memory trustedConsensusStateBz
+        ConsensusState memory trustedConsensusState
     )
         private
         view
     {
-        require(clientState.isFrozen == false, "SP1ICS07Tendermint: client is frozen");
-        require(
-            consensusStateHashes[proofHeight] == keccak256(trustedConsensusStateBz),
-            "SP1ICS07Tendermint: trusted consensus state mismatch"
-        );
-
-        ConsensusState memory trustedConsensusState = abi.decode(trustedConsensusStateBz, (ConsensusState));
-
-        require(outputCommitmentRoot == trustedConsensusState.root, "SP1ICS07Tendermint: invalid commitment root");
+        if (clientState.isFrozen) {
+            revert FrozenClientState();
+        }
+        if (outputCommitmentRoot != trustedConsensusState.root) {
+            revert ConsensusStateRootMismatch(trustedConsensusState.root, outputCommitmentRoot);
+        }
+        bytes32 trustedConsensusStateHash = keccak256(abi.encode(trustedConsensusState));
+        if (consensusStateHashes[proofHeight] != trustedConsensusStateHash) {
+            revert ConsensusStateHashMismatch(trustedConsensusStateHash, consensusStateHashes[proofHeight]);
+        }
     }
 
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.

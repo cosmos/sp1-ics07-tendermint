@@ -51,4 +51,24 @@ interface ISP1ICS07TendermintErrors {
 
     /// @notice The error that is returned when the consensus state is not found.
     error ConsensusStateNotFound();
+
+    /// @notice The error that is returned when the length of a value is out of range.
+    /// @param length The length of the value.
+    /// @param min The minimum length of the value.
+    /// @param max The maximum length of the value.
+    error LengthIsOutOfRange(uint256 length, uint256 min, uint256 max);
+
+    /// @notice The error that is returned when the key-value pair's value does not match the expected value.
+    /// @param expected The expected value.
+    /// @param actual The actual value.
+    error MembershipProofValueMismatch(bytes expected, bytes actual);
+
+    /// @notice The error that is returned when the key-value pair's path is not contained in the proof.
+    /// @param path The path of the key-value pair.
+    error MembershipProofKeyNotFound(bytes path);
+
+    /// @notice The error that is returned when the consensus state root does not match the expected value.
+    /// @param expected The expected consensus state root.
+    /// @param actual The actual consensus state root.
+    error ConsensusStateRootMismatch(bytes32 expected, bytes32 actual);
 }

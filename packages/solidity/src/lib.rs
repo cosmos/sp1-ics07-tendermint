@@ -26,6 +26,27 @@ alloy_sol_types::sol!(
     "../../contracts/abi/SP1ICS07Tendermint.json"
 );
 
+#[cfg(feature = "rpc")]
+impl sp1_ics07_tendermint::SP1Proof {
+    /// Create a new [`sp1_ics07_tendermint::SP1Proof`] instance.
+    ///
+    /// # Panics
+    /// Panics if the vkey is not a valid hex string, or if the bytes cannot be decoded.
+    #[must_use]
+    pub fn new(vkey: &str, proof: Vec<u8>, public_values: Vec<u8>) -> Self {
+        let stripped = vkey.strip_prefix("0x").expect("failed to strip prefix");
+        let vkey_bytes: [u8; 32] = hex::decode(stripped)
+            .expect("failed to decode vkey")
+            .try_into()
+            .expect("invalid vkey length");
+        Self {
+            vKey: vkey_bytes.into(),
+            proof: proof.into(),
+            publicValues: public_values.into(),
+        }
+    }
+}
+
 #[allow(clippy::fallible_impl_from)]
 impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
     fn from(trust_threshold: sp1_ics07_tendermint::TrustThreshold) -> Self {

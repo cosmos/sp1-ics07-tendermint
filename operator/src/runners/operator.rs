@@ -79,11 +79,11 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
             prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
         let update_msg = MsgUpdateClient {
-            sp1Proof: SP1Proof {
-                vKey: prover.vkey.hash_bytes().into(),
-                publicValues: proof_data.public_values.to_vec().into(),
-                proof: proof_data.bytes().into(),
-            },
+            sp1Proof: SP1Proof::new(
+                &prover.vkey.bytes32(),
+                proof_data.bytes(),
+                proof_data.public_values.to_vec(),
+            ),
         };
 
         contract

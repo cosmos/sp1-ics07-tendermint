@@ -80,11 +80,11 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         UpdateClientOutput::abi_decode(proof_data.public_values.as_slice(), false).unwrap();
 
     let update_msg = MsgUpdateClient {
-        sp1Proof: SP1Proof {
-            vKey: uc_prover.vkey.hash_bytes().into(),
-            publicValues: proof_data.public_values.to_vec().into(),
-            proof: proof_data.bytes().into(),
-        },
+        sp1Proof: SP1Proof::new(
+            &uc_prover.vkey.bytes32(),
+            proof_data.bytes(),
+            proof_data.public_values.to_vec(),
+        ),
     };
 
     let fixture = SP1ICS07UpdateClientFixture {

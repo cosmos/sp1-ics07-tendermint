@@ -37,7 +37,8 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(clientState.latestHeight.revisionHeight < targetHeight);
 
-        assert(mockIcs07Tendermint.getConsensusStateHash(targetHeight) == bytes32(0));
+        vm.expectRevert();
+        mockIcs07Tendermint.getConsensusStateHash(targetHeight);
     }
 
     function loadFixture(string memory fileName) public view returns (SP1ICS07UpdateClientFixtureJson memory) {

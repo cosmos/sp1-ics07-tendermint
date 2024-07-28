@@ -17,6 +17,13 @@ build-operator:
   cargo build --bin operator --locked --release
   @echo "Built the operator executable"
 
+# Build the contracts using `forge build` command after cleaning up the cache and output directories
+build-contracts:
+  @echo "Cleaning up the contracts cache and output directories..."
+  rm -r contracts/cache contracts/out
+  @echo "Building the contracts..."
+  forge build
+
 # Run the Solidity tests using `forge test` command
 test-foundry:
   cd contracts && forge test -vvv
@@ -77,7 +84,9 @@ operator:
 
 # Run the e2e tests
 test-e2e testname:
-  echo "Running {{testname}} test..."
+  @echo "Cleaning up the contracts cache and output directories..."
+  rm -r contracts/cache contracts/out
+  @echo "Running {{testname}} test..."
   cd e2e/interchaintestv8 && go test -v -run=TestWithSP1ICS07TendermintTestSuite/{{testname}} -timeout 40m
 
 # Lint the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, and `golanci-lint` commands

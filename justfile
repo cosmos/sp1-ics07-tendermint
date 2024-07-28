@@ -20,7 +20,7 @@ build-operator:
 # Build the contracts using `forge build` command after cleaning up the cache and output directories
 build-contracts:
   @echo "Cleaning up the contracts cache and output directories..."
-  rm -r contracts/cache contracts/out
+  -rm -r contracts/cache contracts/out # `-` is used to ignore the error if the directories do not exist
   @echo "Building the contracts..."
   forge build
 
@@ -85,7 +85,7 @@ operator:
 # Run the e2e tests
 test-e2e testname:
   @echo "Cleaning up the contracts cache and output directories..."
-  rm -r contracts/cache contracts/out
+  -rm -r contracts/cache contracts/out # `-` is used to ignore the error if the directories do not exist
   @echo "Running {{testname}} test..."
   cd e2e/interchaintestv8 && go test -v -run=TestWithSP1ICS07TendermintTestSuite/{{testname}} -timeout 40m
 

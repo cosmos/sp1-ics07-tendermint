@@ -114,8 +114,29 @@ contract SP1ICS07Tendermint is
 
     /// @notice The entrypoint for verifying (non)membership proof.
     /// @param msgMembership The membership message.
-    function membership(MsgMembership memory msgMembership) public view {
-        MembershipProof memory proof = abi.decode(msgMembership.proof, (MembershipProof));
+    /// @return timestamp The timestamp of the trusted consensus state.
+    function membership(MsgMembership memory msgMembership) public returns (uint256 timestamp) {
+        MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
+        if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
+            return handleSP1MembershipProof(
+                msgMembership.proofHeight.revisionHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+            );
+        } else if (membershipProof.proofType != MembershipProofType.SP1MembershipAndUpdateClientProof) {
+            return handleSP1UpdateClientAndMembership(membershipProof.proof, msgMembership.path, msgMembership.value);
+        }
+    }
+
+    function handleSP1MembershipProof(
+        uint32 proofHeight,
+        bytes memory proofBytes,
+        bytes memory kvPath,
+        bytes memory kvValue
+    )
+        private
+        view
+        returns (uint256)
+    {
+        SP1MembershipProof memory proof = abi.decode(proofBytes, (SP1MembershipProof));
         if (proof.sp1Proof.vKey != MEMBERSHIP_PROGRAM_VKEY) {
             revert VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
         }
@@ -129,47 +150,56 @@ contract SP1ICS07Tendermint is
         bool found = false;
         for (uint8 i = 0; i < output.kvPairs.length; i++) {
             bytes memory path = output.kvPairs[i].path;
-            if (keccak256(path) != keccak256(msgMembership.path)) {
+            if (keccak256(path) != keccak256(kvPath)) {
                 continue;
             }
 
             bytes memory value = output.kvPairs[i].value;
-            if (keccak256(value) != keccak256(msgMembership.value)) {
-                revert MembershipProofValueMismatch(msgMembership.value, value);
+            if (keccak256(value) != keccak256(kvValue)) {
+                revert MembershipProofValueMismatch(kvValue, value);
             }
 
             found = true;
+            break;
         }
         if (!found) {
-            revert MembershipProofKeyNotFound(msgMembership.path);
+            revert MembershipProofKeyNotFound(kvPath);
         }
 
-        validateMembershipOutput(
-            output.commitmentRoot, msgMembership.proofHeight.revisionHeight, proof.trustedConsensusState
-        );
+        validateMembershipOutput(output.commitmentRoot, proofHeight, proof.trustedConsensusState);
 
         verifySP1Proof(proof.sp1Proof);
+
+        return proof.trustedConsensusState.timestamp;
     }
 
     /// @notice The entrypoint for updating the client and membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
-    /// @param proof The encoded proof.
-    /// @param publicValues The encoded public values.
-    /// @param kvPairHashes The hashes of the key-value pairs.
-    /// @return The result of the update.
-    function updateClientAndBatchVerifyMembership(
-        bytes calldata proof,
-        bytes calldata publicValues,
-        bytes32[] calldata kvPairHashes
+    /// @param proofBytes The encoded proof.
+    /// @param kvPath The path of the key-value pair.
+    /// @param kvValue The value of the key-value pair.
+    /// @return The timestamp of the new consensus state.
+    function handleSP1UpdateClientAndMembership(
+        bytes memory proofBytes,
+        bytes memory kvPath,
+        bytes memory kvValue
     )
-        public
-        returns (UpdateResult)
+        private
+        returns (uint256)
     {
-        UcAndMembershipOutput memory output = abi.decode(publicValues, (UcAndMembershipOutput));
+        SP1MembershipAndUpdateClientProof memory proof = abi.decode(proofBytes, (SP1MembershipAndUpdateClientProof));
+        if (proof.sp1Proof.vKey != UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY) {
+            revert VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
+        }
+
+        UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
+        if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
+            revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
+        }
 
         validateUpdateClientPublicValues(output.updateClientOutput);
 
-        VERIFIER.verifyProof(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, publicValues, proof);
+        verifySP1Proof(proof.sp1Proof);
 
         UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
         if (updateResult == UpdateResult.Update) {
@@ -179,22 +209,27 @@ contract SP1ICS07Tendermint is
                 keccak256(abi.encode(output.updateClientOutput.newConsensusState));
         } else if (updateResult == UpdateResult.Misbehaviour) {
             clientState.isFrozen = true;
-            return UpdateResult.Misbehaviour;
+            revert CannotHandleMisbehavior();
         } // else: NoOp
 
-        require(kvPairHashes.length != 0, "SP1ICS07Tendermint: kvPairs length is zero");
-
-        require(kvPairHashes.length <= output.kvPairs.length, "SP1ICS07Tendermint: kvPairs length mismatch");
-
         // loop through the key-value pairs and validate them
-        for (uint8 i = 0; i < kvPairHashes.length; i++) {
-            bytes32 kvPairHash = kvPairHashes[i];
-            if (kvPairHash == 0) {
-                // skip the empty hash
+        bool found = false;
+        for (uint8 i = 0; i < output.kvPairs.length; i++) {
+            bytes memory path = output.kvPairs[i].path;
+            if (keccak256(path) != keccak256(kvPath)) {
                 continue;
             }
 
-            require(kvPairHash == keccak256(abi.encode(output.kvPairs[i])), "SP1ICS07Tendermint: kvPair hash mismatch");
+            bytes memory value = output.kvPairs[i].value;
+            if (keccak256(value) != keccak256(kvValue)) {
+                revert MembershipProofValueMismatch(kvValue, value);
+            }
+
+            found = true;
+            break;
+        }
+        if (!found) {
+            revert MembershipProofKeyNotFound(kvPath);
         }
 
         validateMembershipOutput(
@@ -203,7 +238,7 @@ contract SP1ICS07Tendermint is
             output.updateClientOutput.newConsensusState
         );
 
-        return updateResult;
+        return output.updateClientOutput.newConsensusState.timestamp;
     }
 
     /// @notice Validates the MembershipOutput public values.
@@ -295,8 +330,8 @@ contract SP1ICS07Tendermint is
 
     /// @notice A dummy function to generate the ABI for the parameters.
     function abiPublicTypes(
-        MembershipOutput memory output,
-        UcAndMembershipOutput memory output2,
+        MembershipOutput memory o1,
+        UcAndMembershipOutput memory o2,
         MsgUpdateClient memory o3
     )
         public

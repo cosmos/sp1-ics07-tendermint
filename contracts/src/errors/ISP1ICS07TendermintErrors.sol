@@ -71,4 +71,8 @@ interface ISP1ICS07TendermintErrors {
     /// @param expected The expected consensus state root.
     /// @param actual The actual consensus state root.
     error ConsensusStateRootMismatch(bytes32 expected, bytes32 actual);
+
+    /// @notice The error that is returned when the update client and membership program contains misbehavior.
+    /// @dev Misbehavior cannot be handled in membership handler, so it is returned as an error.
+    error CannotHandleMisbehavior();
 }

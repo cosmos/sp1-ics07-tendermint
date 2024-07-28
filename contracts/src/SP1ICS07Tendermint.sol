@@ -293,7 +293,7 @@ contract SP1ICS07Tendermint is
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.
-    function abiPublicTypes(MembershipOutput memory output, UcAndMembershipOutput memory output2) public pure 
+    function abiPublicTypes(MembershipOutput memory output, UcAndMembershipOutput memory output2, MsgUpdateClient memory o3) public pure 
     // solhint-disable-next-line no-empty-blocks
     {
         // This is a dummy function to generate the ABI for MembershipOutput

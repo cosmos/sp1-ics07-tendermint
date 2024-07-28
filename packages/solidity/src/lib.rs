@@ -18,9 +18,6 @@ alloy_sol_types::sol!(
 );
 
 // NOTE: The riscv program won't compile with the `rpc` features.
-// NOTE: Using the entire `SP1ICS07Tendermint.json` file for the `sol!` macro increases
-// the riscv program size significantly, so we can consider using the `sol!` macro with
-// manually defined structs for the required types when `rpc` feature is disabled.
 #[cfg(not(feature = "rpc"))]
 alloy_sol_types::sol!(
     #[derive(serde::Deserialize, serde::Serialize)]

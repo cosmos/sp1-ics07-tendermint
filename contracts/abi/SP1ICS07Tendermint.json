@@ -280,6 +280,35 @@
             ]
           }
         ]
+      },
+      {
+        "name": "o3",
+        "type": "tuple",
+        "internalType": "struct IUpdateClientMsgs.MsgUpdateClient",
+        "components": [
+          {
+            "name": "sp1Proof",
+            "type": "tuple",
+            "internalType": "struct ISP1Msgs.SP1Proof",
+            "components": [
+              {
+                "name": "vKey",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "publicValues",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "proof",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          }
+        ]
       }
     ],
     "outputs": [],
@@ -411,12 +440,7 @@
     "name": "updateClient",
     "inputs": [
       {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "publicValues",
+        "name": "updateMsg",
         "type": "bytes",
         "internalType": "bytes"
       }
@@ -458,5 +482,153 @@
       }
     ],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "error",
+    "name": "ChainIdMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "actual",
+        "type": "string",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ConsensusStateHashMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "actual",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ConsensusStateNotFound",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "FrozenClientState",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ProofIsInTheFuture",
+    "inputs": [
+      {
+        "name": "now",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "proofTimestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ProofIsTooOld",
+    "inputs": [
+      {
+        "name": "now",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "proofTimestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "TrustThresholdMismatch",
+    "inputs": [
+      {
+        "name": "expectedNumerator",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "expectedDenominator",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "actualNumerator",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "actualDenominator",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "TrustingPeriodMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "actual",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "TrustingPeriodTooLong",
+    "inputs": [
+      {
+        "name": "trustingPeriod",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "unbondingPeriod",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "VerificationKeyMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "actual",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
   }
 ]

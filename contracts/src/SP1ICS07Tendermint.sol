@@ -5,6 +5,7 @@ import { ICS07Tendermint } from "./ics07-tendermint/ICS07Tendermint.sol";
 import { UpdateClientProgram } from "./ics07-tendermint/UpdateClientProgram.sol";
 import { MembershipProgram } from "./ics07-tendermint/MembershipProgram.sol";
 import { UpdateClientAndMembershipProgram } from "./ics07-tendermint/UcAndMembershipProgram.sol";
+import { MisbehaviourProgram } from "./ics07-tendermint/MisbehaviourProgram.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 
@@ -263,8 +264,8 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     }
 
     /// @notice Checks for basic misbehaviour.
-    /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
-    /// @dev This function does not check timestamp misbehaviour (a niche case).
+    /// @dev This function checks if the consensus state at the new height is different than the one in the mapping
+    /// @dev or if the timestamp is not increasing. If any of these conditions are met, it returns a Misbehaviour UpdateResult.
     /// @param output The public values of the update client program.
     function checkUpdateResult(UpdateClientProgram.UpdateClientOutput memory output)
         private
@@ -276,8 +277,9 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
             // No consensus state at the new height, so no misbehaviour
             return UpdateClientProgram.UpdateResult.Update;
         }
-        if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
-            // The consensus state at the new height is different than the one in the mapping
+        if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))
+            || output.trustedConsensusState.timestamp >= output.newConsensusState.timestamp) {
+            // The consensus state at the new height is different than the one in the mapping or the timestamp is not increasing
             return UpdateClientProgram.UpdateResult.Misbehaviour;
         } else {
             // The consensus state at the new height is the same as the one in the mapping
@@ -288,7 +290,8 @@ contract SP1ICS07Tendermint is ISP1ICS07Tendermint {
     /// @notice A dummy function to generate the ABI for the parameters.
     function abiPublicTypes(
         MembershipProgram.MembershipOutput memory output,
-        UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output2
+        UpdateClientAndMembershipProgram.UcAndMembershipOutput memory output2,
+        MisbehaviourProgram.MisbehaviourOutput memory output3
     )
         public
         pure

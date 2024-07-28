@@ -228,6 +228,18 @@
             ]
           }
         ]
+      },
+      {
+        "name": "output3",
+        "type": "tuple",
+        "internalType": "struct MisbehaviourProgram.MisbehaviourOutput",
+        "components": [
+          {
+            "name": "isMisbehaviour",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
       }
     ],
     "outputs": [],

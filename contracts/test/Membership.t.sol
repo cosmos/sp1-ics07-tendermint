@@ -9,7 +9,7 @@ import { MembershipTest } from "./MembershipTest.sol";
 contract SP1ICS07MembershipTest is MembershipTest {
     using stdJson for string;
 
-    SP1MembershipProof proof;
+    SP1MembershipProof public proof;
 
     function setUp() public {
         setUpTestWithFixtures("memberships_fixture.json");
@@ -21,9 +21,9 @@ contract SP1ICS07MembershipTest is MembershipTest {
         MembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (MembershipOutput));
 
         assertEq(output.kvPairs.length, 2);
-        assertEq(string(output.kvPairs[0].path), verifyMembershipPath);
+        assertEq(string(output.kvPairs[0].path), VERIFY_MEMBERSHIP_PATH);
         assert(output.kvPairs[0].value.length != 0);
-        assertEq(string(output.kvPairs[1].path), verifyNonMembershipPath);
+        assertEq(string(output.kvPairs[1].path), VERIFY_NON_MEMBERSHIP_PATH);
         assertEq(output.kvPairs[1].value.length, 0);
     }
 
@@ -38,7 +38,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
-            path: bytes(verifyMembershipPath),
+            path: bytes(VERIFY_MEMBERSHIP_PATH),
             value: verifyMembershipValue()
         });
 
@@ -53,7 +53,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes("")
         });
 
@@ -73,7 +73,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(membershipProof),
             proofHeight: fixture.proofHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes("")
         });
 
@@ -87,7 +87,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
             name: "success: valid mock",
             sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.proofHeight.revisionHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes(""),
             expPass: true
         });
@@ -99,7 +99,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
                 vKey: proof.sp1Proof.vKey
             }),
             proofHeight: fixture.proofHeight.revisionHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes(""),
             expPass: false
         });
@@ -107,7 +107,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
             name: "Invalid proof height",
             sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.proofHeight.revisionHeight + 1,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes(""),
             expPass: false
         });
@@ -123,7 +123,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
             name: "Invalid value",
             sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.proofHeight.revisionHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes("invalid"),
             expPass: false
         });
@@ -135,7 +135,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
                 vKey: genesisFixture.ucAndMembershipVkey
             }),
             proofHeight: fixture.proofHeight.revisionHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes(""),
             expPass: false
         });
@@ -143,7 +143,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
             name: "Invalid public values",
             sp1Proof: SP1Proof({ proof: bytes(""), publicValues: bytes("invalid"), vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.proofHeight.revisionHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes(""),
             expPass: false
         });

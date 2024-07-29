@@ -5,12 +5,11 @@ pragma solidity >=0.8.25;
 import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
-import { IMembershipMsgs } from "../src/msgs/IMembershipMsgs.sol";
 
 abstract contract MembershipTest is SP1ICS07TendermintTest {
     // set constant string
-    string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
-    string constant verifyNonMembershipPath = "clients/07-tendermint-001/clientState";
+    string public constant VERIFY_MEMBERSHIP_PATH = "clients/07-tendermint-0/clientState";
+    string public constant VERIFY_NON_MEMBERSHIP_PATH = "clients/07-tendermint-001/clientState";
 
     struct SP1ICS07MembershipFixtureJson {
         Height proofHeight;

@@ -9,7 +9,7 @@ import { MembershipTest } from "./MembershipTest.sol";
 contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     using stdJson for string;
 
-    SP1MembershipAndUpdateClientProof proof;
+    SP1MembershipAndUpdateClientProof public proof;
 
     function setUp() public {
         setUpTestWithFixtures("uc_and_memberships_fixture.json");
@@ -37,7 +37,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
-            path: bytes(verifyMembershipPath),
+            path: bytes(VERIFY_MEMBERSHIP_PATH),
             value: verifyMembershipValue()
         });
 
@@ -65,7 +65,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes("")
         });
 
@@ -101,7 +101,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(membershipProof),
             proofHeight: fixture.proofHeight,
-            path: bytes(verifyNonMembershipPath),
+            path: bytes(VERIFY_NON_MEMBERSHIP_PATH),
             value: bytes("")
         });
 

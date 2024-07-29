@@ -109,7 +109,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let fixture = SP1ICS07MembershipFixture {
         genesis,
         proof_height: trusted_client_state.latestHeight.abi_encode(),
-        proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
+        membership_proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
     };
 
     // Save the proof data to the file path.

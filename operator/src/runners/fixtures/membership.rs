@@ -32,7 +32,7 @@ pub struct SP1ICS07MembershipFixture {
     pub proof_height: Vec<u8>,
     /// The encoded public values.
     #[serde_as(as = "serde_with::hex::Hex")]
-    pub proof: Vec<u8>,
+    pub membership_proof: Vec<u8>,
 }
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
@@ -106,7 +106,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let fixture = SP1ICS07MembershipFixture {
         genesis,
         proof_height: trusted_client_state.latestHeight.abi_encode(),
-        proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
+        membership_proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
     };
 
     // Save the proof data to the file path.

@@ -115,19 +115,21 @@ contract SP1ICS07Tendermint is
     /// @notice The entrypoint for verifying (non)membership proof.
     /// @param msgMembership The membership message.
     /// @return timestamp The timestamp of the trusted consensus state.
-    function membership(MsgMembership memory msgMembership) public returns (uint256 timestamp) {
+    function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
         MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
             return handleSP1MembershipProof(
-                msgMembership.proofHeight.revisionHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
-        } else if (membershipProof.proofType != MembershipProofType.SP1MembershipAndUpdateClientProof) {
-            return handleSP1UpdateClientAndMembership(membershipProof.proof, msgMembership.path, msgMembership.value);
+        } else if (membershipProof.proofType == MembershipProofType.SP1MembershipAndUpdateClientProof) {
+            return handleSP1UpdateClientAndMembership(msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value);
+        } else {
+            revert UnknownMembershipProofType(uint8(membershipProof.proofType));
         }
     }
 
     function handleSP1MembershipProof(
-        uint32 proofHeight,
+        Height memory proofHeight,
         bytes memory proofBytes,
         bytes memory kvPath,
         bytes memory kvValue
@@ -136,6 +138,10 @@ contract SP1ICS07Tendermint is
         view
         returns (uint256)
     {
+        if (proofHeight.revisionNumber != clientState.latestHeight.revisionNumber) {
+            revert ProofHeightMismatch(proofHeight.revisionNumber, proofHeight.revisionHeight, clientState.latestHeight.revisionNumber, clientState.latestHeight.revisionHeight);
+        }
+
         SP1MembershipProof memory proof = abi.decode(proofBytes, (SP1MembershipProof));
         if (proof.sp1Proof.vKey != MEMBERSHIP_PROGRAM_VKEY) {
             revert VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
@@ -166,7 +172,7 @@ contract SP1ICS07Tendermint is
             revert MembershipProofKeyNotFound(kvPath);
         }
 
-        validateMembershipOutput(output.commitmentRoot, proofHeight, proof.trustedConsensusState);
+        validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
 
         verifySP1Proof(proof.sp1Proof);
 
@@ -175,11 +181,13 @@ contract SP1ICS07Tendermint is
 
     /// @notice The entrypoint for updating the client and membership proof.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
+    /// @param proofHeight The height of the proof.
     /// @param proofBytes The encoded proof.
     /// @param kvPath The path of the key-value pair.
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the new consensus state.
     function handleSP1UpdateClientAndMembership(
+        Height memory proofHeight,
         bytes memory proofBytes,
         bytes memory kvPath,
         bytes memory kvValue
@@ -197,6 +205,11 @@ contract SP1ICS07Tendermint is
             revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
         }
 
+        if (proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber) {
+            revert ProofHeightMismatch(proofHeight.revisionNumber, proofHeight.revisionHeight, output.updateClientOutput.newHeight.revisionNumber, output.updateClientOutput.newHeight.revisionHeight);
+        }
+
+
         validateUpdateClientPublicValues(output.updateClientOutput);
 
         verifySP1Proof(proof.sp1Proof);
@@ -204,8 +217,10 @@ contract SP1ICS07Tendermint is
         UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
         if (updateResult == UpdateResult.Update) {
             // adding the new consensus state to the mapping
-            clientState.latestHeight = output.updateClientOutput.newHeight;
-            consensusStateHashes[output.updateClientOutput.newHeight.revisionHeight] =
+            if (proofHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
+                clientState.latestHeight = output.updateClientOutput.newHeight;
+            }
+            consensusStateHashes[proofHeight.revisionHeight] =
                 keccak256(abi.encode(output.updateClientOutput.newConsensusState));
         } else if (updateResult == UpdateResult.Misbehaviour) {
             clientState.isFrozen = true;

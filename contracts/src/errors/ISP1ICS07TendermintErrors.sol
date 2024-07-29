@@ -75,4 +75,15 @@ interface ISP1ICS07TendermintErrors {
     /// @notice The error that is returned when the update client and membership program contains misbehavior.
     /// @dev Misbehavior cannot be handled in membership handler, so it is returned as an error.
     error CannotHandleMisbehavior();
+
+    /// @notice The error that is returned when the proof height does not match the expected value.
+    /// @param expectedRevisionNumber The expected revision number.
+    /// @param expectedRevisionHeight The expected revision height.
+    /// @param actualRevisionNumber The actual revision number.
+    /// @param actualRevisionHeight The actual revision height.
+    error ProofHeightMismatch(uint64 expectedRevisionNumber, uint64 expectedRevisionHeight, uint64 actualRevisionNumber, uint64 actualRevisionHeight);
+
+    /// @notice The error that is returned when the membership proof type is unknown.
+    /// @param proofType The unknown membership proof type.
+    error UnknownMembershipProofType(uint8 proofType);
 }

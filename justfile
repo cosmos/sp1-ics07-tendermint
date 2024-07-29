@@ -26,7 +26,7 @@ build-contracts:
 
 # Run the Solidity tests using `forge test` command
 test-foundry:
-  cd contracts && forge test -vvv
+  forge test -vvv
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:

@@ -309,6 +309,23 @@
             ]
           }
         ]
+      },
+      {
+        "name": "o4",
+        "type": "tuple",
+        "internalType": "struct IMembershipMsgs.MembershipProof",
+        "components": [
+          {
+            "name": "proofType",
+            "type": "uint8",
+            "internalType": "enum IMembershipMsgs.MembershipProofType"
+          },
+          {
+            "name": "proof",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
       }
     ],
     "outputs": [],

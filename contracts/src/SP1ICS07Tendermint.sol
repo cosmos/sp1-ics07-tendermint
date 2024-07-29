@@ -332,7 +332,8 @@ contract SP1ICS07Tendermint is
     function abiPublicTypes(
         MembershipOutput memory o1,
         UcAndMembershipOutput memory o2,
-        MsgUpdateClient memory o3
+        MsgUpdateClient memory o3,
+        MembershipProof memory o4
     )
         public
         pure

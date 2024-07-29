@@ -32,9 +32,8 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
         string memory json = vm.readFile(path);
         bytes memory membershipMsgBz = json.readBytes(".membershipMsg");
 
-        SP1ICS07MembershipFixtureJson memory fix = SP1ICS07MembershipFixtureJson({
-            membershipMsg: abi.decode(membershipMsgBz, (MsgMembership))
-        });
+        SP1ICS07MembershipFixtureJson memory fix =
+            SP1ICS07MembershipFixtureJson({ membershipMsg: abi.decode(membershipMsgBz, (MsgMembership)) });
 
         return fix;
     }

@@ -38,7 +38,8 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
         assert(clientState.isFrozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
+        bytes32 consensusHash =
+            ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
         assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
     }
 
@@ -62,7 +63,8 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
         assert(clientState.isFrozen == false);
 
-        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
+        bytes32 consensusHash =
+            ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
         assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
     }
 

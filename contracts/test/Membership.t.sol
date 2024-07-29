@@ -62,11 +62,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         MockInvalidMembershipTestCase[] memory testCases = new MockInvalidMembershipTestCase[](7);
         testCases[0] = MockInvalidMembershipTestCase({
             name: "success: valid mock",
-            sp1Proof: SP1Proof({
-                proof: bytes(""),
-                publicValues: proof.sp1Proof.publicValues,
-                vKey: proof.sp1Proof.vKey
-            }),
+            sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
             path: fixture.membershipMsg.path,
             value: fixture.membershipMsg.value,
@@ -86,11 +82,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         });
         testCases[2] = MockInvalidMembershipTestCase({
             name: "Invalid proof height",
-            sp1Proof: SP1Proof({
-                proof: bytes(""),
-                publicValues: proof.sp1Proof.publicValues,
-                vKey: proof.sp1Proof.vKey
-            }),
+            sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.membershipMsg.proofHeight.revisionHeight + 1,
             path: fixture.membershipMsg.path,
             value: fixture.membershipMsg.value,
@@ -98,11 +90,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         });
         testCases[3] = MockInvalidMembershipTestCase({
             name: "Invalid path",
-            sp1Proof: SP1Proof({
-                proof: bytes(""),
-                publicValues: proof.sp1Proof.publicValues,
-                vKey: proof.sp1Proof.vKey
-            }),
+            sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
             path: bytes("invalid"),
             value: fixture.membershipMsg.value,
@@ -110,11 +98,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         });
         testCases[4] = MockInvalidMembershipTestCase({
             name: "Invalid value",
-            sp1Proof: SP1Proof({
-                proof: bytes(""),
-                publicValues: proof.sp1Proof.publicValues,
-                vKey: proof.sp1Proof.vKey
-            }),
+            sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
             path: fixture.membershipMsg.path,
             value: bytes("invalid"),
@@ -134,18 +118,14 @@ contract SP1ICS07MembershipTest is MembershipTest {
         });
         testCases[6] = MockInvalidMembershipTestCase({
             name: "Invalid public values",
-            sp1Proof: SP1Proof({
-                proof: bytes(""),
-                publicValues: bytes("invalid"),
-                vKey: proof.sp1Proof.vKey
-            }),
+            sp1Proof: SP1Proof({ proof: bytes(""), publicValues: bytes("invalid"), vKey: proof.sp1Proof.vKey }),
             proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
             path: fixture.membershipMsg.path,
             value: fixture.membershipMsg.value,
             expPass: false
         });
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             MockInvalidMembershipTestCase memory tc = testCases[i];
 
             SP1MembershipProof memory membershipProof = proof;

@@ -13,11 +13,10 @@ struct SP1ICS07UpdateClientFixtureJson {
     bytes updateMsg;
 }
 
-contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest, ILightClientMsgs {
+contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
     using stdJson for string;
 
     SP1ICS07UpdateClientFixtureJson public fixture;
-    SP1ICS07UpdateClientFixtureJson public mockFixture;
 
     uint32 public targetHeight;
     ConsensusState public targetConsensusState;
@@ -25,9 +24,8 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest, ILightClientMsgs {
 
     function setUp() public {
         fixture = loadFixture("update_client_fixture.json");
-        mockFixture = loadFixture("mock_update_client_fixture.json");
 
-        setUpTest("update_client_fixture.json", "mock_update_client_fixture.json");
+        setUpTest("update_client_fixture.json");
 
         MsgUpdateClient memory updateMsg = abi.decode(fixture.updateMsg, (MsgUpdateClient));
         UpdateClientOutput memory output = abi.decode(updateMsg.sp1Proof.publicValues, (UpdateClientOutput));

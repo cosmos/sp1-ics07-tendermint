@@ -16,7 +16,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
     SP1MembershipProof proof;
 
     function setUp() public {
-        setUpTestWithFixtures("memberships_fixture.json", "mock_memberships_fixture.json");
+        setUpTestWithFixtures("memberships_fixture.json");
 
         proof = abi.decode(fixture.membershipMsg.proof, (SP1MembershipProof));
     }

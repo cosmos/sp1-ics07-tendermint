@@ -38,9 +38,8 @@ abstract contract SP1ICS07TendermintTest is
     SP1ICS07Tendermint public mockIcs07Tendermint;
 
     SP1ICS07GenesisFixtureJson internal genesisFixture;
-    SP1ICS07GenesisFixtureJson internal mockGenesisFixture;
 
-    function setUpTest(string memory fileName, string memory mockFileName) public {
+    function setUpTest(string memory fileName) public {
         genesisFixture = loadGenesisFixture(fileName);
 
         ConsensusState memory trustedConsensusState = abi.decode(genesisFixture.trustedConsensusState, (ConsensusState));
@@ -57,28 +56,21 @@ abstract contract SP1ICS07TendermintTest is
             trustedConsensusHash
         );
 
-        mockGenesisFixture = loadGenesisFixture(mockFileName);
-
-        ConsensusState memory mockTrustedConsensusState =
-            abi.decode(mockGenesisFixture.trustedConsensusState, (ConsensusState));
-
-        bytes32 mockTrustedConsensusHash = keccak256(abi.encode(mockTrustedConsensusState));
-
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
-            mockGenesisFixture.updateClientVkey,
-            mockGenesisFixture.membershipVkey,
-            mockGenesisFixture.ucAndMembershipVkey,
+            genesisFixture.updateClientVkey,
+            genesisFixture.membershipVkey,
+            genesisFixture.ucAndMembershipVkey,
             address(mockVerifier),
-            mockGenesisFixture.trustedClientState,
-            mockTrustedConsensusHash
+            genesisFixture.trustedClientState,
+            trustedConsensusHash
         );
 
         ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(keccak256(abi.encode(clientState)) == keccak256(mockGenesisFixture.trustedClientState));
+        assert(keccak256(abi.encode(clientState)) == keccak256(genesisFixture.trustedClientState));
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
-        assert(consensusHash == mockTrustedConsensusHash);
+        assert(consensusHash == trustedConsensusHash);
     }
 
     function loadGenesisFixture(string memory fileName) public view returns (SP1ICS07GenesisFixtureJson memory) {

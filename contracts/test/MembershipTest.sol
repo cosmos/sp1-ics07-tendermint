@@ -15,13 +15,11 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
     using stdJson for string;
 
     SP1ICS07MembershipFixtureJson public fixture;
-    SP1ICS07MembershipFixtureJson public mockFixture;
 
-    function setUpTestWithFixtures(string memory fileName, string memory mockFileName) public {
+    function setUpTestWithFixtures(string memory fileName) public {
         fixture = loadFixture(fileName);
-        mockFixture = loadFixture(mockFileName);
 
-        setUpTest(fileName, mockFileName);
+        setUpTest(fileName);
     }
 
     function loadFixture(string memory fileName) public view returns (SP1ICS07MembershipFixtureJson memory) {

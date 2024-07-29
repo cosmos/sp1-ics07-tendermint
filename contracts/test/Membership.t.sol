@@ -14,7 +14,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
     function setUp() public {
         setUpTestWithFixtures("memberships_fixture.json");
 
-        proof = abi.decode(fixture.membershipProof, (SP1MembershipProof));
+        proof = abi.decode(fixture.membershipProof.proof, (SP1MembershipProof));
     }
 
     function test_ValidateFixtures() public view {
@@ -36,7 +36,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
     // Confirm that submitting a real proof passes the verifier.
     function test_ValidVerifyMembership() public {
         MsgMembership memory membershipMsg = MsgMembership({
-            proof: fixture.membershipProof,
+            proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: bytes(verifyMembershipPath),
             value: verifyMembershipValue()
@@ -51,7 +51,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
     // Modify the proof to make it a non-membership proof.
     function test_ValidVerifyNonMembership() public {
         MsgMembership memory membershipMsg = MsgMembership({
-            proof: fixture.membershipProof,
+            proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: bytes(verifyNonMembershipPath),
             value: bytes("")
@@ -168,10 +168,10 @@ contract SP1ICS07MembershipTest is MembershipTest {
             });
 
             if (tc.expPass) {
-                ics07Tendermint.membership(membershipMsg);
+                mockIcs07Tendermint.membership(membershipMsg);
             } else {
                 vm.expectRevert();
-                ics07Tendermint.membership(membershipMsg);
+                mockIcs07Tendermint.membership(membershipMsg);
             }
         }
     }

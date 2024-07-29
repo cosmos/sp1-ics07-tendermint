@@ -14,7 +14,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function setUp() public {
         setUpTestWithFixtures("uc_and_memberships_fixture.json");
 
-        proof = abi.decode(fixture.membershipProof, (SP1MembershipAndUpdateClientProof));
+        proof = abi.decode(fixture.membershipProof.proof, (SP1MembershipAndUpdateClientProof));
 
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
 
@@ -35,7 +35,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         vm.warp(output.updateClientOutput.env.now + 300);
 
         MsgMembership memory membershipMsg = MsgMembership({
-            proof: fixture.membershipProof,
+            proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: bytes(verifyMembershipPath),
             value: verifyMembershipValue()
@@ -63,7 +63,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         vm.warp(output.updateClientOutput.env.now + 300);
 
         MsgMembership memory membershipMsg = MsgMembership({
-            proof: fixture.membershipProof,
+            proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: bytes(verifyNonMembershipPath),
             value: bytes("")

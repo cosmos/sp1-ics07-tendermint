@@ -14,7 +14,7 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
 
     struct SP1ICS07MembershipFixtureJson {
         Height proofHeight;
-        bytes membershipProof;
+        MembershipProof membershipProof;
     }
 
     using stdJson for string;
@@ -36,7 +36,7 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
 
         SP1ICS07MembershipFixtureJson memory fix = SP1ICS07MembershipFixtureJson({
             proofHeight: abi.decode(proofHeightBz, (Height)),
-            membershipProof: membershipProofBz
+            membershipProof: abi.decode(membershipProofBz, (MembershipProof))
         });
 
         return fix;

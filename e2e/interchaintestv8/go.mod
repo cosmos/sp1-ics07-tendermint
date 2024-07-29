@@ -10,9 +10,9 @@ require (
 	cosmossdk.io/x/tx v0.13.3
 	cosmossdk.io/x/upgrade v0.1.2
 	github.com/CosmWasm/wasmd v0.50.0
-	github.com/cosmos/cosmos-sdk v0.50.6
+	github.com/cosmos/cosmos-sdk v0.50.7
 	github.com/cosmos/gogoproto v1.4.12
-	github.com/cosmos/ibc-go/v8 v8.3.0
+	github.com/cosmos/ibc-go/v8 v8.4.0
 	github.com/docker/docker v24.0.9+incompatible
 	github.com/ethereum/go-ethereum v1.14.6
 	github.com/strangelove-ventures/interchaintest/v8 v8.3.0

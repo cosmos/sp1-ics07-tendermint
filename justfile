@@ -17,9 +17,16 @@ build-operator:
   cargo build --bin operator --locked --release
   @echo "Built the operator executable"
 
+# Build the contracts using `forge build` command after cleaning up the cache and output directories
+build-contracts:
+  @echo "Cleaning up the contracts cache and output directories..."
+  -rm -r contracts/cache contracts/out # `-` is used to ignore the error if the directories do not exist
+  @echo "Building the contracts..."
+  forge build
+
 # Run the Solidity tests using `forge test` command
 test-foundry:
-  cd contracts && forge test -vvv
+  forge test -vvv
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:
@@ -33,7 +40,7 @@ genesis:
   @echo "Generating the genesis file..."
   RUST_LOG=info cargo run --bin operator --release -- genesis
 
-# Generate the `fixture.json` file for the Celestia Mocha testnet using the prover parameter.
+# Generate the fixture files for the Celestia Mocha testnet using the prover parameter.
 # The prover parameter should be one of: ["mock", "network", "local"]
 # This generates the fixtures for all programs in parallel using GNU parallel.
 # If prover is set to network, this command requires the `SP1_PRIVATE_KEY` environment variable to be set.
@@ -45,10 +52,9 @@ fixtures prover:
   just build-operator
   @echo "Generating fixtures... This may take a while (up to 20 minutes)"
   parallel --progress --shebang --ungroup -j 4 ::: \
-    "RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2330000 --target-block 2330010 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}update_client_fixture.json'" \
-    "{{ if prover == "network" { "sleep 15 &&" } else { "" } }} RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block 2330000 --target-block 2330010 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}uc_and_memberships_fixture.json'" \
-    "{{ if prover == "network" { "sleep 30 &&" } else { "" } }} RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures membership --key-paths 'clients/07-tendermint-0/clientState' --trusted-block 2330000 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}verify_membership_fixture.json'" \
-    "{{ if prover == "network" { "sleep 45 &&" } else { "" } }} RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block 2330000 -o 'contracts/fixtures/{{ if prover == "mock" { "mock_" } else { "" } }}memberships_fixture.json'"
+    "RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2330000 --target-block 2330010 -o 'contracts/fixtures/update_client_fixture.json'" \
+    "sleep 15 && RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block 2330000 --target-block 2330010 -o 'contracts/fixtures/uc_and_memberships_fixture.json'" \
+    "sleep 30 && RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block 2330000 -o 'contracts/fixtures/memberships_fixture.json'"
   @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
@@ -77,7 +83,9 @@ operator:
 
 # Run the e2e tests
 test-e2e testname:
-  echo "Running {{testname}} test..."
+  @echo "Cleaning up the contracts cache and output directories..."
+  -rm -r contracts/cache contracts/out # `-` is used to ignore the error if the directories do not exist
+  @echo "Running {{testname}} test..."
   cd e2e/interchaintestv8 && go test -v -run=TestWithSP1ICS07TendermintTestSuite/{{testname}} -timeout 40m
 
 # Lint the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, and `golanci-lint` commands

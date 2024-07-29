@@ -66,6 +66,7 @@ async-trait = "0.1.80"
 hex = "0.4.3"
 prost = { version = "0.12", default-features = false }
 futures = "0.3"
+serde_with = { version = "3.9.0", features = ["hex"] }
 
 [patch.crates-io]
 sha2-v0-9-8 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", branch = "patch-v0.9.8" }

@@ -10,10 +10,11 @@ use crate::{
     rpc::TendermintRpcExt,
 };
 use alloy::providers::ProviderBuilder;
+use alloy_sol_types::SolValue;
 use log::{debug, info};
 use reqwest::Url;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env};
-use sp1_sdk::utils::setup_logger;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env, MsgUpdateClient, SP1Proof};
+use sp1_sdk::{utils::setup_logger, HashableKey};
 use tendermint_rpc::HttpClient;
 
 /// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint
@@ -77,11 +78,16 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         let proof_data =
             prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
+        let update_msg = MsgUpdateClient {
+            sp1Proof: SP1Proof::new(
+                &prover.vkey.bytes32(),
+                proof_data.bytes(),
+                proof_data.public_values.to_vec(),
+            ),
+        };
+
         contract
-            .updateClient(
-                proof_data.bytes().into(),
-                proof_data.public_values.to_vec().into(),
-            )
+            .updateClient(update_msg.abi_encode().into())
             .send()
             .await?
             .watch()

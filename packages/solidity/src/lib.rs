@@ -2,6 +2,7 @@
 #![deny(missing_docs)]
 #![deny(clippy::nursery, clippy::pedantic, warnings)]
 
+use alloy_sol_types::SolValue;
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use tendermint::{hash::Algorithm, Time};
@@ -18,9 +19,6 @@ alloy_sol_types::sol!(
 );
 
 // NOTE: The riscv program won't compile with the `rpc` features.
-// NOTE: Using the entire `SP1ICS07Tendermint.json` file for the `sol!` macro increases
-// the riscv program size significantly, so we can consider using the `sol!` macro with
-// manually defined structs for the required types when `rpc` feature is disabled.
 #[cfg(not(feature = "rpc"))]
 alloy_sol_types::sol!(
     #[derive(serde::Deserialize, serde::Serialize)]
@@ -28,6 +26,27 @@ alloy_sol_types::sol!(
     sp1_ics07_tendermint,
     "../../contracts/abi/SP1ICS07Tendermint.json"
 );
+
+#[cfg(feature = "rpc")]
+impl sp1_ics07_tendermint::SP1Proof {
+    /// Create a new [`sp1_ics07_tendermint::SP1Proof`] instance.
+    ///
+    /// # Panics
+    /// Panics if the vkey is not a valid hex string, or if the bytes cannot be decoded.
+    #[must_use]
+    pub fn new(vkey: &str, proof: Vec<u8>, public_values: Vec<u8>) -> Self {
+        let stripped = vkey.strip_prefix("0x").expect("failed to strip prefix");
+        let vkey_bytes: [u8; 32] = hex::decode(stripped)
+            .expect("failed to decode vkey")
+            .try_into()
+            .expect("invalid vkey length");
+        Self {
+            vKey: vkey_bytes.into(),
+            proof: proof.into(),
+            publicValues: public_values.into(),
+        }
+    }
+}
 
 #[allow(clippy::fallible_impl_from)]
 impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
@@ -89,6 +108,26 @@ impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusStat
                 &consensus_state.nextValidatorsHash.0,
             )
             .unwrap(),
+        }
+    }
+}
+
+impl From<sp1_ics07_tendermint::SP1MembershipProof> for sp1_ics07_tendermint::MembershipProof {
+    fn from(proof: sp1_ics07_tendermint::SP1MembershipProof) -> Self {
+        Self {
+            proofType: 0,
+            proof: proof.abi_encode().into(),
+        }
+    }
+}
+
+impl From<sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof>
+    for sp1_ics07_tendermint::MembershipProof
+{
+    fn from(proof: sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof) -> Self {
+        Self {
+            proofType: 1,
+            proof: proof.abi_encode().into(),
         }
     }
 }

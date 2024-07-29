@@ -5,10 +5,14 @@ pragma solidity >=0.8.25;
 import "forge-std/console.sol";
 import { Test } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
-import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
+import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
+import { IUpdateClientMsgs } from "../src/msgs/IUpdateClientMsgs.sol";
+import { IMembershipMsgs } from "../src/msgs/IMembershipMsgs.sol";
+import { IUpdateClientAndMembershipMsgs } from "../src/msgs/IUcAndMembershipMsgs.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { SP1Verifier } from "@sp1-contracts/v1.0.1/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
+import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 
 struct SP1ICS07GenesisFixtureJson {
     bytes trustedClientState;
@@ -18,7 +22,14 @@ struct SP1ICS07GenesisFixtureJson {
     bytes32 ucAndMembershipVkey;
 }
 
-abstract contract SP1ICS07TendermintTest is Test {
+abstract contract SP1ICS07TendermintTest is
+    Test,
+    IICS07TendermintMsgs,
+    IUpdateClientMsgs,
+    IMembershipMsgs,
+    IUpdateClientAndMembershipMsgs,
+    ILightClientMsgs
+{
     using stdJson for string;
 
     SP1Verifier public verifier;
@@ -27,13 +38,11 @@ abstract contract SP1ICS07TendermintTest is Test {
     SP1ICS07Tendermint public mockIcs07Tendermint;
 
     SP1ICS07GenesisFixtureJson internal genesisFixture;
-    SP1ICS07GenesisFixtureJson internal mockGenesisFixture;
 
-    function setUpTest(string memory fileName, string memory mockFileName) public {
+    function setUpTest(string memory fileName) public {
         genesisFixture = loadGenesisFixture(fileName);
 
-        ICS07Tendermint.ConsensusState memory trustedConsensusState =
-            abi.decode(genesisFixture.trustedConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory trustedConsensusState = abi.decode(genesisFixture.trustedConsensusState, (ConsensusState));
 
         bytes32 trustedConsensusHash = keccak256(abi.encode(trustedConsensusState));
 
@@ -47,28 +56,21 @@ abstract contract SP1ICS07TendermintTest is Test {
             trustedConsensusHash
         );
 
-        mockGenesisFixture = loadGenesisFixture(mockFileName);
-
-        ICS07Tendermint.ConsensusState memory mockTrustedConsensusState =
-            abi.decode(mockGenesisFixture.trustedConsensusState, (ICS07Tendermint.ConsensusState));
-
-        bytes32 mockTrustedConsensusHash = keccak256(abi.encode(mockTrustedConsensusState));
-
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
-            mockGenesisFixture.updateClientVkey,
-            mockGenesisFixture.membershipVkey,
-            mockGenesisFixture.ucAndMembershipVkey,
+            genesisFixture.updateClientVkey,
+            genesisFixture.membershipVkey,
+            genesisFixture.ucAndMembershipVkey,
             address(mockVerifier),
-            mockGenesisFixture.trustedClientState,
-            mockTrustedConsensusHash
+            genesisFixture.trustedClientState,
+            trustedConsensusHash
         );
 
-        ICS07Tendermint.ClientState memory clientState = mockIcs07Tendermint.getClientState();
-        assert(keccak256(abi.encode(clientState)) == keccak256(mockGenesisFixture.trustedClientState));
+        ClientState memory clientState = mockIcs07Tendermint.getClientState();
+        assert(keccak256(abi.encode(clientState)) == keccak256(genesisFixture.trustedClientState));
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
-        assert(consensusHash == mockTrustedConsensusHash);
+        assert(consensusHash == trustedConsensusHash);
     }
 
     function loadGenesisFixture(string memory fileName) public view returns (SP1ICS07GenesisFixtureJson memory) {

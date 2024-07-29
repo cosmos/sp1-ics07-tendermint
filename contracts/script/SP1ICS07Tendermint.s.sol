@@ -5,7 +5,7 @@ import { Script } from "forge-std/Script.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { SP1Verifier } from "@sp1-contracts/v1.0.1/SP1Verifier.sol";
-import { ICS07Tendermint } from "../src/ics07-tendermint/ICS07Tendermint.sol";
+import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
 
 struct SP1ICS07TendermintGenesisJson {
     bytes trustedClientState;
@@ -15,7 +15,7 @@ struct SP1ICS07TendermintGenesisJson {
     bytes32 ucAndMembershipVkey;
 }
 
-contract SP1TendermintScript is Script {
+contract SP1TendermintScript is Script, IICS07TendermintMsgs {
     using stdJson for string;
 
     SP1ICS07Tendermint public ics07Tendermint;
@@ -25,8 +25,7 @@ contract SP1TendermintScript is Script {
         // Read the initialization parameters for the SP1 Tendermint contract.
         SP1ICS07TendermintGenesisJson memory genesis = loadGenesis("genesis.json");
 
-        ICS07Tendermint.ConsensusState memory trustedConsensusState =
-            abi.decode(genesis.trustedConsensusState, (ICS07Tendermint.ConsensusState));
+        ConsensusState memory trustedConsensusState = abi.decode(genesis.trustedConsensusState, (ConsensusState));
 
         bytes32 trustedConsensusHash = keccak256(abi.encode(trustedConsensusState));
 
@@ -44,7 +43,7 @@ contract SP1TendermintScript is Script {
 
         vm.stopBroadcast();
 
-        ICS07Tendermint.ClientState memory clientState = ics07Tendermint.getClientState();
+        ClientState memory clientState = ics07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(genesis.trustedClientState));
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);

@@ -3,14 +3,14 @@
 <div align="center">
 
 [![Github Actions][gha-badge]][gha]
-[![Foundry][foundry-badge]][foundry]
+[![SP1][sp1-badge]][sp1]
 [![License: MIT][license-badge]][license]
 </div>
 
 [gha]: https://github.com/cosmos/sp1-ics07-tendermint/actions
 [gha-badge]: https://github.com/cosmos/sp1-ics07-tendermint/actions/workflows/e2e.yml/badge.svg
-[foundry]: https://getfoundry.sh/
-[foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
+[sp1]: https://github.com/succinctlabs/sp1
+[sp1-badge]: https://img.shields.io/badge/Built%20with-SP1-1D4351.svg
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
@@ -58,6 +58,7 @@ This project contains the following programs
 |     `membership`    | As consensus states are added to the client, they can be used for proof verification by relayers wishing to prove packet flow messages against a particular height on the counterparty. This uses the `verify_membership` and `verify_non_membership` methods on the tendermint client. |      ✅     |
 | `uc-and-membership` | This is a program that combines `update-client` and `membership` to update the client, and prove membership of packet flow messages against the new consensus state.                                                                                                                    |      ✅     |
 |    `misbehaviour`   | In case, the malicious subset of the validators exceeds the trust level of the client; then the client can be deceived into accepting invalid blocks and the connection is no longer secure. The tendermint client has some mitigations in place to prevent this.                       |      ⏳     |
+|   `upgrade-client`   | The chain which this light client is tracking can elect to write a special pre-determined key in state to allow the light client to update its client state (e.g. with a new chain ID or revision).                                                                                    |      ⏳     |
 
 ## Requirements
 
@@ -65,7 +66,7 @@ This project contains the following programs
 - [SP1](https://succinctlabs.github.io/sp1/getting-started/install.html)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh/)
-- [Just](https://just.systems/man/en/) (recommended)
+- [Just](https://just.systems/man/en/)
 
 Foundry typically uses git submodules to manage contract dependencies, but this template uses Node.js packages (via Bun) because submodules don't scale. You can install the contracts dependencies by running the following command:
 
@@ -155,7 +156,8 @@ just test-foundry
 
 There are several end-to-end tests in the `e2e/interchaintestv8` directory. These tests are written in Go and use the [`interchaintest`](https://github.com/strangelove-ventures/interchaintest) library. It spins up a local Ethereum and a Tendermint network and runs the tests found in [`e2e/interchaintestv8/sp1_ics07_test.go`](e2e/interchaintestv8/sp1_ics07_test.go). Some of the tests use the prover network to generate the proofs, so you need to provide your SP1 network private key to `.env` for these tests to pass.
 
-> If you are running on a mac with an M chip, you will need to do the following:
+> [!NOTE]
+> If you are running on a Mac with an M chip, you will need to do the following:
 > - Set up Rosetta
 > - Enable Rosetta for Docker (in Docker Desktop: Settings -> General -> enable "Use Rosetta for x86_64/amd64 emulation on Apple Silicon")
 > - Pull the foundry image with the following command:

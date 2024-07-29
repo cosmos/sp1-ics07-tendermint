@@ -6,10 +6,6 @@ import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { MembershipTest } from "./MembershipTest.sol";
 
-// set constant string
-string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
-string constant verifyNonMembershipPath = "clients/07-tendermint-001/clientState";
-
 contract SP1ICS07MembershipTest is MembershipTest {
     using stdJson for string;
 
@@ -21,18 +17,14 @@ contract SP1ICS07MembershipTest is MembershipTest {
         proof = abi.decode(fixture.membershipMsg.proof, (SP1MembershipProof));
     }
 
-    function kvPairs() public view returns (KVPair[] memory) {
+    function test_ValidateFixtures() public view {
         MembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (MembershipOutput));
 
-        return output.kvPairs;
-    }
-
-    function test_ValidateFixtures() public view {
-        assertEq(kvPairs().length, 2);
-        assertEq(string(kvPairs()[0].path), verifyMembershipPath);
-        assert(kvPairs()[0].value.length != 0);
-        assertEq(string(kvPairs()[1].path), verifyNonMembershipPath);
-        assertEq(kvPairs()[1].value.length, 0);
+        assertEq(output.kvPairs.length, 2);
+        assertEq(string(output.kvPairs[0].path), verifyMembershipPath);
+        assert(output.kvPairs[0].value.length != 0);
+        assertEq(string(output.kvPairs[1].path), verifyNonMembershipPath);
+        assertEq(output.kvPairs[1].value.length, 0);
     }
 
     // Confirm that submitting a real proof passes the verifier.

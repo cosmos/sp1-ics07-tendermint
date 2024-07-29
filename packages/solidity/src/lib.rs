@@ -2,6 +2,7 @@
 #![deny(missing_docs)]
 #![deny(clippy::nursery, clippy::pedantic, warnings)]
 
+use alloy_sol_types::SolValue;
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use tendermint::{hash::Algorithm, Time};
@@ -107,6 +108,26 @@ impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusStat
                 &consensus_state.nextValidatorsHash.0,
             )
             .unwrap(),
+        }
+    }
+}
+
+impl From<sp1_ics07_tendermint::SP1MembershipProof> for sp1_ics07_tendermint::MembershipProof {
+    fn from(proof: sp1_ics07_tendermint::SP1MembershipProof) -> Self {
+        Self {
+            proofType: 0,
+            proof: proof.abi_encode().into(),
+        }
+    }
+}
+
+impl From<sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof>
+    for sp1_ics07_tendermint::MembershipProof
+{
+    fn from(proof: sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof) -> Self {
+        Self {
+            proofType: 1,
+            proof: proof.abi_encode().into(),
         }
     }
 }

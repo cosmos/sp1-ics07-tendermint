@@ -33,8 +33,15 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = HttpClient::from_env();
     let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
 
+    let trusted_light_block = tm_rpc_client
+        .get_light_block(Some(args.trusted_block))
+        .await?;
+    let target_light_block = tm_rpc_client
+        .get_light_block(Some(args.target_block))
+        .await?;
+
     let genesis = SP1ICS07TendermintGenesis::from_env(
-        Some(args.trusted_block), // TODO: make this a light block
+        &trusted_light_block,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
     )
@@ -42,13 +49,6 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;
     let trusted_consensus_state: ConsensusState =
         SolConsensusState::abi_decode(&genesis.trusted_consensus_state, false)?.into();
-
-    let trusted_light_block = tm_rpc_client
-        .get_light_block(Some(args.trusted_block))
-        .await?;
-    let target_light_block = tm_rpc_client
-        .get_light_block(Some(args.target_block))
-        .await?;
 
     let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {

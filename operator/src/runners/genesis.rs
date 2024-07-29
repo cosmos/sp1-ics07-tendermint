@@ -13,7 +13,7 @@ use serde_with::serde_as;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::{env, path::PathBuf};
-use tendermint_light_client_verifier::types::TrustThreshold;
+use tendermint_light_client_verifier::types::{LightBlock, TrustThreshold};
 use tendermint_rpc::HttpClient;
 
 /// The genesis data for the SP1 ICS07 Tendermint contract.
@@ -41,7 +41,7 @@ impl SP1ICS07TendermintGenesis {
     /// and making the necessary RPC calls.
     #[allow(clippy::missing_errors_doc)]
     pub async fn from_env(
-        trusted_height: Option<u32>,
+        trusted_light_block: &LightBlock,
         trusting_period: Option<u32>,
         trust_level: TrustThreshold,
     ) -> anyhow::Result<Self> {
@@ -51,14 +51,6 @@ impl SP1ICS07TendermintGenesis {
         }
 
         let tm_rpc_client = HttpClient::from_env();
-
-        let trusted_light_block = tm_rpc_client.get_light_block(trusted_height).await?;
-        if trusted_height.is_none() {
-            log::info!(
-                "Latest block height: {}",
-                trusted_light_block.height().value()
-            );
-        }
 
         let unbonding_period = tm_rpc_client
             .sdk_staking_params()
@@ -96,8 +88,18 @@ impl SP1ICS07TendermintGenesis {
 /// Creates the `genesis.json` file for the `SP1ICS07Tendermint` contract.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: Args) -> anyhow::Result<()> {
+    let tm_rpc_client = HttpClient::from_env();
+
+    let trusted_light_block = tm_rpc_client.get_light_block(args.trusted_block).await?;
+    if args.trusted_block.is_none() {
+        log::info!(
+            "Latest block height: {}",
+            trusted_light_block.height().value()
+        );
+    }
+
     let genesis = SP1ICS07TendermintGenesis::from_env(
-        args.trusted_block,
+        &trusted_light_block,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
     )

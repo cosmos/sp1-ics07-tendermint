@@ -43,8 +43,12 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let tm_rpc_client = HttpClient::from_env();
     let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 
+    let trusted_light_block = tm_rpc_client
+        .get_light_block(Some(args.trusted_block))
+        .await?;
+
     let genesis = SP1ICS07TendermintGenesis::from_env(
-        Some(args.trusted_block),
+        &trusted_light_block,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
     )

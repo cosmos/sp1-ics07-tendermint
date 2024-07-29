@@ -13,7 +13,8 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
     string constant verifyNonMembershipPath = "clients/07-tendermint-001/clientState";
 
     struct SP1ICS07MembershipFixtureJson {
-        MsgMembership membershipMsg;
+        Height proofHeight;
+        bytes membershipProof;
     }
 
     using stdJson for string;
@@ -30,10 +31,13 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/contracts/fixtures/", fileName);
         string memory json = vm.readFile(path);
-        bytes memory membershipMsgBz = json.readBytes(".membershipMsg");
+        bytes memory proofHeightBz = json.readBytes(".proofHeight");
+        bytes memory membershipProofBz = json.readBytes(".membershipProof");
 
-        SP1ICS07MembershipFixtureJson memory fix =
-            SP1ICS07MembershipFixtureJson({ membershipMsg: abi.decode(membershipMsgBz, (MsgMembership)) });
+        SP1ICS07MembershipFixtureJson memory fix = SP1ICS07MembershipFixtureJson({
+            proofHeight: abi.decode(proofHeightBz, (Height)),
+            membershipProof: membershipProofBz
+        });
 
         return fix;
     }

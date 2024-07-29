@@ -333,7 +333,9 @@ contract SP1ICS07Tendermint is
         MembershipOutput memory o1,
         UcAndMembershipOutput memory o2,
         MsgUpdateClient memory o3,
-        MembershipProof memory o4
+        MembershipProof memory o4,
+        SP1MembershipProof memory o5,
+        SP1MembershipAndUpdateClientProof memory o6
     )
         public
         pure

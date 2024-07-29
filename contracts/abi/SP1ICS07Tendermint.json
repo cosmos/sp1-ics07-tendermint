@@ -326,6 +326,86 @@
             "internalType": "bytes"
           }
         ]
+      },
+      {
+        "name": "o5",
+        "type": "tuple",
+        "internalType": "struct IMembershipMsgs.SP1MembershipProof",
+        "components": [
+          {
+            "name": "sp1Proof",
+            "type": "tuple",
+            "internalType": "struct ISP1Msgs.SP1Proof",
+            "components": [
+              {
+                "name": "vKey",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "publicValues",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "proof",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          },
+          {
+            "name": "trustedConsensusState",
+            "type": "tuple",
+            "internalType": "struct IICS07TendermintMsgs.ConsensusState",
+            "components": [
+              {
+                "name": "timestamp",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "root",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "nextValidatorsHash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "o6",
+        "type": "tuple",
+        "internalType": "struct IMembershipMsgs.SP1MembershipAndUpdateClientProof",
+        "components": [
+          {
+            "name": "sp1Proof",
+            "type": "tuple",
+            "internalType": "struct ISP1Msgs.SP1Proof",
+            "components": [
+              {
+                "name": "vKey",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "publicValues",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "proof",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          }
+        ]
       }
     ],
     "outputs": [],

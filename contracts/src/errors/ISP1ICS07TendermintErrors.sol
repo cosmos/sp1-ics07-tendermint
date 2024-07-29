@@ -91,4 +91,7 @@ interface ISP1ICS07TendermintErrors {
     /// @notice The error that is returned when the membership proof type is unknown.
     /// @param proofType The unknown membership proof type.
     error UnknownMembershipProofType(uint8 proofType);
+
+    /// @notice Returned when the feature is not supported.
+    error FeatureNotSupported();
 }

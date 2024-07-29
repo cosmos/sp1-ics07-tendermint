@@ -8,7 +8,7 @@ import { IUpdateClientAndMembershipMsgs } from "./msgs/IUcAndMembershipMsgs.sol"
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
-// import { ILightClient } from "ibc-solidity-interfaces/ILightClient.sol";
+import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -20,7 +20,8 @@ contract SP1ICS07Tendermint is
     IMembershipMsgs,
     IUpdateClientAndMembershipMsgs,
     ISP1ICS07TendermintErrors,
-    ILightClientMsgs
+    ILightClientMsgs,
+    ILightClient
 {
     /// @notice The verification key for the update client program.
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
@@ -128,6 +129,18 @@ contract SP1ICS07Tendermint is
         } else {
             revert UnknownMembershipProofType(uint8(membershipProof.proofType));
         }
+    }
+
+    /// @notice The entrypoint for misbehaviour.
+    /// TODO: Not yet implemented. (#56)
+    function misbehaviour(bytes calldata) public pure {
+        revert FeatureNotSupported();
+    }
+
+    /// @notice The entrypoint for upgrading the client.
+    /// TODO: Not yet implemented. (#78)
+    function upgradeClient(bytes calldata) public pure {
+        revert FeatureNotSupported();
     }
 
     function handleSP1MembershipProof(

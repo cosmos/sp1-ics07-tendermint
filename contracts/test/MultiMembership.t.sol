@@ -10,11 +10,21 @@ import { MembershipTest } from "./MembershipTest.sol";
 string constant verifyMembershipPath = "clients/07-tendermint-0/clientState";
 string constant verifyNonMembershipPath = "clients/07-tendermint-001/clientState";
 
-contract SP1ICS07MultiMembershipTest is MembershipTest {
+contract SP1ICS07MembershipTest is MembershipTest {
     using stdJson for string;
+
+    SP1MembershipProof proof;
 
     function setUp() public {
         setUpTestWithFixtures("memberships_fixture.json", "mock_memberships_fixture.json");
+
+        proof = abi.decode(fixture.membershipMsg.proof, (SP1MembershipProof));
+    }
+
+    function kvPairs() public view returns (KVPair[] memory) {
+        MembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (MembershipOutput));
+
+        return output.kvPairs;
     }
 
     function test_ValidateFixtures() public view {
@@ -23,102 +33,153 @@ contract SP1ICS07MultiMembershipTest is MembershipTest {
         assert(kvPairs()[0].value.length != 0);
         assertEq(string(kvPairs()[1].path), verifyNonMembershipPath);
         assertEq(kvPairs()[1].value.length, 0);
-
-        assertEq(mockKvPairs().length, 2);
-        assertEq(string(mockKvPairs()[0].path), verifyMembershipPath);
-        assert(mockKvPairs()[0].value.length != 0);
-        assertEq(string(mockKvPairs()[1].path), verifyNonMembershipPath);
-        assertEq(mockKvPairs()[1].value.length, 0);
-    }
-
-    function test_ValidVerifyNonMembership() public view {
-        bytes32[] memory kvPairHashes = new bytes32[](2);
-        kvPairHashes[0] = bytes32(0); // skip validation of the first kvPair
-        kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
-
-        ics07Tendermint.batchVerifyMembership(
-            fixture.proof, fixture.publicValues, fixture.proofHeight, fixture.trustedConsensusState, kvPairHashes
-        );
-
-        // to console
-        console.log("VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
     // Confirm that submitting a real proof passes the verifier.
-    function test_ValidMultiMembership() public view {
-        bytes32[] memory kvPairHashes = new bytes32[](2);
-        kvPairHashes[0] = keccak256(abi.encode(kvPairs()[0]));
-        kvPairHashes[1] = keccak256(abi.encode(kvPairs()[1]));
-
-        ics07Tendermint.batchVerifyMembership(
-            fixture.proof, fixture.publicValues, fixture.proofHeight, fixture.trustedConsensusState, kvPairHashes
-        );
+    function test_ValidVerifyMembership() public {
+        ics07Tendermint.membership(fixture.membershipMsg);
 
         // to console
         console.log("VerifyMultiMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
-    // Confirm that submitting an empty proof passes the mock verifier.
-    function test_ValidMockMultiMembership() public view {
-        bytes32[] memory kvPairHashes = new bytes32[](2);
-        kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
-        kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
+    // Modify the proof to make it a non-membership proof.
+    function test_ValidVerifyNonMembership() public {
+        MsgMembership memory membershipMsg = fixture.membershipMsg;
+        membershipMsg.path = bytes(verifyNonMembershipPath);
+        membershipMsg.value = bytes("");
 
-        mockIcs07Tendermint.batchVerifyMembership(
-            bytes(""),
-            mockFixture.publicValues,
-            mockFixture.proofHeight,
-            mockFixture.trustedConsensusState,
-            kvPairHashes
-        );
+        ics07Tendermint.membership(membershipMsg);
+        // to console
+        console.log("VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
-    function test_Invalid_MockMultiMembership() public {
-        bytes32[] memory kvPairHashes = new bytes32[](2);
-        kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
-        kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
-        // Invalid proof
-        vm.expectRevert();
-        mockIcs07Tendermint.batchVerifyMembership(
-            bytes("invalid"),
-            mockFixture.publicValues,
-            mockFixture.proofHeight,
-            mockFixture.trustedConsensusState,
-            kvPairHashes
-        );
+    // Confirm that submitting an invalid proof with the real verifier fails.
+    function test_Invalid_VerifyMembership() public {
+        SP1MembershipProof memory proofMsg = proof;
+        proofMsg.sp1Proof.proof = bytes("invalid");
 
-        // Invalid proof height
-        vm.expectRevert();
-        mockIcs07Tendermint.batchVerifyMembership(
-            bytes(""), mockFixture.publicValues, 1, mockFixture.trustedConsensusState, kvPairHashes
-        );
+        MsgMembership memory membershipMsg = fixture.membershipMsg;
+        membershipMsg.proof = abi.encode(proofMsg);
 
-        // Invalid trusted consensus state
         vm.expectRevert();
-        mockIcs07Tendermint.batchVerifyMembership(
-            bytes(""), mockFixture.publicValues, mockFixture.proofHeight, bytes("invalid"), kvPairHashes
-        );
-
-        // Empty kvPairHashes length
-        vm.expectRevert();
-        mockIcs07Tendermint.batchVerifyMembership(
-            bytes(""),
-            mockFixture.publicValues,
-            mockFixture.proofHeight,
-            mockFixture.trustedConsensusState,
-            new bytes32[](0)
-        );
+        ics07Tendermint.membership(membershipMsg);
     }
 
-    // Confirm that submitting a random proof with the real verifier fails.
-    function test_Invalid_MultiMembership() public {
-        bytes32[] memory kvPairHashes = new bytes32[](2);
-        kvPairHashes[0] = keccak256(abi.encode(mockKvPairs()[0]));
-        kvPairHashes[1] = keccak256(abi.encode(mockKvPairs()[1]));
+    function test_Invalid_MockMembership() public {
+        MockInvalidMembershipTestCase[] memory testCases = new MockInvalidMembershipTestCase[](7);
+        testCases[0] = MockInvalidMembershipTestCase({
+            name: "success: valid mock",
+            sp1Proof: SP1Proof({
+                proof: bytes(""),
+                publicValues: proof.sp1Proof.publicValues,
+                vKey: proof.sp1Proof.vKey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
+            path: fixture.membershipMsg.path,
+            value: fixture.membershipMsg.value,
+            expPass: true
+        });
+        testCases[1] = MockInvalidMembershipTestCase({
+            name: "Invalid proof",
+            sp1Proof: SP1Proof({
+                proof: bytes("invalid"),
+                publicValues: proof.sp1Proof.publicValues,
+                vKey: proof.sp1Proof.vKey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
+            path: fixture.membershipMsg.path,
+            value: fixture.membershipMsg.value,
+            expPass: false
+        });
+        testCases[2] = MockInvalidMembershipTestCase({
+            name: "Invalid proof height",
+            sp1Proof: SP1Proof({
+                proof: bytes(""),
+                publicValues: proof.sp1Proof.publicValues,
+                vKey: proof.sp1Proof.vKey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight + 1,
+            path: fixture.membershipMsg.path,
+            value: fixture.membershipMsg.value,
+            expPass: false
+        });
+        testCases[3] = MockInvalidMembershipTestCase({
+            name: "Invalid path",
+            sp1Proof: SP1Proof({
+                proof: bytes(""),
+                publicValues: proof.sp1Proof.publicValues,
+                vKey: proof.sp1Proof.vKey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
+            path: bytes("invalid"),
+            value: fixture.membershipMsg.value,
+            expPass: false
+        });
+        testCases[4] = MockInvalidMembershipTestCase({
+            name: "Invalid value",
+            sp1Proof: SP1Proof({
+                proof: bytes(""),
+                publicValues: proof.sp1Proof.publicValues,
+                vKey: proof.sp1Proof.vKey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
+            path: fixture.membershipMsg.path,
+            value: bytes("invalid"),
+            expPass: false
+        });
+        testCases[5] = MockInvalidMembershipTestCase({
+            name: "Invalid vKey",
+            sp1Proof: SP1Proof({
+                proof: bytes(""),
+                publicValues: proof.sp1Proof.publicValues,
+                vKey: genesisFixture.ucAndMembershipVkey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
+            path: fixture.membershipMsg.path,
+            value: fixture.membershipMsg.value,
+            expPass: false
+        });
+        testCases[6] = MockInvalidMembershipTestCase({
+            name: "Invalid public values",
+            sp1Proof: SP1Proof({
+                proof: bytes(""),
+                publicValues: bytes("invalid"),
+                vKey: proof.sp1Proof.vKey
+            }),
+            proofHeight: fixture.membershipMsg.proofHeight.revisionHeight,
+            path: fixture.membershipMsg.path,
+            value: fixture.membershipMsg.value,
+            expPass: false
+        });
 
-        vm.expectRevert();
-        ics07Tendermint.batchVerifyMembership(
-            bytes("invalid"), fixture.publicValues, fixture.proofHeight, fixture.trustedConsensusState, kvPairHashes
-        );
+        for (uint i = 0; i < testCases.length; i++) {
+            MockInvalidMembershipTestCase memory tc = testCases[i];
+
+            SP1MembershipProof memory membershipProof = proof;
+            membershipProof.sp1Proof = tc.sp1Proof;
+
+            MsgMembership memory membershipMsg = fixture.membershipMsg;
+            membershipMsg.proof = abi.encode(membershipProof);
+            membershipMsg.proofHeight.revisionHeight = tc.proofHeight;
+            membershipMsg.path = tc.path;
+            membershipMsg.value = tc.value;
+
+            if (tc.expPass) {
+                ics07Tendermint.membership(membershipMsg);
+            } else {
+                vm.expectRevert();
+                ics07Tendermint.membership(membershipMsg);
+            }
+        }
+    }
+
+    struct MockInvalidMembershipTestCase {
+        string name;
+        SP1Proof sp1Proof;
+        uint32 proofHeight;
+        bytes path;
+        bytes value;
+        bool expPass;
     }
 }

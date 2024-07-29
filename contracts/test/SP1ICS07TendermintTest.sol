@@ -12,6 +12,7 @@ import { IUpdateClientAndMembershipMsgs } from "../src/msgs/IUcAndMembershipMsgs
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { SP1Verifier } from "@sp1-contracts/v1.0.1/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
+import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 
 struct SP1ICS07GenesisFixtureJson {
     bytes trustedClientState;
@@ -26,7 +27,8 @@ abstract contract SP1ICS07TendermintTest is
     IICS07TendermintMsgs,
     IUpdateClientMsgs,
     IMembershipMsgs,
-    IUpdateClientAndMembershipMsgs
+    IUpdateClientAndMembershipMsgs,
+    ILightClientMsgs
 {
     using stdJson for string;
 

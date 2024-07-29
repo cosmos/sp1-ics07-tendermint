@@ -5,18 +5,13 @@ pragma solidity >=0.8.25;
 import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
-
-struct SP1ICS07MembershipFixtureJson {
-    uint32 proofHeight;
-    bytes trustedClientState;
-    bytes trustedConsensusState;
-    bytes32 commitmentRoot;
-    bytes publicValues;
-    bytes proof;
-    bytes kvPairsBz;
-}
+import { IMembershipMsgs } from "../src/msgs/IMembershipMsgs.sol";
 
 abstract contract MembershipTest is SP1ICS07TendermintTest {
+    struct SP1ICS07MembershipFixtureJson {
+        MsgMembership membershipMsg;
+    }
+
     using stdJson for string;
 
     SP1ICS07MembershipFixtureJson public fixture;
@@ -29,34 +24,14 @@ abstract contract MembershipTest is SP1ICS07TendermintTest {
         setUpTest(fileName, mockFileName);
     }
 
-    function kvPairs() public view returns (KVPair[] memory) {
-        return abi.decode(fixture.kvPairsBz, (KVPair[]));
-    }
-
-    function mockKvPairs() public view returns (KVPair[] memory) {
-        return abi.decode(mockFixture.kvPairsBz, (KVPair[]));
-    }
-
     function loadFixture(string memory fileName) public view returns (SP1ICS07MembershipFixtureJson memory) {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/contracts/fixtures/", fileName);
         string memory json = vm.readFile(path);
-        bytes memory trustedClientState = json.readBytes(".trustedClientState");
-        bytes memory trustedConsensusState = json.readBytes(".trustedConsensusState");
-        uint32 proofHeight = uint32(json.readUint(".proofHeight"));
-        bytes32 commitmentRoot = json.readBytes32(".commitmentRoot");
-        bytes memory publicValues = json.readBytes(".publicValues");
-        bytes memory proof = json.readBytes(".proof");
-        bytes memory kvPairsBz = json.readBytes(".kvPairs");
+        bytes memory membershipMsgBz = json.readBytes(".membershipMsg");
 
         SP1ICS07MembershipFixtureJson memory fix = SP1ICS07MembershipFixtureJson({
-            commitmentRoot: commitmentRoot,
-            trustedClientState: trustedClientState,
-            trustedConsensusState: trustedConsensusState,
-            proofHeight: proofHeight,
-            publicValues: publicValues,
-            proof: proof,
-            kvPairsBz: kvPairsBz
+            membershipMsg: abi.decode(membershipMsgBz, (MsgMembership))
         });
 
         return fix;

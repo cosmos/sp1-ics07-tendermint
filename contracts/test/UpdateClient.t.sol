@@ -5,6 +5,7 @@ pragma solidity >=0.8.25;
 import "forge-std/console.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
+import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 
 struct SP1ICS07UpdateClientFixtureJson {
     bytes trustedClientState;
@@ -12,7 +13,7 @@ struct SP1ICS07UpdateClientFixtureJson {
     bytes updateMsg;
 }
 
-contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
+contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest, ILightClientMsgs {
     using stdJson for string;
 
     SP1ICS07UpdateClientFixtureJson public fixture;

@@ -122,7 +122,9 @@ contract SP1ICS07Tendermint is
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else if (membershipProof.proofType == MembershipProofType.SP1MembershipAndUpdateClientProof) {
-            return handleSP1UpdateClientAndMembership(msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value);
+            return handleSP1UpdateClientAndMembership(
+                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+            );
         } else {
             revert UnknownMembershipProofType(uint8(membershipProof.proofType));
         }
@@ -139,7 +141,12 @@ contract SP1ICS07Tendermint is
         returns (uint256)
     {
         if (proofHeight.revisionNumber != clientState.latestHeight.revisionNumber) {
-            revert ProofHeightMismatch(proofHeight.revisionNumber, proofHeight.revisionHeight, clientState.latestHeight.revisionNumber, clientState.latestHeight.revisionHeight);
+            revert ProofHeightMismatch(
+                proofHeight.revisionNumber,
+                proofHeight.revisionHeight,
+                clientState.latestHeight.revisionNumber,
+                clientState.latestHeight.revisionHeight
+            );
         }
 
         SP1MembershipProof memory proof = abi.decode(proofBytes, (SP1MembershipProof));
@@ -205,10 +212,17 @@ contract SP1ICS07Tendermint is
             revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
         }
 
-        if (proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber) {
-            revert ProofHeightMismatch(proofHeight.revisionNumber, proofHeight.revisionHeight, output.updateClientOutput.newHeight.revisionNumber, output.updateClientOutput.newHeight.revisionHeight);
+        if (
+            proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight
+                || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber
+        ) {
+            revert ProofHeightMismatch(
+                proofHeight.revisionNumber,
+                proofHeight.revisionHeight,
+                output.updateClientOutput.newHeight.revisionNumber,
+                output.updateClientOutput.newHeight.revisionHeight
+            );
         }
-
 
         validateUpdateClientPublicValues(output.updateClientOutput);
 

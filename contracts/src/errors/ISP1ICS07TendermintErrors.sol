@@ -81,7 +81,12 @@ interface ISP1ICS07TendermintErrors {
     /// @param expectedRevisionHeight The expected revision height.
     /// @param actualRevisionNumber The actual revision number.
     /// @param actualRevisionHeight The actual revision height.
-    error ProofHeightMismatch(uint64 expectedRevisionNumber, uint64 expectedRevisionHeight, uint64 actualRevisionNumber, uint64 actualRevisionHeight);
+    error ProofHeightMismatch(
+        uint64 expectedRevisionNumber,
+        uint64 expectedRevisionHeight,
+        uint64 actualRevisionNumber,
+        uint64 actualRevisionHeight
+    );
 
     /// @notice The error that is returned when the membership proof type is unknown.
     /// @param proofType The unknown membership proof type.

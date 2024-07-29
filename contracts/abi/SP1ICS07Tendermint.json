@@ -105,7 +105,7 @@
     "name": "abiPublicTypes",
     "inputs": [
       {
-        "name": "output",
+        "name": "o1",
         "type": "tuple",
         "internalType": "struct IMembershipMsgs.MembershipOutput",
         "components": [
@@ -117,7 +117,7 @@
           {
             "name": "kvPairs",
             "type": "tuple[]",
-            "internalType": "struct ILightClientMsgs.KVPair[]",
+            "internalType": "struct IMembershipMsgs.KVPair[]",
             "components": [
               {
                 "name": "path",
@@ -134,7 +134,7 @@
         ]
       },
       {
-        "name": "output2",
+        "name": "o2",
         "type": "tuple",
         "internalType": "struct IUpdateClientAndMembershipMsgs.UcAndMembershipOutput",
         "components": [
@@ -265,7 +265,7 @@
           {
             "name": "kvPairs",
             "type": "tuple[]",
-            "internalType": "struct ILightClientMsgs.KVPair[]",
+            "internalType": "struct IMembershipMsgs.KVPair[]",
             "components": [
               {
                 "name": "path",
@@ -313,39 +313,6 @@
     ],
     "outputs": [],
     "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "batchVerifyMembership",
-    "inputs": [
-      {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "publicValues",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "proofHeight",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
-        "name": "trustedConsensusStateBz",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "kvPairHashes",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -437,6 +404,59 @@
   },
   {
     "type": "function",
+    "name": "membership",
+    "inputs": [
+      {
+        "name": "msgMembership",
+        "type": "tuple",
+        "internalType": "struct ILightClientMsgs.MsgMembership",
+        "components": [
+          {
+            "name": "proof",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "proofHeight",
+            "type": "tuple",
+            "internalType": "struct IICS02ClientMsgs.Height",
+            "components": [
+              {
+                "name": "revisionNumber",
+                "type": "uint32",
+                "internalType": "uint32"
+              },
+              {
+                "name": "revisionHeight",
+                "type": "uint32",
+                "internalType": "uint32"
+              }
+            ]
+          },
+          {
+            "name": "path",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "value",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "updateClient",
     "inputs": [
       {
@@ -455,33 +475,9 @@
     "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "updateClientAndBatchVerifyMembership",
-    "inputs": [
-      {
-        "name": "proof",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "publicValues",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "kvPairHashes",
-        "type": "bytes32[]",
-        "internalType": "bytes32[]"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint8",
-        "internalType": "enum ILightClientMsgs.UpdateResult"
-      }
-    ],
-    "stateMutability": "nonpayable"
+    "type": "error",
+    "name": "CannotHandleMisbehavior",
+    "inputs": []
   },
   {
     "type": "error",
@@ -522,8 +518,72 @@
   },
   {
     "type": "error",
+    "name": "ConsensusStateRootMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "actual",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "FrozenClientState",
     "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LengthIsOutOfRange",
+    "inputs": [
+      {
+        "name": "length",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "min",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "max",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "MembershipProofKeyNotFound",
+    "inputs": [
+      {
+        "name": "path",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "MembershipProofValueMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "actual",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
   },
   {
     "type": "error",

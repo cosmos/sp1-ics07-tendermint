@@ -67,8 +67,11 @@ contract SP1ICS07MembershipTest is MembershipTest {
         SP1MembershipProof memory proofMsg = proof;
         proofMsg.sp1Proof.proof = bytes("invalid");
 
+        MembershipProof memory membershipProof =
+            MembershipProof({ proofType: MembershipProofType.SP1MembershipProof, proof: abi.encode(proofMsg) });
+
         MsgMembership memory membershipMsg = MsgMembership({
-            proof: abi.encode(proofMsg),
+            proof: abi.encode(membershipProof),
             proofHeight: fixture.proofHeight,
             path: bytes(verifyNonMembershipPath),
             value: bytes("")
@@ -148,8 +151,11 @@ contract SP1ICS07MembershipTest is MembershipTest {
         for (uint256 i = 0; i < testCases.length; i++) {
             MockInvalidMembershipTestCase memory tc = testCases[i];
 
-            SP1MembershipProof memory membershipProof = proof;
-            membershipProof.sp1Proof = tc.sp1Proof;
+            SP1MembershipProof memory proofMsg = proof;
+            proofMsg.sp1Proof = tc.sp1Proof;
+
+            MembershipProof memory membershipProof =
+                MembershipProof({ proofType: MembershipProofType.SP1MembershipProof, proof: abi.encode(proofMsg) });
 
             Height memory proofHeight = fixture.proofHeight;
             proofHeight.revisionHeight = tc.proofHeight;

@@ -20,6 +20,15 @@ jobs:
           toolchain: stable
           override: true
           components: rustfmt, clippy
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
@@ -43,6 +52,15 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
 
       - name: Run unit tests
         uses: actions-rs/cargo@v1
@@ -65,6 +83,16 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:

@@ -14,6 +14,9 @@ build-programs:
 
 # Build the operator executable using `cargo build` command
 build-operator:
+  @echo "Building the programs for the operator..."
+  just build-programs
+  @echo "Building the operator executable..."
   cargo build --bin operator --locked --release
   @echo "Built the operator executable"
 

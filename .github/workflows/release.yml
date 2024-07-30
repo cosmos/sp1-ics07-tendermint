@@ -1,18 +1,16 @@
-name: upload-programs
+name: release
 
-on: 
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+on:
+  release:
+    types: [published]
 
 jobs:
-  upload:
-    strategy:
-      fail-fast: true
+  release:
     name: build-and-upload
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout sources
+        uses: actions/checkout@v4
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -26,12 +24,13 @@ jobs:
           ~/.sp1/bin/cargo-prove prove --version
       - name: Install just
         uses: extractions/setup-just@v2
-
       - name: Build SP1 Programs
         run: just build-programs
-      - name: Upload Programs
-        uses: actions/upload-artifact@v4
+      - name: Upload RISC-V ELF files
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: program-elfs
-          path: elf/
-          retention-days: 5
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./elf/*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true

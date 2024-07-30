@@ -12,8 +12,11 @@ on:
       - '**.sum'
       - '**.sol'
       - '.github/workflows/e2e.yml'
+env:
+  FOUNDRY_PROFILE: ci
 permissions:
   contents: read
+
 jobs:
   golangci:
     name: lint
@@ -42,8 +45,6 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -55,18 +56,23 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.79.0
+          toolchain: stable
           override: true
-          components: rustfmt, clippy
-      - name: Build executables
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --workspace --exclude sp1-ics07-tendermint-update-client --locked --all-features --release
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
+      - name: Build operator
+        run: just build-operator
       - name: "Install Bun"
         uses: "oven-sh/setup-bun@v1"
       - name: "Install the Node.js dependencies"
-        run: "bun install"
+        run: bun install
       - name: Run Tests
         env:
           SP1_PRIVATE_KEY: ${{ secrets.SP1_PRIVATE_KEY }}

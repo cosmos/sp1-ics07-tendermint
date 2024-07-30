@@ -6,25 +6,20 @@ on:
     branches: [ main ]
   pull_request:
 
-env:
-  FOUNDRY_PROFILE: ci
-
 jobs:
   update-client:
     strategy:
       fail-fast: true
-    name: Build update-client
+    name: build-update-client
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2024-04-17
+          toolchain: stable
           override: true
 
       - name: Install SP1 toolchain
@@ -41,18 +36,16 @@ jobs:
   membership:
     strategy:
       fail-fast: true
-    name: Build membership
+    name: build-membership
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2024-04-17
+          toolchain: stable
           override: true
 
       - name: Install SP1 toolchain
@@ -69,18 +62,16 @@ jobs:
   uc-and-membership:
     strategy:
       fail-fast: true
-    name: Build uc-and-membership
+    name: build-uc-and-membership
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2024-04-17
+          toolchain: stable
           override: true
 
       - name: Install SP1 toolchain

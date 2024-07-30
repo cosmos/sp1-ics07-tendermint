@@ -8,7 +8,7 @@ on:
 
 jobs:
   lints:
-    name: Clippy and Fmt
+    name: fmt-and-clippy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -17,9 +17,18 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.79.0
+          toolchain: stable
           override: true
           components: rustfmt, clippy
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
@@ -32,7 +41,7 @@ jobs:
           command: clippy
 
   tests:
-    name: Unit Tests
+    name: unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -41,9 +50,18 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.79.0
+          toolchain: stable
           override: true
-          components: rustfmt, clippy
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
+
       - name: Run unit tests
         uses: actions-rs/cargo@v1
         with:
@@ -53,7 +71,7 @@ jobs:
           RUST_BACKTRACE: 1
 
   build-all-features:
-    name: Build (without programs)
+    name: build-without-programs
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -63,9 +81,18 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.79.0
+          toolchain: stable
           override: true
-          components: rustfmt, clippy
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+      - name: Build SP1 Programs
+        run: just build-programs
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:

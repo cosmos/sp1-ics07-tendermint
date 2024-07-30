@@ -68,7 +68,7 @@ This project contains the following programs
 - [Bun](https://bun.sh/)
 - [Just](https://just.systems/man/en/)
 
-Foundry typically uses git submodules to manage contract dependencies, but this template uses Node.js packages (via Bun) because submodules don't scale. You can install the contracts dependencies by running the following command:
+Foundry typically uses git submodules to manage contract dependencies, but this repository uses Node.js packages (via Bun) because submodules don't scale. You can install the contracts dependencies by running the following command:
 
 ```sh
 bun install
@@ -76,11 +76,13 @@ bun install
 
 ## Build the programs
 
-You can build the programs for zkVM by running the following command:
+You should build the programs for zkVM by running the following command:
 
 ```sh
 just build-programs
 ```
+
+The programs will be built in the `elf/` directory which is ignored by `.gitignore` but are needed for the operator to build.
 
 ## Run ICS-07 Tendermint Light Client End to End
 
@@ -129,7 +131,7 @@ just build-programs
 ## EVM-Compatible Proof Generation & Verification
 
 > [!WARNING]
-> You will need at least 128GB RAM to generate the PLONK proof.
+> You will need at least 128GB RAM to generate the PLONK proofs locally.
 
 Here, I will show you how to generate a proof to be used in the fixtures for the foundry tests. You can do this locally or by using the SP1 prover network. To do this on your local machine, run the following command:
 

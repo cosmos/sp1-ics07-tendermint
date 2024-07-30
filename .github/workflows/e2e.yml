@@ -12,8 +12,11 @@ on:
       - '**.sum'
       - '**.sol'
       - '.github/workflows/e2e.yml'
+env:
+  FOUNDRY_PROFILE: ci
 permissions:
   contents: read
+
 jobs:
   golangci:
     name: lint

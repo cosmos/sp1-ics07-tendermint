@@ -19,6 +19,9 @@ pgo-data.profdata
 **/proof-with-pis.json
 **/proof-with-io.json
 
+# SP1 Programs
+elf/
+
 # Env
 .env
 

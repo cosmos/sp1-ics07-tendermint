@@ -71,6 +71,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		s.Require().NoError(operator.RunGenesis(
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+			"-o", "contracts/script/genesis.json",
 		))
 
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{

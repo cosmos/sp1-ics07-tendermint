@@ -41,7 +41,7 @@ genesis:
   @echo "Building the program..."
   just build-programs
   @echo "Generating the genesis file..."
-  RUST_LOG=info cargo run --bin operator --release -- genesis
+  RUST_LOG=info cargo run --bin operator --release -- genesis -o contracts/script/genesis.json
 
 # Generate the fixture files for the Celestia Mocha testnet using the prover parameter.
 # The prover parameter should be one of: ["mock", "network", "local"]

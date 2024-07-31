@@ -52,7 +52,7 @@ pub mod genesis {
         pub trusted_block: Option<u32>,
 
         /// Genesis path.
-        #[clap(long, default_value = "../contracts/script")]
+        #[clap(long, short = 'o', default_value = "./genesis.json")]
         pub genesis_path: String,
 
         /// Trust options

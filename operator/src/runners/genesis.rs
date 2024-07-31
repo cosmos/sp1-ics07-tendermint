@@ -12,7 +12,7 @@ use alloy_sol_types::SolValue;
 use serde_with::serde_as;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 use tendermint_light_client_verifier::types::{LightBlock, TrustThreshold};
 use tendermint_rpc::HttpClient;
 
@@ -105,9 +105,8 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     )
     .await?;
 
-    let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(args.genesis_path);
     std::fs::write(
-        fixture_path.join("genesis.json"),
+        PathBuf::from(args.genesis_path),
         serde_json::to_string_pretty(&genesis).unwrap(),
     )
     .unwrap();

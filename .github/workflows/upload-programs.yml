@@ -1,4 +1,4 @@
-name: upload-programs
+name: upload-artifacts
 
 on: 
   workflow_dispatch:
@@ -9,8 +9,14 @@ jobs:
   upload:
     strategy:
       fail-fast: true
-    name: build-and-upload
-    runs-on: ubuntu-20.04
+      matrix:
+        platform:
+          - os_name: linux-x86_64
+            os: ubuntu-20.04
+          - os_name: darwin-aarch64
+            os: macos-14
+    name: build-and-upload-{{ matrix.platform.os_name }}
+    runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Install rust toolchain
@@ -32,6 +38,15 @@ jobs:
       - name: Upload Programs
         uses: actions/upload-artifact@v4
         with:
-          name: program-elfs
+          name: program-elfs-{{ matrix.platform.os_name }}
           path: elf/
+          retention-days: 5
+
+      - name: Build Operator
+        run: just build-operator
+      - name: Upload Operator
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-{{ matrix.platform.os_name }}
+          path: target/release/operator
           retention-days: 5

@@ -6,7 +6,36 @@ on:
     branches: [ main ]
 
 jobs:
-  upload:
+  upload-programs:
+    name: build-and-upload-programs
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Install SP1 toolchain
+        run: |
+          curl -L https://sp1.succinct.xyz | bash
+          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/cargo-prove prove --version
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Build SP1 Programs
+        run: just build-programs
+      - name: Upload Programs
+        uses: actions/upload-artifact@v4
+        with:
+          name: program-elfs
+          path: elf/
+          retention-days: 5
+
+  build-and-upload-operator:
+    needs: [upload-programs]
     strategy:
       fail-fast: false
       matrix:
@@ -25,25 +54,18 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - name: Install SP1 toolchain
-        run: |
-          curl -L https://sp1.succinct.xyz | bash
-          ~/.sp1/bin/sp1up --token ${{ secrets.TEST_TOKEN }}
-          ~/.sp1/bin/cargo-prove prove --version
-      - name: Install just
-        uses: extractions/setup-just@v2
 
-      - name: Build SP1 Programs
-        run: just build-programs
-      - name: Upload Programs
-        uses: actions/upload-artifact@v4
+      - name: Download Programs
+        uses: actions/download-artifact@v4
         with:
-          name: program-elfs-${{ matrix.platform.os_name }}
+          name: program-elfs
           path: elf/
-          retention-days: 5
+
+      - name: LS elf
+        run: ls -la elf/
 
       - name: Build Operator
-        run: just build-operator
+        run: cargo build --bin operator --locked --release
       - name: Upload Operator
         uses: actions/upload-artifact@v4
         with:

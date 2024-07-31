@@ -61,9 +61,6 @@ jobs:
           name: program-elfs
           path: elf/
 
-      - name: LS elf
-        run: ls -la elf/
-
       - name: Build Operator
         run: cargo build --bin operator --locked --release
       - name: Upload Operator

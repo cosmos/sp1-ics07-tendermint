@@ -8,14 +8,14 @@ on:
 jobs:
   upload:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         platform:
           - os_name: linux-x86_64
             os: ubuntu-20.04
           - os_name: darwin-aarch64
             os: macos-14
-    name: build-and-upload-{{ matrix.platform.os_name }}
+    name: build-and-upload-${{ matrix.platform.os_name }}
     runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
       - name: Upload Programs
         uses: actions/upload-artifact@v4
         with:
-          name: program-elfs-{{ matrix.platform.os_name }}
+          name: program-elfs-${{ matrix.platform.os_name }}
           path: elf/
           retention-days: 5
 
@@ -47,6 +47,6 @@ jobs:
       - name: Upload Operator
         uses: actions/upload-artifact@v4
         with:
-          name: operator-{{ matrix.platform.os_name }}
+          name: operator-${{ matrix.platform.os_name }}
           path: target/release/operator
           retention-days: 5

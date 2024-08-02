@@ -1,5 +1,7 @@
 //! Contains the command line interface for the application.
 
+use std::convert::Infallible;
+
 use clap::{command, Parser};
 use tendermint_light_client_verifier::types::TrustThreshold;
 
@@ -40,6 +42,15 @@ pub struct TrustOptions {
     pub trusting_period: Option<u32>,
 }
 
+/// The output path for files.
+#[derive(Debug, Clone)]
+pub enum OutputPath {
+    /// Write the output to stdout.
+    Stdout,
+    /// Write the output to a file.
+    File(String),
+}
+
 /// The cli interface for the genesis command.
 pub mod genesis {
     use super::Parser;
@@ -51,9 +62,9 @@ pub mod genesis {
         #[clap(long)]
         pub trusted_block: Option<u32>,
 
-        /// Genesis path.
-        #[clap(long, short = 'o', default_value = "./genesis.json")]
-        pub genesis_path: String,
+        /// Genesis path. If not provided, the output will be written to stdout.
+        #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]
+        pub output_path: super::OutputPath,
 
         /// Trust options
         #[clap(flatten)]
@@ -110,9 +121,9 @@ pub mod fixtures {
         #[clap(long, env)]
         pub target_block: u32,
 
-        /// Fixture path.
-        #[clap(long, short = 'o')]
-        pub output_path: String,
+        /// Fixture path. If not provided, the output will be written to stdout.
+        #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]
+        pub output_path: super::OutputPath,
 
         /// Trust options
         #[clap(flatten)]
@@ -131,9 +142,9 @@ pub mod fixtures {
         #[clap(long, value_delimiter = ',')]
         pub key_paths: Vec<String>,
 
-        /// Fixture path.
-        #[clap(long, short = 'o')]
-        pub output_path: String,
+        /// Fixture path. If not provided, the output will be written to stdout.
+        #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]
+        pub output_path: super::OutputPath,
 
         /// Trust options
         #[clap(flatten)]
@@ -156,13 +167,22 @@ pub mod fixtures {
         #[clap(long, value_delimiter = ',')]
         pub key_paths: Vec<String>,
 
-        /// Fixture path.
-        #[clap(long, short = 'o')]
-        pub output_path: String,
+        /// Fixture path. If not provided, the output will be written to stdout.
+        #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]
+        pub output_path: super::OutputPath,
 
         /// Trust options
         #[clap(flatten)]
         pub trust_options: super::TrustOptions,
+    }
+}
+
+#[allow(clippy::unnecessary_wraps)]
+fn parse_output_path(path: &str) -> Result<OutputPath, Infallible> {
+    if path == "-" {
+        Ok(OutputPath::Stdout)
+    } else {
+        Ok(OutputPath::File(path.to_string()))
     }
 }
 

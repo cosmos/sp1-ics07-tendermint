@@ -1,8 +1,11 @@
 //! Runner for generating `update_client` fixtures
 
 use crate::{
-    cli::command::fixtures::UpdateClientCmd, helpers::light_block::LightBlockExt,
-    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver, rpc::TendermintRpcExt,
+    cli::command::{fixtures::UpdateClientCmd, OutputPath},
+    helpers::light_block::LightBlockExt,
+    programs::UpdateClientProgram,
+    prover::SP1ICS07TendermintProver,
+    rpc::TendermintRpcExt,
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
@@ -94,11 +97,19 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         update_msg: update_msg.abi_encode(),
     };
 
-    // Save the proof data to the file path.
-    std::fs::write(
-        PathBuf::from(args.output_path),
-        serde_json::to_string_pretty(&fixture).unwrap(),
-    )
-    .unwrap();
+    match args.output_path {
+        OutputPath::File(path) => {
+            // Save the proof data to the file path.
+            std::fs::write(
+                PathBuf::from(path),
+                serde_json::to_string_pretty(&fixture).unwrap(),
+            )
+            .unwrap();
+        }
+        OutputPath::Stdout => {
+            println!("{}", serde_json::to_string_pretty(&fixture).unwrap());
+        }
+    }
+
     Ok(())
 }

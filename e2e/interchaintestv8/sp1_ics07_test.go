@@ -14,6 +14,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
+	ibctesting "github.com/cosmos/ibc-go/v8/testing"
+
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 
@@ -32,9 +36,6 @@ type SP1ICS07TendermintTestSuite struct {
 	key *ecdsa.PrivateKey
 	// The SP1ICS07Tendermint contract
 	contract *sp1ics07tendermint.Contract
-
-	// The latest height of client state
-	latestHeight uint32
 }
 
 // SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
@@ -123,8 +124,6 @@ func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
 		s.Require().Greater(clientState.LatestHeight.RevisionHeight, uint32(0))
-
-		s.latestHeight = clientState.LatestHeight.RevisionHeight
 	}))
 }
 
@@ -137,9 +136,14 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	_, simd := s.ChainA, s.ChainB
 
 	s.Require().True(s.Run("Update client", func() {
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		initialHeight := clientState.LatestHeight.RevisionHeight
+
 		s.Require().NoError(operator.StartOperator("--only-once"))
 
-		clientState, err := s.contract.GetClientState(nil)
+		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
 
 		stakingParams, err := simd.StakingQueryParams(ctx)
@@ -152,8 +156,46 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
-		s.Require().Greater(clientState.LatestHeight.RevisionHeight, s.latestHeight)
+		s.Require().Greater(clientState.LatestHeight.RevisionHeight, initialHeight)
+	}))
+}
 
-		s.latestHeight = clientState.LatestHeight.RevisionHeight
+func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	_, simd := s.ChainA, s.ChainB
+
+	s.Require().True(s.Run("Update and verify non-membership", func() {
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		trustedHeight := clientState.LatestHeight.RevisionHeight
+
+		latestHeight, err := simd.Height(ctx)
+		s.Require().NoError(err)
+
+		// This will be a non-membership proof since no packets have been sent
+		packetReceiptPath := ibchost.PacketReceiptPath(transfertypes.PortID, ibctesting.FirstChannelID, 1)
+		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(uint64(trustedHeight), uint64(latestHeight), packetReceiptPath)
+		s.Require().NoError(err)
+
+		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+			ProofHeight: *proofHeight,
+			Proof:       ucAndMemProof,
+			Path:        []byte(packetReceiptPath),
+			Value:       []byte(""),
+		}
+
+		_, err = s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		s.Require().NoError(err)
+
+		clientState, err = s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
+		s.Require().Equal(uint32(latestHeight), clientState.LatestHeight.RevisionHeight)
+		s.Require().False(clientState.IsFrozen)
 	}))
 }

@@ -245,7 +245,7 @@ contract SP1ICS07Tendermint is
         if (updateResult == UpdateResult.Update) {
             // adding the new consensus state to the mapping
             if (proofHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
-                clientState.latestHeight = output.updateClientOutput.newHeight;
+                clientState.latestHeight = proofHeight;
             }
             consensusStateHashes[proofHeight.revisionHeight] =
                 keccak256(abi.encode(output.updateClientOutput.newConsensusState));

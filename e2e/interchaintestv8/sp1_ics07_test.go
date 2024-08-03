@@ -178,7 +178,11 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 
 		// This will be a non-membership proof since no packets have been sent
 		packetReceiptPath := ibchost.PacketReceiptPath(transfertypes.PortID, ibctesting.FirstChannelID, 1)
-		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(uint64(trustedHeight), uint64(latestHeight), packetReceiptPath)
+		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(
+			uint64(trustedHeight), uint64(latestHeight), packetReceiptPath,
+			"--trust-level", testvalues.DefaultTrustLevel.String(),
+			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+		)
 		s.Require().NoError(err)
 
 		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
@@ -195,7 +199,8 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().NoError(err)
 
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
-		s.Require().Equal(uint32(latestHeight), clientState.LatestHeight.RevisionHeight)
+		s.Require().Greater(clientState.LatestHeight.RevisionHeight, trustedHeight)
+		s.Require().Equal(proofHeight.RevisionHeight, clientState.LatestHeight.RevisionHeight)
 		s.Require().False(clientState.IsFrozen)
 	}))
 }

@@ -20,6 +20,7 @@ import (
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
@@ -165,9 +166,11 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 
 	s.SetupSuite(ctx)
 
-	_, simd := s.ChainA, s.ChainB
+	eth, simd := s.ChainA, s.ChainB
 
 	s.Require().True(s.Run("Update and verify non-membership", func() {
+		s.Require().NoError(testutil.WaitForBlocks(ctx, 5, simd))
+
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
 
@@ -175,6 +178,8 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 
 		latestHeight, err := simd.Height(ctx)
 		s.Require().NoError(err)
+
+		s.Require().Greater(uint32(latestHeight), trustedHeight)
 
 		// This will be a non-membership proof since no packets have been sent
 		packetReceiptPath := ibchost.PacketReceiptPath(transfertypes.PortID, ibctesting.FirstChannelID, 1)
@@ -192,8 +197,11 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 			Value:       []byte(""),
 		}
 
-		_, err = s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
 		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		_ = s.GetTxReciept(ctx, eth, tx.Hash())
 
 		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)

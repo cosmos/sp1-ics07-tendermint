@@ -92,6 +92,22 @@ func (s *TestSuite) GetEthAddressFromStdout(stdout string) string {
 	return matches[1]
 }
 
+// GetEvmEvent parses the logs in the given receipt and returns the first event that can be parsed
+func GetEvmEvent[T any](receipt *ethtypes.Receipt, parseFn func(log ethtypes.Log) (*T, error)) (event *T, err error) {
+	for _, l := range receipt.Logs {
+		event, err = parseFn(*l)
+		if err == nil && event != nil {
+			break
+		}
+	}
+
+	if event == nil {
+		err = fmt.Errorf("event not found")
+	}
+
+	return
+}
+
 // GetTransactOpts returns a new TransactOpts with the given private key
 func (s *TestSuite) GetTransactOpts(key *ecdsa.PrivateKey) *bind.TransactOpts {
 	chainIDStr, err := strconv.ParseInt(s.ChainA.Config().ChainID, 10, 64)

@@ -2,8 +2,17 @@ package e2esuite
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"fmt"
+	"math/big"
 	"regexp"
+	"strconv"
+	"time"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"cosmossdk.io/math"
 
@@ -12,6 +21,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 )
@@ -80,4 +90,49 @@ func (s *TestSuite) GetEthAddressFromStdout(stdout string) string {
 	}
 	// Extract the value
 	return matches[1]
+}
+
+// GetEvmEvent parses the logs in the given receipt and returns the first event that can be parsed
+func GetEvmEvent[T any](receipt *ethtypes.Receipt, parseFn func(log ethtypes.Log) (*T, error)) (event *T, err error) {
+	for _, l := range receipt.Logs {
+		event, err = parseFn(*l)
+		if err == nil && event != nil {
+			break
+		}
+	}
+
+	if event == nil {
+		err = fmt.Errorf("event not found")
+	}
+
+	return
+}
+
+// GetTransactOpts returns a new TransactOpts with the given private key
+func (s *TestSuite) GetTransactOpts(key *ecdsa.PrivateKey) *bind.TransactOpts {
+	chainIDStr, err := strconv.ParseInt(s.ChainA.Config().ChainID, 10, 64)
+	s.Require().NoError(err)
+	chainID := big.NewInt(chainIDStr)
+
+	txOpts, err := bind.NewKeyedTransactorWithChainID(key, chainID)
+	s.Require().NoError(err)
+
+	return txOpts
+}
+
+func (s *TestSuite) GetTxReciept(ctx context.Context, chain *ethereum.EthereumChain, hash ethcommon.Hash) *ethtypes.Receipt {
+	client, err := ethclient.Dial(chain.GetHostRPCAddress())
+	s.Require().NoError(err)
+
+	var receipt *ethtypes.Receipt
+	err = testutil.WaitForCondition(time.Second*10, time.Second, func() (bool, error) {
+		receipt, err = client.TransactionReceipt(ctx, hash)
+		if err != nil {
+			return false, nil
+		}
+
+		return receipt != nil, nil
+	})
+	s.Require().NoError(err)
+	return receipt
 }

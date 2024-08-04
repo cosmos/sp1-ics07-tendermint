@@ -14,8 +14,13 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
+	ibctesting "github.com/cosmos/ibc-go/v8/testing"
+
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
+	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
@@ -32,9 +37,6 @@ type SP1ICS07TendermintTestSuite struct {
 	key *ecdsa.PrivateKey
 	// The SP1ICS07Tendermint contract
 	contract *sp1ics07tendermint.Contract
-
-	// The latest height of client state
-	latestHeight uint32
 }
 
 // SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
@@ -123,8 +125,6 @@ func (s *SP1ICS07TendermintTestSuite) TestDeploy() {
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
 		s.Require().Greater(clientState.LatestHeight.RevisionHeight, uint32(0))
-
-		s.latestHeight = clientState.LatestHeight.RevisionHeight
 	}))
 }
 
@@ -137,9 +137,14 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	_, simd := s.ChainA, s.ChainB
 
 	s.Require().True(s.Run("Update client", func() {
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		initialHeight := clientState.LatestHeight.RevisionHeight
+
 		s.Require().NoError(operator.StartOperator("--only-once"))
 
-		clientState, err := s.contract.GetClientState(nil)
+		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
 
 		stakingParams, err := simd.StakingQueryParams(ctx)
@@ -152,8 +157,58 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 		s.Require().Equal(uint32(stakingParams.UnbondingTime.Seconds()), clientState.UnbondingPeriod)
 		s.Require().False(clientState.IsFrozen)
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
-		s.Require().Greater(clientState.LatestHeight.RevisionHeight, s.latestHeight)
+		s.Require().Greater(clientState.LatestHeight.RevisionHeight, initialHeight)
+	}))
+}
 
-		s.latestHeight = clientState.LatestHeight.RevisionHeight
+func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	eth, simd := s.ChainA, s.ChainB
+
+	s.Require().True(s.Run("Update and verify non-membership", func() {
+		s.Require().NoError(testutil.WaitForBlocks(ctx, 5, simd))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		trustedHeight := clientState.LatestHeight.RevisionHeight
+
+		latestHeight, err := simd.Height(ctx)
+		s.Require().NoError(err)
+
+		s.Require().Greater(uint32(latestHeight), trustedHeight)
+
+		// This will be a non-membership proof since no packets have been sent
+		packetReceiptPath := ibchost.PacketReceiptPath(transfertypes.PortID, ibctesting.FirstChannelID, 1)
+		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(
+			uint64(trustedHeight), uint64(latestHeight), packetReceiptPath,
+			"--trust-level", testvalues.DefaultTrustLevel.String(),
+			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+		)
+		s.Require().NoError(err)
+
+		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+			ProofHeight: *proofHeight,
+			Proof:       ucAndMemProof,
+			Path:        []byte(packetReceiptPath),
+			Value:       []byte(""),
+		}
+
+		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		_ = s.GetTxReciept(ctx, eth, tx.Hash())
+
+		clientState, err = s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
+		s.Require().Greater(clientState.LatestHeight.RevisionHeight, trustedHeight)
+		s.Require().Equal(proofHeight.RevisionHeight, clientState.LatestHeight.RevisionHeight)
+		s.Require().False(clientState.IsFrozen)
 	}))
 }

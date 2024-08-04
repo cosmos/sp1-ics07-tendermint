@@ -1,7 +1,7 @@
 //! Contains the runner for the genesis command.
 
 use crate::{
-    cli::command::genesis::Args,
+    cli::command::{genesis::Args, OutputPath},
     helpers::light_block::LightBlockExt,
     programs::{
         MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
@@ -105,11 +105,19 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     )
     .await?;
 
-    std::fs::write(
-        PathBuf::from(args.genesis_path),
-        serde_json::to_string_pretty(&genesis).unwrap(),
-    )
-    .unwrap();
+    match args.output_path {
+        OutputPath::File(path) => {
+            // Save the proof data to the file path.
+            std::fs::write(
+                PathBuf::from(path),
+                serde_json::to_string_pretty(&genesis).unwrap(),
+            )
+            .unwrap();
+        }
+        OutputPath::Stdout => {
+            println!("{}", serde_json::to_string_pretty(&genesis).unwrap());
+        }
+    }
 
     Ok(())
 }

@@ -89,7 +89,7 @@ test-e2e testname:
   @echo "Cleaning up the contracts cache and output directories..."
   -rm -r contracts/cache contracts/out # `-` is used to ignore the error if the directories do not exist
   @echo "Running {{testname}} test..."
-  cd e2e/interchaintestv8 && go test -v -run=TestWithSP1ICS07TendermintTestSuite/{{testname}} -timeout 40m
+  cd e2e/interchaintestv8 && go test -v -run "^TestWithSP1ICS07TendermintTestSuite/{{testname}}$" -timeout 40m
 
 # Lint the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, and `golanci-lint` commands
 lint:

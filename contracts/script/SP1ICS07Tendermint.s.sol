@@ -4,7 +4,7 @@ pragma solidity >=0.8.25;
 import { Script } from "forge-std/Script.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
-import { SP1Verifier } from "@sp1-contracts/v1.0.1/SP1Verifier.sol";
+import { SP1Verifier } from "@sp1-contracts/v1.1.0/SP1Verifier.sol";
 import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
 
 struct SP1ICS07TendermintGenesisJson {

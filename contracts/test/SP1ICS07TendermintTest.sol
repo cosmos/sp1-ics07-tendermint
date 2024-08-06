@@ -10,7 +10,7 @@ import { IUpdateClientMsgs } from "../src/msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "../src/msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "../src/msgs/IUcAndMembershipMsgs.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
-import { SP1Verifier } from "@sp1-contracts/v1.0.1/SP1Verifier.sol";
+import { SP1Verifier } from "@sp1-contracts/v1.1.0/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 

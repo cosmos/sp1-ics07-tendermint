@@ -94,7 +94,7 @@ lint:
   @echo "Linting the Rust code..."
   cargo fmt --all -- --check
   @echo "Linting the Solidity code..."
-  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol'
+  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --include 'contracts/src/**/*.sol'
   @echo "Linting the Go code..."
   cd e2e/interchaintestv8 && golangci-lint run
 
@@ -103,6 +103,6 @@ lint-fix:
   @echo "Fixing the Rust code..."
   cargo fmt --all
   @echo "Fixing the Solidity code..."
-  forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol'
+  forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --include 'contracts/src/**/*.sol'
   @echo "Fixing the Go code..."
   cd e2e/interchaintestv8 && golangci-lint run --fix

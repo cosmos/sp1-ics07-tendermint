@@ -13,7 +13,8 @@
     "solidity-ibc": "github.com:srdtrk/solidity-ibc-eureka#afdaf02d5af2799b61da7524b7abe53581aab1c9"
   },
   "devDependencies": {
-    "solhint": "^5.0.3"
+    "solhint": "^5.0.3",
+    "@defi-wonderland/natspec-smells": "^1.1.4"
   },
   "keywords": [
     "blockchain",

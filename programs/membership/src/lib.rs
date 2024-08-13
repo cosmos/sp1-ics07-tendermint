@@ -30,7 +30,7 @@ pub fn membership(
                     .verify_non_membership::<HostFunctionsManager>(
                         &ProofSpecs::cosmos(),
                         commitment_root.clone().into(),
-                        path,
+                        path.into(),
                     )
                     .unwrap();
             } else {
@@ -38,7 +38,7 @@ pub fn membership(
                     .verify_membership::<HostFunctionsManager>(
                         &ProofSpecs::cosmos(),
                         commitment_root.clone().into(),
-                        path,
+                        path.into(),
                         value.clone(),
                         0,
                     )

@@ -16,7 +16,7 @@ jobs:
           - programs/update-client
           - programs/membership
           - programs/uc-and-membership
-    name: build:${{ matrix.programs }}
+    name: 'build: ${{ matrix.programs }}'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

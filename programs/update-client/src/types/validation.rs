@@ -59,7 +59,7 @@ impl<'a, 'b> ClientValidationContext for ClientValidationCtx<'a, 'b> {
 
 impl<'a, 'b> ExtClientValidationContext for ClientValidationCtx<'a, 'b> {
     fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
-        Ok(Timestamp::from_nanoseconds(self.env.now * 1_000_000_000).unwrap())
+        Ok(Timestamp::from_nanoseconds(self.env.now * 1_000_000_000))
     }
 
     fn host_height(&self) -> Result<ibc_core_client::types::Height, ContextError> {

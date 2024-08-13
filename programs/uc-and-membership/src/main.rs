@@ -44,17 +44,18 @@ pub fn main() {
     // TODO: find an encoding that works for all the structs above.
 
     let request_iter = (0..request_len).map(|_| {
-        let loop_encoded_1 = sp1_zkvm::io::read_vec();
-        let path_str = String::from_utf8(loop_encoded_1).unwrap();
+        // loop_encoded_1 is the path we want to verify the membership of
+        // usually a utf-8 string under the "ibc" store key
+        let path_bz = sp1_zkvm::io::read_vec();
 
-        let loop_encoded_2 = sp1_zkvm::io::read_vec();
-        let merkle_proof = MerkleProof::decode_vec(&loop_encoded_2).unwrap();
-
-        // loop_encoded_3 is the value we want to prove the membership of
+        // loop_encoded_2 is the value we want to prove the membership of
         // if it is empty, we are verifying non-membership
         let value = sp1_zkvm::io::read_vec();
 
-        (path_str, merkle_proof, value)
+        let loop_encoded_3 = sp1_zkvm::io::read_vec();
+        let merkle_proof = MerkleProof::decode_vec(&loop_encoded_3).unwrap();
+
+        (path_bz, value, merkle_proof)
     });
 
     let output =

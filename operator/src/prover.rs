@@ -101,7 +101,7 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
     pub fn generate_proof(
         &self,
         commitment_root: &[u8],
-        kv_proofs: Vec<(String, MerkleProof, Vec<u8>)>,
+        kv_proofs: Vec<(Vec<u8>, Vec<u8>, MerkleProof)>,
     ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
@@ -109,10 +109,10 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
         let mut stdin = SP1Stdin::new();
         stdin.write_slice(commitment_root);
         stdin.write_vec(vec![len]);
-        for (path, proof, value) in kv_proofs {
-            stdin.write_slice(path.as_bytes());
-            stdin.write_vec(proof.encode_vec());
+        for (path, value, proof) in kv_proofs {
+            stdin.write_vec(path);
             stdin.write_vec(value);
+            stdin.write_vec(proof.encode_vec());
         }
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
@@ -148,7 +148,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
         contract_env: &Env,
-        kv_proofs: Vec<(String, MerkleProof, Vec<u8>)>,
+        kv_proofs: Vec<(Vec<u8>, Vec<u8>, MerkleProof)>,
     ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
@@ -167,10 +167,10 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         stdin.write_vec(encoded_2);
         stdin.write_vec(encoded_3);
         stdin.write_vec(vec![len]);
-        for (path, proof, value) in kv_proofs {
-            stdin.write_slice(path.as_bytes());
-            stdin.write_vec(proof.encode_vec());
+        for (path, value, proof) in kv_proofs {
+            stdin.write_vec(path);
             stdin.write_vec(value);
+            stdin.write_vec(proof.encode_vec());
         }
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.

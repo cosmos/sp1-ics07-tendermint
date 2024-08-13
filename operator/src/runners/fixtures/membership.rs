@@ -64,7 +64,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         .as_bytes()
         .to_vec();
 
-    let kv_proofs: Vec<(String, MerkleProof, Vec<u8>)> =
+    let kv_proofs: Vec<(Vec<u8>, Vec<u8>, MerkleProof)> =
         futures::future::try_join_all(args.key_paths.into_iter().map(|key_path| async {
             let res = tm_rpc_client
                 .abci_query(
@@ -85,7 +85,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
             }
             assert!(!vm_proof.proofs.is_empty());
 
-            anyhow::Ok((key_path, vm_proof, value))
+            anyhow::Ok((key_path.into(), value, vm_proof))
         }))
         .await?;
 

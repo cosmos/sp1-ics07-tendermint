@@ -2,14 +2,11 @@ set dotenv-load
 
 # Build riscv elf file using `~/.sp1/bin/cargo-prove`
 build-programs:
-  cd programs/update-client && ~/.sp1/bin/cargo-prove prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/update-client-riscv32im-succinct-zkvm-elf
+  cd programs/update-client && ~/.sp1/bin/cargo-prove prove build --elf-name update-client-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/update-client-riscv32im-succinct-zkvm-elf'"
-  cd programs/membership && ~/.sp1/bin/cargo-prove prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/membership-riscv32im-succinct-zkvm-elf
+  cd programs/membership && ~/.sp1/bin/cargo-prove prove build --elf-name membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/membership-riscv32im-succinct-zkvm-elf'"
-  cd programs/uc-and-membership && ~/.sp1/bin/cargo-prove prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/uc-and-membership-riscv32im-succinct-zkvm-elf
+  cd programs/uc-and-membership && ~/.sp1/bin/cargo-prove prove build --elf-name uc-and-membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/uc-and-membership-riscv32im-succinct-zkvm-elf'"
 
 # Build the operator executable using `cargo build` command

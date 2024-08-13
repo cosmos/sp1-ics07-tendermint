@@ -9,32 +9,40 @@ import { IICS07TendermintMsgs } from "./IICS07TendermintMsgs.sol";
 /// @notice Defines shared types for the verify (non)membership program.
 interface IMembershipMsgs is ISP1Msgs {
     /// @notice The key-value pair used in the verify (non)membership program.
+    /// @param path The path of the value in the key-value store.
+    /// @param value The value of the key-value pair.
     struct KVPair {
-        /// The path of the value in the key-value store.
         bytes path;
-        /// The value of the key-value pair.
         bytes value;
     }
 
     /// @notice The public value output for the sp1 verify (non)membership program.
+    /// @param commitmentRoot The app hash of the header.
+    /// @param kvPairs The key-value pairs verified by the program.
     struct MembershipOutput {
-        /// The app hash of the header.
         bytes32 commitmentRoot;
-        /// The key-value pairs verified by the program.
         KVPair[] kvPairs;
     }
 
+    /// @notice The membership proof that can be submitted to the SP1Verifier contract.
+    /// @param proofType The type of the membership proof.
+    /// @param proof The membership proof.
+    struct MembershipProof {
+        MembershipProofType proofType;
+        bytes proof;
+    }
+
     /// @notice The membership proof for the sp1 verify (non)membership program.
+    /// @param sp1Proof The sp1 proof for the membership program.
+    /// @param trustedConsensusState The trusted consensus state that the proof is based on.
     struct SP1MembershipProof {
-        /// The sp1 proof for the membership program.
         SP1Proof sp1Proof;
-        /// The trusted consensus state that the proof is based on.
         IICS07TendermintMsgs.ConsensusState trustedConsensusState;
     }
 
     /// @notice The membership proof for the sp1 verify (non)membership and update client program.
+    /// @param sp1Proof The sp1 proof for the membership and update client program.
     struct SP1MembershipAndUpdateClientProof {
-        /// The sp1 proof for the membership and update client program.
         SP1Proof sp1Proof;
     }
 
@@ -44,13 +52,5 @@ interface IMembershipMsgs is ISP1Msgs {
         SP1MembershipProof,
         /// The proof is for the verify membership and update client program.
         SP1MembershipAndUpdateClientProof
-    }
-
-    /// @notice The membership proof that can be submitted to the SP1Verifier contract.
-    struct MembershipProof {
-        /// The type of the membership proof.
-        MembershipProofType proofType;
-        /// The membership proof.
-        bytes proof;
     }
 }

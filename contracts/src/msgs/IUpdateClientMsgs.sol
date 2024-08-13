@@ -9,35 +9,35 @@ import { ISP1Msgs } from "./ISP1Msgs.sol";
 /// @notice Defines shared types for the update client program.
 interface IUpdateClientMsgs is IICS07TendermintMsgs, ISP1Msgs {
     /// @notice The message that is submitted to the updateClient function.
+    /// @param sp1Proof The SP1 proof for updating the client.
     struct MsgUpdateClient {
-        /// SP1 proof for updating the client.
         SP1Proof sp1Proof;
     }
 
     /// @notice The public value output for the sp1 update client program.
+    /// @param trustedConsensusState The trusted consensus state.
+    /// @param newConsensusState The new consensus state with the verified header.
+    /// @param env The validation environment.
+    /// @param trustedHeight The trusted height.
+    /// @param newHeight The new height.
     struct UpdateClientOutput {
-        /// The trusted consensus state.
         ConsensusState trustedConsensusState;
-        /// The new consensus state with the verified header.
         ConsensusState newConsensusState;
-        /// The validation environment.
         Env env;
-        /// trusted height
         Height trustedHeight;
-        /// new height
         Height newHeight;
     }
 
     /// @notice The environment output for the sp1 program.
+    /// @param chainId The chain ID of the chain that the client is tracking.
+    /// @param trustThreshold Fraction of validator overlap needed to update header
+    /// @param trustingPeriod Duration of the period since the `LatestTimestamp` during which the
+    /// submitted headers are valid for upgrade in seconds.
+    /// @param now Timestamp in seconds.
     struct Env {
-        /// The chain ID of the chain that the client is tracking.
         string chainId;
-        /// Fraction of validator overlap needed to update header
         TrustThreshold trustThreshold;
-        /// Duration of the period since the `LatestTimestamp` during which the
-        /// submitted headers are valid for upgrade in seconds.
         uint32 trustingPeriod;
-        /// Timestamp in seconds
         uint64 now;
     }
 }

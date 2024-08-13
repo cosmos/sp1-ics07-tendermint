@@ -1,6 +1,7 @@
 use sp1_helper::{build_program_with_args, BuildArgs};
 
 // Build script to build the programs if they change.
+// Requires SP1 toolchain to be installed.
 fn main() {
     // Build the update-client program.
     build_program_with_args(

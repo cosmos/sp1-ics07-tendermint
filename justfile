@@ -33,7 +33,7 @@ test-foundry:
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:
-  cargo test --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --locked --all-features
+  cargo test --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --locked --all-features
 
 # Generate the `genesis.json` file using $TENDERMINT_RPC_URL in the `.env` file
 genesis:
@@ -89,11 +89,20 @@ test-e2e testname:
   @echo "Running {{testname}} test..."
   cd e2e/interchaintestv8 && go test -v -run "^TestWithSP1ICS07TendermintTestSuite/{{testname}}$" -timeout 40m
 
-# Lint the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, and `golanci-lint` commands
+# Lint the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, `solhint` and `golanci-lint` commands
 lint:
   @echo "Linting the Rust code..."
-  cargo fmt
+  cargo fmt --all -- --check
   @echo "Linting the Solidity code..."
-  forge fmt
+  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
   @echo "Linting the Go code..."
+  cd e2e/interchaintestv8 && golangci-lint run
+
+# Fix the Rust, Solidity, and Go code using `cargo fmt`, `forge fmt`, and `golanci-lint` commands
+lint-fix:
+  @echo "Fixing the Rust code..."
+  cargo fmt --all
+  @echo "Fixing the Solidity code..."
+  forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
+  @echo "Fixing the Go code..."
   cd e2e/interchaintestv8 && golangci-lint run --fix

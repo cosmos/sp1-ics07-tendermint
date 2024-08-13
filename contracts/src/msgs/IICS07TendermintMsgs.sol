@@ -7,39 +7,39 @@ import { IICS02ClientMsgs } from "solidity-ibc/msgs/IICS02ClientMsgs.sol";
 /// @author srdtrk
 /// @notice Defines shared types for ICS07Tendermint implementations.
 interface IICS07TendermintMsgs is IICS02ClientMsgs {
-    /// Fraction of validator overlap needed to update header
+    /// @notice Fraction of validator overlap needed to update header
+    /// @param numerator Numerator of the fraction
+    /// @param denominator Denominator of the fraction
     struct TrustThreshold {
-        /// Numerator of the fraction
         uint8 numerator;
-        /// Denominator of the fraction
         uint8 denominator;
     }
 
     /// @notice Defines the ICS07Tendermint ClientState for ibc-lite
+    /// @param chainId Chain ID
+    /// @param trustLevel Fraction of validator overlap needed to update header
+    /// @param latestHeight Latest height the client was updated to
+    /// @param trustingPeriod duration of the period since the LatestTimestamp during which the
+    /// submitted headers are valid for upgrade in seconds.
+    /// @param unbondingPeriod duration of the staking unbonding period in seconds
+    /// @param isFrozen whether or not client is frozen (due to misbehavior)
     struct ClientState {
-        /// Chain ID
         string chainId;
-        /// Fraction of validator overlap needed to update header
         TrustThreshold trustLevel;
-        /// Latest height the client was updated to
         Height latestHeight;
-        /// duration of the period since the LatestTimestamp during which the
-        /// submitted headers are valid for upgrade in seconds
         uint32 trustingPeriod;
-        /// duration of the staking unbonding period in seconds
         uint32 unbondingPeriod;
-        /// whether or not client is frozen (due to misbehavior)
         bool isFrozen;
     }
 
-    /// Defines the Tendermint light client's consensus state at some height.
+    /// @notice Defines the Tendermint light client's consensus state at some height.
+    /// @param timestamp timestamp that corresponds to the counterparty block height
+    /// in which the ConsensusState was generated.
+    /// @param root commitment root (i.e app hash)
+    /// @param nextValidatorsHash next validators hash
     struct ConsensusState {
-        /// timestamp that corresponds to the block height in which the ConsensusState
-        /// was stored.
         uint64 timestamp;
-        /// commitment root (i.e app hash)
         bytes32 root;
-        /// next validators hash
         bytes32 nextValidatorsHash;
     }
 }

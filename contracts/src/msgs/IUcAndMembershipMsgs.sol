@@ -9,10 +9,10 @@ import { IMembershipMsgs } from "./IMembershipMsgs.sol";
 /// @notice Defines shared types for the update client and membership program.
 interface IUpdateClientAndMembershipMsgs is IUpdateClientMsgs {
     /// @notice The public value output for the sp1 update client and membership program.
+    /// @param updateClientOutput The output of the update client program.
+    /// @param kvPairs The key-value pairs verified by the membership program in the proposed header.
     struct UcAndMembershipOutput {
-        /// Update client program output.
         UpdateClientOutput updateClientOutput;
-        /// The key-value pairs verified by the membership program in the proposed header.
         IMembershipMsgs.KVPair[] kvPairs;
     }
 }

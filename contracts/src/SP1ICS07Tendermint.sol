@@ -7,6 +7,7 @@ import { IMembershipMsgs } from "./msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "./msgs/IUcAndMembershipMsgs.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.sol";
+import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
 
@@ -21,15 +22,15 @@ contract SP1ICS07Tendermint is
     IUpdateClientAndMembershipMsgs,
     ISP1ICS07TendermintErrors,
     ILightClientMsgs,
-    ILightClient
+    ISP1ICS07Tendermint
 {
-    /// @notice The verification key for the update client program.
+    /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
-    /// @notice The verification key for the verify (non)membership program.
+    /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable MEMBERSHIP_PROGRAM_VKEY;
-    /// @notice The verification key for the update client and membership program.
+    /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
-    /// @notice The SP1 verifier contract.
+    /// @inheritdoc ISP1ICS07Tendermint
     ISP1Verifier public immutable VERIFIER;
 
     /// @notice The ICS07Tendermint client state
@@ -37,7 +38,8 @@ contract SP1ICS07Tendermint is
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
 
-    /// Allowed clock drift in seconds
+    /// @notice Allowed clock drift in seconds.
+    /// @inheritdoc ISP1ICS07Tendermint
     uint16 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
@@ -64,15 +66,12 @@ contract SP1ICS07Tendermint is
         consensusStateHashes[clientState.latestHeight.revisionHeight] = _consensusState;
     }
 
-    /// @notice Returns the client state.
-    /// @return The client state.
+    /// @inheritdoc ISP1ICS07Tendermint
     function getClientState() public view returns (ClientState memory) {
         return clientState;
     }
 
-    /// @notice Returns the consensus state keccak256 hash at the given revision height.
-    /// @param revisionHeight The revision height.
-    /// @return The consensus state at the given revision height.
+    /// @inheritdoc ISP1ICS07Tendermint
     function getConsensusStateHash(uint32 revisionHeight) public view returns (bytes32) {
         bytes32 hash = consensusStateHashes[revisionHeight];
         if (hash == 0) {
@@ -85,6 +84,7 @@ contract SP1ICS07Tendermint is
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param updateMsg The encoded update message.
     /// @return The result of the update.
+    /// @inheritdoc ILightClient
     function updateClient(bytes calldata updateMsg) public returns (UpdateResult) {
         MsgUpdateClient memory msgUpdateClient = abi.decode(updateMsg, (MsgUpdateClient));
         if (msgUpdateClient.sp1Proof.vKey != UPDATE_CLIENT_PROGRAM_VKEY) {
@@ -116,6 +116,7 @@ contract SP1ICS07Tendermint is
     /// @notice The entrypoint for verifying (non)membership proof.
     /// @param msgMembership The membership message.
     /// @return timestamp The timestamp of the trusted consensus state.
+    /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
         MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
@@ -132,17 +133,25 @@ contract SP1ICS07Tendermint is
     }
 
     /// @notice The entrypoint for misbehaviour.
-    /// TODO: Not yet implemented. (#56)
+    /// @inheritdoc ILightClient
     function misbehaviour(bytes calldata) public pure {
+        // TODO: Not yet implemented. (#56)
         revert FeatureNotSupported();
     }
 
     /// @notice The entrypoint for upgrading the client.
-    /// TODO: Not yet implemented. (#78)
+    /// @inheritdoc ILightClient
     function upgradeClient(bytes calldata) public pure {
+        // TODO: Not yet implemented. (#78)
         revert FeatureNotSupported();
     }
 
+    /// @notice Handles the `SP1MembershipProof` proof type.
+    /// @param proofHeight The height of the proof.
+    /// @param proofBytes The encoded proof.
+    /// @param kvPath The path of the key-value pair.
+    /// @param kvValue The value of the key-value pair.
+    /// @return The timestamp of the trusted consensus state.
     function handleSP1MembershipProof(
         Height memory proofHeight,
         bytes memory proofBytes,
@@ -199,7 +208,7 @@ contract SP1ICS07Tendermint is
         return proof.trustedConsensusState.timestamp;
     }
 
-    /// @notice The entrypoint for updating the client and membership proof.
+    /// @notice The entrypoint for handling the `SP1MembershipAndUpdateClientProof` proof type.
     /// @dev This function verifies the public values and forwards the proof to the SP1 verifier.
     /// @param proofHeight The height of the proof.
     /// @param proofBytes The encoded proof.
@@ -351,13 +360,13 @@ contract SP1ICS07Tendermint is
     /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
     /// @dev This function does not check timestamp misbehaviour (a niche case).
     /// @param output The public values of the update client program.
+    /// @return The result of the update.
     function checkUpdateResult(UpdateClientOutput memory output) private view returns (UpdateResult) {
         bytes32 consensusStateHash = consensusStateHashes[output.newHeight.revisionHeight];
         if (consensusStateHash == bytes32(0)) {
             // No consensus state at the new height, so no misbehaviour
             return UpdateResult.Update;
-        }
-        if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
+        } else if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
             // The consensus state at the new height is different than the one in the mapping
             return UpdateResult.Misbehaviour;
         } else {
@@ -366,11 +375,19 @@ contract SP1ICS07Tendermint is
         }
     }
 
+    /// @notice Verifies the SP1 proof.
+    /// @param proof The SP1 proof.
     function verifySP1Proof(SP1Proof memory proof) private view {
         VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.
+    /// @param o1 The MembershipOutput.
+    /// @param o2 The UcAndMembershipOutput.
+    /// @param o3 The MsgUpdateClient.
+    /// @param o4 The MembershipProof.
+    /// @param o5 The SP1MembershipProof.
+    /// @param o6 The SP1MembershipAndUpdateClientProof.
     function abiPublicTypes(
         MembershipOutput memory o1,
         UcAndMembershipOutput memory o2,

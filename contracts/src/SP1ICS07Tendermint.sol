@@ -24,13 +24,13 @@ contract SP1ICS07Tendermint is
     ILightClientMsgs,
     ISP1ICS07Tendermint
 {
-    /// @notice The verification key for the update client program.
+    /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
-    /// @notice The verification key for the verify (non)membership program.
+    /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable MEMBERSHIP_PROGRAM_VKEY;
-    /// @notice The verification key for the update client and membership program.
+    /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
-    /// @notice The SP1 verifier contract.
+    /// @inheritdoc ISP1ICS07Tendermint
     ISP1Verifier public immutable VERIFIER;
 
     /// @notice The ICS07Tendermint client state
@@ -38,7 +38,8 @@ contract SP1ICS07Tendermint is
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
 
-    /// Allowed clock drift in seconds
+    /// @notice Allowed clock drift in seconds.
+    /// @inheritdoc ISP1ICS07Tendermint
     uint16 public constant ALLOWED_SP1_CLOCK_DRIFT = 3000; // 3000 seconds
 
     /// @notice The constructor sets the program verification key and the initial client and consensus states.
@@ -359,13 +360,13 @@ contract SP1ICS07Tendermint is
     /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
     /// @dev This function does not check timestamp misbehaviour (a niche case).
     /// @param output The public values of the update client program.
+    /// @return The result of the update.
     function checkUpdateResult(UpdateClientOutput memory output) private view returns (UpdateResult) {
         bytes32 consensusStateHash = consensusStateHashes[output.newHeight.revisionHeight];
         if (consensusStateHash == bytes32(0)) {
             // No consensus state at the new height, so no misbehaviour
             return UpdateResult.Update;
-        }
-        if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
+        } else if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
             // The consensus state at the new height is different than the one in the mapping
             return UpdateResult.Misbehaviour;
         } else {

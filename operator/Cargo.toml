@@ -43,3 +43,6 @@ clap = { workspace = true }
 log = { workspace = true }
 async-trait = { workspace = true }
 hex = { workspace = true }
+
+[build-dependencies]
+sp1-helper = { workspace = true }

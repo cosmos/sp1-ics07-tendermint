@@ -22,6 +22,12 @@ build-contracts:
   @echo "Building the contracts..."
   forge build
 
+# Install the operator executable using `cargo install` command
+install-operator:
+  @echo "Installing the operator executable..."
+  cargo install --path operator --locked --force
+  @echo "Installed the operator executable"
+
 # Run the Solidity tests using `forge test` command
 test-foundry:
   forge test -vvv

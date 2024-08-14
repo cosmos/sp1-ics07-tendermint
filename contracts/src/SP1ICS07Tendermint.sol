@@ -10,6 +10,7 @@ import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.so
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
+import { Paths } from "./utils/Paths.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -119,13 +120,16 @@ contract SP1ICS07Tendermint is
     /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
         MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
+        bytes[] memory kvPath = new bytes[](2); // TODO: Temporary fix
+        kvPath[0] = bytes("ibc");
+        kvPath[1] = msgMembership.path;
+
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
-            return handleSP1MembershipProof(
-                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
-            );
+            return
+                handleSP1MembershipProof(msgMembership.proofHeight, membershipProof.proof, kvPath, msgMembership.value);
         } else if (membershipProof.proofType == MembershipProofType.SP1MembershipAndUpdateClientProof) {
             return handleSP1UpdateClientAndMembership(
-                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+                msgMembership.proofHeight, membershipProof.proof, kvPath, msgMembership.value
             );
         } else {
             revert UnknownMembershipProofType(uint8(membershipProof.proofType));
@@ -155,7 +159,7 @@ contract SP1ICS07Tendermint is
     function handleSP1MembershipProof(
         Height memory proofHeight,
         bytes memory proofBytes,
-        bytes memory kvPath,
+        bytes[] memory kvPath,
         bytes memory kvValue
     )
         private
@@ -184,8 +188,7 @@ contract SP1ICS07Tendermint is
         // loop through the key-value pairs and validate them
         bool found = false;
         for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            bytes memory path = output.kvPairs[i].path[1]; // TODO: This is a temporary fix.
-            if (keccak256(path) != keccak256(kvPath)) {
+            if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
                 continue;
             }
 
@@ -218,7 +221,7 @@ contract SP1ICS07Tendermint is
     function handleSP1UpdateClientAndMembership(
         Height memory proofHeight,
         bytes memory proofBytes,
-        bytes memory kvPath,
+        bytes[] memory kvPath,
         bytes memory kvValue
     )
         private
@@ -266,8 +269,7 @@ contract SP1ICS07Tendermint is
         // loop through the key-value pairs and validate them
         bool found = false;
         for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            bytes memory path = output.kvPairs[i].path[1]; // TODO: This is a temporary fix.
-            if (keccak256(path) != keccak256(kvPath)) {
+            if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
                 continue;
             }
 

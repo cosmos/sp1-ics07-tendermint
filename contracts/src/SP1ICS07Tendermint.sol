@@ -184,7 +184,7 @@ contract SP1ICS07Tendermint is
         // loop through the key-value pairs and validate them
         bool found = false;
         for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            bytes memory path = output.kvPairs[i].path;
+            bytes memory path = output.kvPairs[i].path[1]; // TODO: This is a temporary fix.
             if (keccak256(path) != keccak256(kvPath)) {
                 continue;
             }
@@ -266,7 +266,7 @@ contract SP1ICS07Tendermint is
         // loop through the key-value pairs and validate them
         bool found = false;
         for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            bytes memory path = output.kvPairs[i].path;
+            bytes memory path = output.kvPairs[i].path[1]; // TODO: This is a temporary fix.
             if (keccak256(path) != keccak256(kvPath)) {
                 continue;
             }

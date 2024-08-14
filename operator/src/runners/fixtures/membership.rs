@@ -10,6 +10,7 @@ use crate::{
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
+use ibc_core_host_cosmos::IBC_QUERY_PATH;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
@@ -68,7 +69,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         futures::future::try_join_all(args.key_paths.into_iter().map(|key_path| async {
             let res = tm_rpc_client
                 .abci_query(
-                    Some("store/ibc/key".to_string()),
+                    Some(IBC_QUERY_PATH.to_string()),
                     key_path.as_bytes(),
                     // Proof height should be the block before the target block.
                     Some((args.trusted_block - 1).into()),

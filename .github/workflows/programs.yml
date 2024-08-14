@@ -7,11 +7,17 @@ on:
   pull_request:
 
 jobs:
-  update-client:
+  build-programs:
     strategy:
-      fail-fast: true
-    name: build-update-client
-    runs-on: ubuntu-20.04
+      fail-fast: false
+      matrix:
+        programs:
+          # List your program directories here
+          - programs/update-client
+          - programs/membership
+          - programs/uc-and-membership
+    name: 'build: ${{ matrix.programs }}'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -30,57 +36,5 @@ jobs:
 
       - name: Build SP1 program
         run: |
-          cd programs/update-client
-          ~/.sp1/bin/cargo-prove prove build
-
-  membership:
-    strategy:
-      fail-fast: true
-    name: build-membership
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Install SP1 toolchain
-        run: |
-          curl -L https://sp1.succinct.xyz | bash
-          ~/.sp1/bin/sp1up 
-          ~/.sp1/bin/cargo-prove prove --version
-
-      - name: Build SP1 program
-        run: |
-          cd programs/membership
-          ~/.sp1/bin/cargo-prove prove build
-
-  uc-and-membership:
-    strategy:
-      fail-fast: true
-    name: build-uc-and-membership
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Install SP1 toolchain
-        run: |
-          curl -L https://sp1.succinct.xyz | bash
-          ~/.sp1/bin/sp1up 
-          ~/.sp1/bin/cargo-prove prove --version
-
-      - name: Build SP1 program
-        run: |
-          cd programs/uc-and-membership
+          cd ${{ matrix.programs }}
           ~/.sp1/bin/cargo-prove prove build

@@ -2,20 +2,15 @@ set dotenv-load
 
 # Build riscv elf file using `~/.sp1/bin/cargo-prove`
 build-programs:
-  cd programs/update-client && ~/.sp1/bin/cargo-prove prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/update-client-riscv32im-succinct-zkvm-elf
+  cd programs/update-client && ~/.sp1/bin/cargo-prove prove build --elf-name update-client-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/update-client-riscv32im-succinct-zkvm-elf'"
-  cd programs/membership && ~/.sp1/bin/cargo-prove prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/membership-riscv32im-succinct-zkvm-elf
+  cd programs/membership && ~/.sp1/bin/cargo-prove prove build --elf-name membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/membership-riscv32im-succinct-zkvm-elf'"
-  cd programs/uc-and-membership && ~/.sp1/bin/cargo-prove prove build
-  mv elf/riscv32im-succinct-zkvm-elf elf/uc-and-membership-riscv32im-succinct-zkvm-elf
+  cd programs/uc-and-membership && ~/.sp1/bin/cargo-prove prove build --elf-name uc-and-membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/uc-and-membership-riscv32im-succinct-zkvm-elf'"
 
 # Build the operator executable using `cargo build` command
 build-operator:
-  @echo "Building the programs for the operator..."
-  just build-programs
   @echo "Building the operator executable..."
   cargo build --bin operator --locked --release
   @echo "Built the operator executable"
@@ -26,6 +21,12 @@ build-contracts:
   -rm -r contracts/cache contracts/out # `-` is used to ignore the error if the directories do not exist
   @echo "Building the contracts..."
   forge build
+
+# Install the operator executable using `cargo install` command
+install-operator:
+  @echo "Installing the operator executable..."
+  cargo install --path operator --locked --force
+  @echo "Installed the operator executable"
 
 # Run the Solidity tests using `forge test` command
 test-foundry:

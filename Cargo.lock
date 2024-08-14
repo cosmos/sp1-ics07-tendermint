@@ -5644,6 +5644,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-build"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65c9c5c2628b485693b6c2e5ba89f1af7ce5cfede39a6a4b041afd2e5b838480"
+dependencies = [
+ "anyhow",
+ "cargo_metadata",
+ "clap",
+ "dirs",
+]
+
+[[package]]
 name = "sp1-core"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5718,6 +5730,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-helper"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec6177089127a447ea26b258f722050c0c4f874eba5df7934b246b59088c8f72"
+dependencies = [
+ "cargo_metadata",
+ "chrono",
+ "sp1-build",
+]
+
+[[package]]
 name = "sp1-ics07-tendermint-membership"
 version = "0.1.0"
 dependencies = [
@@ -5755,6 +5778,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "sha2 0.10.8",
+ "sp1-helper",
  "sp1-ics07-tendermint-solidity",
  "sp1-ics07-tendermint-update-client",
  "sp1-ics07-tendermint-utils",

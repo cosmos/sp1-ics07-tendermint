@@ -59,14 +59,8 @@ jobs:
           ~/.sp1/bin/cargo-prove prove --version
       - name: Install just
         uses: extractions/setup-just@v2
-      - name: Build SP1 Programs
-        run: just build-programs
-
       - name: Run unit tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --locked
+        run: just test-cargo
         env:
           RUST_BACKTRACE: 1
 
@@ -88,13 +82,9 @@ jobs:
           curl -L https://sp1.succinct.xyz | bash
           ~/.sp1/bin/sp1up 
           ~/.sp1/bin/cargo-prove prove --version
-      - name: Install just
-        uses: extractions/setup-just@v2
-      - name: Build SP1 Programs
-        run: just build-programs
 
       - name: Build
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership--locked --exclude sp1-ics07-tendermint-uc-and-membership --all-features
+          args: --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --all-features --locked

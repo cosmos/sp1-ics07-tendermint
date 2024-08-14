@@ -101,7 +101,7 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
     pub fn generate_proof(
         &self,
         commitment_root: &[u8],
-        kv_proofs: Vec<(Vec<u8>, Vec<u8>, MerkleProof)>,
+        kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)>,
     ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
@@ -110,7 +110,7 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
         stdin.write_slice(commitment_root);
         stdin.write_vec(vec![len]);
         for (path, value, proof) in kv_proofs {
-            stdin.write_vec(path);
+            stdin.write_vec(bincode::serialize(&path).unwrap());
             stdin.write_vec(value);
             stdin.write_vec(proof.encode_vec());
         }
@@ -148,7 +148,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
         contract_env: &Env,
-        kv_proofs: Vec<(Vec<u8>, Vec<u8>, MerkleProof)>,
+        kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)>,
     ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
@@ -168,7 +168,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         stdin.write_vec(encoded_3);
         stdin.write_vec(vec![len]);
         for (path, value, proof) in kv_proofs {
-            stdin.write_vec(path);
+            stdin.write_vec(bincode::serialize(&path).unwrap());
             stdin.write_vec(value);
             stdin.write_vec(proof.encode_vec());
         }

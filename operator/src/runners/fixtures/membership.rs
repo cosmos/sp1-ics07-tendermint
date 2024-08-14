@@ -65,12 +65,12 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         .as_bytes()
         .to_vec();
 
-    let kv_proofs: Vec<(Vec<u8>, Vec<u8>, MerkleProof)> =
-        futures::future::try_join_all(args.key_paths.into_iter().map(|key_path| async {
+    let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
+        futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
             let res = tm_rpc_client
                 .abci_query(
                     Some(IBC_QUERY_PATH.to_string()),
-                    key_path.as_bytes(),
+                    path.as_bytes(),
                     // Proof height should be the block before the target block.
                     Some((args.trusted_block - 1).into()),
                     true,
@@ -78,7 +78,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
                 .await?;
 
             assert_eq!(u32::try_from(res.height.value())? + 1, args.trusted_block);
-            assert_eq!(res.key.as_slice(), key_path.as_bytes());
+            assert_eq!(res.key.as_slice(), path.as_bytes());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             let value = res.value;
             if value.is_empty() {
@@ -86,7 +86,8 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
             }
             assert!(!vm_proof.proofs.is_empty());
 
-            anyhow::Ok((key_path.into(), value, vm_proof))
+            let key_path = vec![b"ibc".to_vec(), path.into()];
+            anyhow::Ok((key_path, value, vm_proof))
         }))
         .await?;
 

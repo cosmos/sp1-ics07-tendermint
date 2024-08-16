@@ -5870,6 +5870,7 @@ name = "sp1-ics07-tendermint-membership"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "bincode",
  "ibc-core-commitment-types",
  "ibc-proto",
  "sp1-ics07-tendermint-solidity",

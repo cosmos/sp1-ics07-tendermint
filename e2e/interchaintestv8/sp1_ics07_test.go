@@ -16,6 +16,7 @@ import (
 
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	ibctesting "github.com/cosmos/ibc-go/v8/testing"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
@@ -193,7 +194,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
 			ProofHeight: *proofHeight,
 			Proof:       ucAndMemProof,
-			Path:        []byte(packetReceiptPath),
+			Path:        [][]byte{[]byte(ibcexported.StoreKey), []byte(packetReceiptPath)},
 			Value:       []byte(""),
 		}
 

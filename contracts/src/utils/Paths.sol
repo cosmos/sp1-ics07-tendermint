@@ -20,4 +20,11 @@ library Paths {
         }
         return true;
     }
+
+    function toKvPath(bytes memory path) public pure returns (bytes[] memory) {
+        bytes[] memory kvPath = new bytes[](2);
+        kvPath[0] = bytes("ibc");
+        kvPath[1] = path;
+        return kvPath;
+    }
 }

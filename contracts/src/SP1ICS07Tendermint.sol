@@ -120,16 +120,13 @@ contract SP1ICS07Tendermint is
     /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
         MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
-        bytes[] memory kvPath = new bytes[](2); // TODO: Temporary fix
-        kvPath[0] = bytes("ibc");
-        kvPath[1] = msgMembership.path;
-
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
-            return
-                handleSP1MembershipProof(msgMembership.proofHeight, membershipProof.proof, kvPath, msgMembership.value);
+            return handleSP1MembershipProof(
+                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+            );
         } else if (membershipProof.proofType == MembershipProofType.SP1MembershipAndUpdateClientProof) {
             return handleSP1UpdateClientAndMembership(
-                msgMembership.proofHeight, membershipProof.proof, kvPath, msgMembership.value
+                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else {
             revert UnknownMembershipProofType(uint8(membershipProof.proofType));
@@ -185,23 +182,24 @@ contract SP1ICS07Tendermint is
             revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
         }
 
-        // loop through the key-value pairs and validate them
-        bool found = false;
-        for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
-                continue;
-            }
+        {
+            // loop through the key-value pairs and validate them
+            bool found = false;
+            for (uint8 i = 0; i < output.kvPairs.length; i++) {
+                if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
+                    continue;
+                }
 
-            bytes memory value = output.kvPairs[i].value;
-            if (keccak256(value) != keccak256(kvValue)) {
-                revert MembershipProofValueMismatch(kvValue, value);
-            }
+                if (keccak256(output.kvPairs[i].value) != keccak256(kvValue)) {
+                    revert MembershipProofValueMismatch(kvValue, output.kvPairs[i].value);
+                }
 
-            found = true;
-            break;
-        }
-        if (!found) {
-            revert MembershipProofKeyNotFound(kvPath);
+                found = true;
+                break;
+            }
+            if (!found) {
+                revert MembershipProofKeyNotFound(kvPath);
+            }
         }
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
@@ -267,22 +265,24 @@ contract SP1ICS07Tendermint is
         } // else: NoOp
 
         // loop through the key-value pairs and validate them
-        bool found = false;
-        for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
-                continue;
-            }
+        {
+            bool found = false;
+            for (uint8 i = 0; i < output.kvPairs.length; i++) {
+                if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
+                    continue;
+                }
 
-            bytes memory value = output.kvPairs[i].value;
-            if (keccak256(value) != keccak256(kvValue)) {
-                revert MembershipProofValueMismatch(kvValue, value);
-            }
+                bytes memory value = output.kvPairs[i].value;
+                if (keccak256(value) != keccak256(kvValue)) {
+                    revert MembershipProofValueMismatch(kvValue, value);
+                }
 
-            found = true;
-            break;
-        }
-        if (!found) {
-            revert MembershipProofKeyNotFound(kvPath);
+                found = true;
+                break;
+            }
+            if (!found) {
+                revert MembershipProofKeyNotFound(kvPath);
+            }
         }
 
         validateMembershipOutput(

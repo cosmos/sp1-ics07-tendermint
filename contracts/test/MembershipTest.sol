@@ -7,9 +7,9 @@ import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
 
 abstract contract MembershipTest is SP1ICS07TendermintTest {
-    // set constant string
-    string public constant VERIFY_MEMBERSHIP_PATH = "clients/07-tendermint-0/clientState";
-    string public constant VERIFY_NON_MEMBERSHIP_PATH = "clients/07-tendermint-001/clientState";
+    bytes[] public VERIFY_MEMBERSHIP_PATH = [bytes("ibc"), bytes("clients/07-tendermint-0/clientState")];
+
+    bytes[] public VERIFY_NON_MEMBERSHIP_PATH = [bytes("ibc"), bytes("clients/07-tendermint-001/clientState")];
 
     struct SP1ICS07MembershipFixtureJson {
         Height proofHeight;

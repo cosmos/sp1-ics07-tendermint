@@ -154,10 +154,10 @@ contract SP1ICS07Tendermint is
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the trusted consensus state.
     function handleSP1MembershipProof(
-        Height memory proofHeight,
+        Height calldata proofHeight,
         bytes memory proofBytes,
-        bytes[] memory kvPath,
-        bytes memory kvValue
+        bytes[] calldata kvPath,
+        bytes calldata kvValue
     )
         private
         view
@@ -217,52 +217,59 @@ contract SP1ICS07Tendermint is
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the new consensus state.
     function handleSP1UpdateClientAndMembership(
-        Height memory proofHeight,
+        Height calldata proofHeight,
         bytes memory proofBytes,
-        bytes[] memory kvPath,
-        bytes memory kvValue
+        bytes[] calldata kvPath,
+        bytes calldata kvValue
     )
         private
         returns (uint256)
     {
-        SP1MembershipAndUpdateClientProof memory proof = abi.decode(proofBytes, (SP1MembershipAndUpdateClientProof));
-        if (proof.sp1Proof.vKey != UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY) {
-            revert VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
-        }
-
-        UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
-        if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
-            revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
-        }
-
-        if (
-            proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight
-                || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber
-        ) {
-            revert ProofHeightMismatch(
-                proofHeight.revisionNumber,
-                proofHeight.revisionHeight,
-                output.updateClientOutput.newHeight.revisionNumber,
-                output.updateClientOutput.newHeight.revisionHeight
-            );
-        }
-
-        validateUpdateClientPublicValues(output.updateClientOutput);
-
-        verifySP1Proof(proof.sp1Proof);
-
-        UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
-        if (updateResult == UpdateResult.Update) {
-            // adding the new consensus state to the mapping
-            if (proofHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
-                clientState.latestHeight = proofHeight;
+        // validate proof and deserialize output
+        UcAndMembershipOutput memory output;
+        {
+            SP1MembershipAndUpdateClientProof memory proof = abi.decode(proofBytes, (SP1MembershipAndUpdateClientProof));
+            if (proof.sp1Proof.vKey != UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY) {
+                revert VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
             }
-            consensusStateHashes[proofHeight.revisionHeight] =
-                keccak256(abi.encode(output.updateClientOutput.newConsensusState));
-        } else if (updateResult == UpdateResult.Misbehaviour) {
-            clientState.isFrozen = true;
-            revert CannotHandleMisbehavior();
-        } // else: NoOp
+
+            output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
+            if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
+                revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
+            }
+
+            if (
+                proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight
+                    || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber
+            ) {
+                revert ProofHeightMismatch(
+                    proofHeight.revisionNumber,
+                    proofHeight.revisionHeight,
+                    output.updateClientOutput.newHeight.revisionNumber,
+                    output.updateClientOutput.newHeight.revisionHeight
+                );
+            }
+
+            validateUpdateClientPublicValues(output.updateClientOutput);
+
+            verifySP1Proof(proof.sp1Proof);
+        }
+
+        // check update result
+        {
+            UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
+            if (updateResult == UpdateResult.Update) {
+                // adding the new consensus state to the mapping
+                if (proofHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
+                    clientState.latestHeight = proofHeight;
+                }
+                consensusStateHashes[proofHeight.revisionHeight] =
+                    keccak256(abi.encode(output.updateClientOutput.newConsensusState));
+            } else if (updateResult == UpdateResult.Misbehaviour) {
+                clientState.isFrozen = true;
+                revert CannotHandleMisbehavior();
+            } // else: NoOp
+        }
 
         // loop through the key-value pairs and validate them
         {

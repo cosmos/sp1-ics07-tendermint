@@ -3,12 +3,9 @@ pragma solidity >=0.8.25;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
-import { stdJson } from "forge-std/StdJson.sol";
 import { MembershipTest } from "./MembershipTest.sol";
 
 contract SP1ICS07MembershipTest is MembershipTest {
-    using stdJson for string;
-
     SP1MembershipProof public proof;
 
     function setUp() public {

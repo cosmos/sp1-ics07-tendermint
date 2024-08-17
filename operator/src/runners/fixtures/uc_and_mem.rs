@@ -13,6 +13,7 @@ use crate::{
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
+use ibc_core_host_cosmos::IBC_QUERY_PATH;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
     ClientState, ConsensusState as SolConsensusState, Env, MembershipProof,
     SP1MembershipAndUpdateClientProof, SP1Proof, UcAndMembershipOutput,
@@ -60,12 +61,12 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
             .as_secs(),
     };
 
-    let kv_proofs: Vec<(String, MerkleProof, Vec<u8>)> =
-        futures::future::try_join_all(args.key_paths.into_iter().map(|key_path| async {
+    let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
+        futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
             let res = tm_rpc_client
                 .abci_query(
-                    Some("store/ibc/key".to_string()),
-                    key_path.as_bytes(),
+                    Some(IBC_QUERY_PATH.to_string()),
+                    path.as_bytes(),
                     // Proof height should be the block before the target block.
                     Some((args.target_block - 1).into()),
                     true,
@@ -73,7 +74,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
                 .await?;
 
             assert_eq!(u32::try_from(res.height.value())? + 1, args.target_block);
-            assert_eq!(res.key.as_slice(), key_path.as_bytes());
+            assert_eq!(res.key.as_slice(), path.as_bytes());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             let value = res.value;
             if value.is_empty() {
@@ -81,7 +82,8 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
             }
             assert!(!vm_proof.proofs.is_empty());
 
-            anyhow::Ok((key_path, vm_proof, value))
+            let key_path = vec![b"ibc".to_vec(), path.into()];
+            anyhow::Ok((key_path, value, vm_proof))
         }))
         .await?;
 

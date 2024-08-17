@@ -7,6 +7,7 @@ cache_path = "contracts/cache"
 broadcast = "contracts/broadcast"
 libs = ["node_modules", "contracts/lib"]
 fs_permissions = [{ access = "read-write", path = "./" },]
+via_ir = true
 
 [fmt]
 bracket_spacing = true

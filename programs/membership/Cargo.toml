@@ -13,3 +13,4 @@ ibc-core-commitment-types = { workspace = true }
 alloy-sol-types = { workspace = true }
 sp1-ics07-tendermint-solidity = { workspace = true }
 ibc-proto = { workspace = true }
+bincode = { workspace = true }

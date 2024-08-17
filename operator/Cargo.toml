@@ -9,15 +9,19 @@ license = { workspace = true }
 [dependencies]
 sp1-sdk = { workspace = true }
 
+cosmos-sdk-proto = { workspace = true }
+
+ibc-proto = { workspace = true }
+
 tendermint = { workspace = true }
 tendermint-rpc = { workspace = true }
 tendermint-light-client-verifier = { workspace = true }
-cosmos-sdk-proto = { workspace = true }
+
 ibc-client-tendermint = { workspace = true }
 ibc-core-client-types = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 ibc-core-host-types = { workspace = true, features = ["std"] }
-ibc-proto = { workspace = true }
+ibc-core-host-cosmos = { workspace = true }
 
 sp1-ics07-tendermint-update-client = { workspace = true }
 sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }

@@ -10,6 +10,7 @@ import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.so
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
+import { Paths } from "./utils/Paths.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -153,10 +154,10 @@ contract SP1ICS07Tendermint is
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the trusted consensus state.
     function handleSP1MembershipProof(
-        Height memory proofHeight,
+        Height calldata proofHeight,
         bytes memory proofBytes,
-        bytes memory kvPath,
-        bytes memory kvValue
+        bytes[] calldata kvPath,
+        bytes calldata kvValue
     )
         private
         view
@@ -181,24 +182,24 @@ contract SP1ICS07Tendermint is
             revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
         }
 
-        // loop through the key-value pairs and validate them
-        bool found = false;
-        for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            bytes memory path = output.kvPairs[i].path;
-            if (keccak256(path) != keccak256(kvPath)) {
-                continue;
-            }
+        {
+            // loop through the key-value pairs and validate them
+            bool found = false;
+            for (uint8 i = 0; i < output.kvPairs.length; i++) {
+                if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
+                    continue;
+                }
 
-            bytes memory value = output.kvPairs[i].value;
-            if (keccak256(value) != keccak256(kvValue)) {
-                revert MembershipProofValueMismatch(kvValue, value);
-            }
+                if (keccak256(output.kvPairs[i].value) != keccak256(kvValue)) {
+                    revert MembershipProofValueMismatch(kvValue, output.kvPairs[i].value);
+                }
 
-            found = true;
-            break;
-        }
-        if (!found) {
-            revert MembershipProofKeyNotFound(kvPath);
+                found = true;
+                break;
+            }
+            if (!found) {
+                revert MembershipProofKeyNotFound(kvPath);
+            }
         }
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
@@ -216,71 +217,79 @@ contract SP1ICS07Tendermint is
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the new consensus state.
     function handleSP1UpdateClientAndMembership(
-        Height memory proofHeight,
+        Height calldata proofHeight,
         bytes memory proofBytes,
-        bytes memory kvPath,
-        bytes memory kvValue
+        bytes[] calldata kvPath,
+        bytes calldata kvValue
     )
         private
         returns (uint256)
     {
-        SP1MembershipAndUpdateClientProof memory proof = abi.decode(proofBytes, (SP1MembershipAndUpdateClientProof));
-        if (proof.sp1Proof.vKey != UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY) {
-            revert VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
-        }
-
-        UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
-        if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
-            revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
-        }
-
-        if (
-            proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight
-                || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber
-        ) {
-            revert ProofHeightMismatch(
-                proofHeight.revisionNumber,
-                proofHeight.revisionHeight,
-                output.updateClientOutput.newHeight.revisionNumber,
-                output.updateClientOutput.newHeight.revisionHeight
-            );
-        }
-
-        validateUpdateClientPublicValues(output.updateClientOutput);
-
-        verifySP1Proof(proof.sp1Proof);
-
-        UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
-        if (updateResult == UpdateResult.Update) {
-            // adding the new consensus state to the mapping
-            if (proofHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
-                clientState.latestHeight = proofHeight;
+        // validate proof and deserialize output
+        UcAndMembershipOutput memory output;
+        {
+            SP1MembershipAndUpdateClientProof memory proof = abi.decode(proofBytes, (SP1MembershipAndUpdateClientProof));
+            if (proof.sp1Proof.vKey != UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY) {
+                revert VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
             }
-            consensusStateHashes[proofHeight.revisionHeight] =
-                keccak256(abi.encode(output.updateClientOutput.newConsensusState));
-        } else if (updateResult == UpdateResult.Misbehaviour) {
-            clientState.isFrozen = true;
-            revert CannotHandleMisbehavior();
-        } // else: NoOp
+
+            output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
+            if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
+                revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
+            }
+
+            if (
+                proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight
+                    || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber
+            ) {
+                revert ProofHeightMismatch(
+                    proofHeight.revisionNumber,
+                    proofHeight.revisionHeight,
+                    output.updateClientOutput.newHeight.revisionNumber,
+                    output.updateClientOutput.newHeight.revisionHeight
+                );
+            }
+
+            validateUpdateClientPublicValues(output.updateClientOutput);
+
+            verifySP1Proof(proof.sp1Proof);
+        }
+
+        // check update result
+        {
+            UpdateResult updateResult = checkUpdateResult(output.updateClientOutput);
+            if (updateResult == UpdateResult.Update) {
+                // adding the new consensus state to the mapping
+                if (proofHeight.revisionHeight > clientState.latestHeight.revisionHeight) {
+                    clientState.latestHeight = proofHeight;
+                }
+                consensusStateHashes[proofHeight.revisionHeight] =
+                    keccak256(abi.encode(output.updateClientOutput.newConsensusState));
+            } else if (updateResult == UpdateResult.Misbehaviour) {
+                clientState.isFrozen = true;
+                revert CannotHandleMisbehavior();
+            } // else: NoOp
+        }
 
         // loop through the key-value pairs and validate them
-        bool found = false;
-        for (uint8 i = 0; i < output.kvPairs.length; i++) {
-            bytes memory path = output.kvPairs[i].path;
-            if (keccak256(path) != keccak256(kvPath)) {
-                continue;
-            }
+        {
+            bool found = false;
+            for (uint8 i = 0; i < output.kvPairs.length; i++) {
+                if (!Paths.equal(output.kvPairs[i].path, kvPath)) {
+                    continue;
+                }
 
-            bytes memory value = output.kvPairs[i].value;
-            if (keccak256(value) != keccak256(kvValue)) {
-                revert MembershipProofValueMismatch(kvValue, value);
-            }
+                bytes memory value = output.kvPairs[i].value;
+                if (keccak256(value) != keccak256(kvValue)) {
+                    revert MembershipProofValueMismatch(kvValue, value);
+                }
 
-            found = true;
-            break;
-        }
-        if (!found) {
-            revert MembershipProofKeyNotFound(kvPath);
+                found = true;
+                break;
+            }
+            if (!found) {
+                revert MembershipProofKeyNotFound(kvPath);
+            }
         }
 
         validateMembershipOutput(

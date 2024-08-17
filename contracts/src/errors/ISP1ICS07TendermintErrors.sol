@@ -65,7 +65,7 @@ interface ISP1ICS07TendermintErrors {
 
     /// @notice The error that is returned when the key-value pair's path is not contained in the proof.
     /// @param path The path of the key-value pair.
-    error MembershipProofKeyNotFound(bytes path);
+    error MembershipProofKeyNotFound(bytes[] path);
 
     /// @notice The error that is returned when the consensus state root does not match the expected value.
     /// @param expected The expected consensus state root.

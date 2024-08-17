@@ -12,7 +12,7 @@ interface IMembershipMsgs is ISP1Msgs {
     /// @param path The path of the value in the key-value store.
     /// @param value The value of the key-value pair.
     struct KVPair {
-        bytes path;
+        bytes[] path;
         bytes value;
     }
 

@@ -26,6 +26,11 @@ const (
 	EnvKeySp1Prover = "SP1_PROVER"
 	// Private key for the prover network.
 	EnvKeySp1PrivateKey = "SP1_PRIVATE_KEY"
+	// The log level for the Rust logger.
+	EnvKeyRustLog = "RUST_LOG"
+
+	// Log level for the Rust logger.
+	EnvValueRustLog_Info = "info"
 )
 
 var (

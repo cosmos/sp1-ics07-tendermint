@@ -10,7 +10,7 @@
     "@openzeppelin/contracts": "^5.0.2",
     "forge-std": "github:foundry-rs/forge-std#v1.9.1",
     "sp1-contracts": "github:succinctlabs/sp1-contracts#v1.1.0",
-    "solidity-ibc": "https://github.com/cosmos/solidity-ibc-eureka.git#serdar/xxx-generic-paths"
+    "solidity-ibc": "github:cosmos/solidity-ibc-eureka#370ce703e20148086f84e51f59895dfd237ceec8"
   },
   "devDependencies": {
     "solhint": "^5.0.3",

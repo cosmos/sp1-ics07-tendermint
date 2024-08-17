@@ -8,6 +8,7 @@ broadcast = "contracts/broadcast"
 libs = ["node_modules", "contracts/lib"]
 fs_permissions = [{ access = "read-write", path = "./" },]
 via_ir = true
+no_match_path = "node_modules/**/test/**"
 
 [fmt]
 bracket_spacing = true

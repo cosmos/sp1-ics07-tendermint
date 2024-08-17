@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -24,13 +25,17 @@ type membershipFixture struct {
 // RunGenesis is a function that runs the genesis script to generate genesis.json
 func RunGenesis(args ...string) error {
 	args = append([]string{"genesis"}, args...)
-	return exec.Command("target/release/operator", args...).Run()
+	cmd := exec.Command("target/release/operator", args...)
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 // StartOperator is a function that runs the operator
 func StartOperator(args ...string) error {
 	args = append([]string{"start"}, args...)
-	return exec.Command("target/release/operator", args...).Run()
+	cmd := exec.Command("target/release/operator", args...)
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 // UpdateClientAndMembershipProof is a function that generates an update client and membership proof
@@ -41,6 +46,9 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 	if err != nil {
 		return nil, nil, err
 	}
+
+	// NOTE: writing stdout to os.Stdout after execution due to how `.Output()` works
+	os.Stdout.Write(stdout)
 
 	// eliminate non-json characters
 	jsonStartIdx := strings.Index(string(stdout), "{")

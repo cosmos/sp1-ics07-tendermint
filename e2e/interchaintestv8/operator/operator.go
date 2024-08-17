@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -24,7 +25,11 @@ type membershipFixture struct {
 // RunGenesis is a function that runs the genesis script to generate genesis.json
 func RunGenesis(args ...string) error {
 	args = append([]string{"genesis"}, args...)
-	return exec.Command("target/release/operator", args...).Run()
+	cmd := exec.Command("target/release/operator", args...)
+	// return execution result to stdout
+	cmd.Stdout = os.Stdout
+
+	return cmd.Run()
 }
 
 // StartOperator is a function that runs the operator

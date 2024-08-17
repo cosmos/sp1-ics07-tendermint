@@ -26,23 +26,25 @@ type membershipFixture struct {
 func RunGenesis(args ...string) error {
 	args = append([]string{"genesis"}, args...)
 	cmd := exec.Command("target/release/operator", args...)
-	// return execution result to stdout
 	cmd.Stdout = os.Stdout
-
 	return cmd.Run()
 }
 
 // StartOperator is a function that runs the operator
 func StartOperator(args ...string) error {
 	args = append([]string{"start"}, args...)
-	return exec.Command("target/release/operator", args...).Run()
+	cmd := exec.Command("target/release/operator", args...)
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 // UpdateClientAndMembershipProof is a function that generates an update client and membership proof
 func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
 	args = append([]string{"fixtures", "update-client-and-membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--target-block", strconv.FormatUint(target_height, 10), "--key-paths", paths}, args...)
+	cmd := exec.Command("target/release/operator", args...)
+	cmd.Stdout = os.Stdout
 
-	stdout, err := exec.Command("target/release/operator", args...).Output()
+	stdout, err := cmd.Output()
 	if err != nil {
 		return nil, nil, err
 	}

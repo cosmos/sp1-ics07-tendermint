@@ -37,7 +37,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
-            path: VERIFY_MEMBERSHIP_PATH,
+            path: verifyMembershipPath,
             value: verifyMembershipValue()
         });
 
@@ -65,7 +65,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
-            path: VERIFY_NON_MEMBERSHIP_PATH,
+            path: verifyNonMembershipPath,
             value: bytes("")
         });
 
@@ -101,7 +101,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(membershipProof),
             proofHeight: fixture.proofHeight,
-            path: VERIFY_NON_MEMBERSHIP_PATH,
+            path: verifyNonMembershipPath,
             value: bytes("")
         });
 

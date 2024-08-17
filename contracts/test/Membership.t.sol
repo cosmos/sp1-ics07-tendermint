@@ -79,7 +79,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
     }
 
     function test_Invalid_MockMembership() public {
-        MockInvalidMembershipTestCase[] memory testCases = new MockInvalidMembershipTestCase[](7);
+        MockInvalidMembershipTestCase[] memory testCases = new MockInvalidMembershipTestCase[](9);
         testCases[0] = MockInvalidMembershipTestCase({
             name: "success: valid mock",
             sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
@@ -134,15 +134,6 @@ contract SP1ICS07MembershipTest is MembershipTest {
             expPass: false
         });
         testCases[5].path[1] = bytes("invalid");
-        testCases[5] = MockInvalidMembershipTestCase({
-            name: "Path too long",
-            sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),
-            proofHeight: fixture.proofHeight.revisionHeight,
-            path: VERIFY_NON_MEMBERSHIP_PATH,
-            value: bytes(""),
-            expPass: false
-        });
-        testCases[5].path[2] = bytes("invalid");
         testCases[6] = MockInvalidMembershipTestCase({
             name: "Invalid value",
             sp1Proof: SP1Proof({ proof: bytes(""), publicValues: proof.sp1Proof.publicValues, vKey: proof.sp1Proof.vKey }),

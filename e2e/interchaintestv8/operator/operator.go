@@ -41,13 +41,14 @@ func StartOperator(args ...string) error {
 // UpdateClientAndMembershipProof is a function that generates an update client and membership proof
 func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
 	args = append([]string{"fixtures", "update-client-and-membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--target-block", strconv.FormatUint(target_height, 10), "--key-paths", paths}, args...)
-	cmd := exec.Command("target/release/operator", args...)
-	cmd.Stdout = os.Stdout
 
-	stdout, err := cmd.Output()
+	stdout, err := exec.Command("target/release/operator", args...).Output()
 	if err != nil {
 		return nil, nil, err
 	}
+
+	// NOTE: writing stdout to os.Stdout after execution due to how `.Output()` works
+	os.Stdout.Write(stdout)
 
 	// eliminate non-json characters
 	jsonStartIdx := strings.Index(string(stdout), "{")

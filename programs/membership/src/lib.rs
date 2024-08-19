@@ -5,8 +5,8 @@ use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{KVPair, MembershipOutp
 
 use ibc_core_commitment_types::{
     commitment::CommitmentRoot,
-    merkle::MerkleProof,
-    proto::{ics23::HostFunctionsManager, v1::MerklePath},
+    merkle::{MerklePath, MerkleProof},
+    proto::ics23::HostFunctionsManager,
     specs::ProofSpecs,
 };
 
@@ -15,14 +15,14 @@ use ibc_core_commitment_types::{
 #[must_use]
 pub fn membership(
     app_hash: [u8; 32],
-    request_iter: impl Iterator<Item = (String, MerkleProof, Vec<u8>)>,
+    request_iter: impl Iterator<Item = (Vec<Vec<u8>>, Vec<u8>, MerkleProof)>,
 ) -> MembershipOutput {
     let commitment_root = CommitmentRoot::from_bytes(&app_hash);
 
     let kv_pairs = request_iter
-        .map(|(path_str, merkle_proof, value)| {
-            let path = MerklePath {
-                key_path: vec!["ibc".to_string(), path_str.clone()],
+        .map(|(path, value, merkle_proof)| {
+            let merkle_path = MerklePath {
+                key_path: path.into_iter().map(Into::into).collect(),
             };
 
             if value.is_empty() {
@@ -30,7 +30,7 @@ pub fn membership(
                     .verify_non_membership::<HostFunctionsManager>(
                         &ProofSpecs::cosmos(),
                         commitment_root.clone().into(),
-                        path,
+                        merkle_path.clone(),
                     )
                     .unwrap();
             } else {
@@ -38,7 +38,7 @@ pub fn membership(
                     .verify_membership::<HostFunctionsManager>(
                         &ProofSpecs::cosmos(),
                         commitment_root.clone().into(),
-                        path,
+                        merkle_path.clone(),
                         value.clone(),
                         0,
                     )
@@ -46,7 +46,11 @@ pub fn membership(
             }
 
             KVPair {
-                key: path_str,
+                path: merkle_path
+                    .key_path
+                    .into_iter()
+                    .map(|v| v.into_vec().into())
+                    .collect(),
                 value: value.into(),
             }
         })

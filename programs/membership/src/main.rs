@@ -29,17 +29,18 @@ pub fn main() {
     assert!(request_len != 0);
 
     let request_iter = (0..request_len).map(|_| {
+        // loop_encoded_1 is the path we want to verify the membership of
         let loop_encoded_1 = sp1_zkvm::io::read_vec();
-        let path_str = String::from_utf8(loop_encoded_1).unwrap();
+        let path = bincode::deserialize(&loop_encoded_1).unwrap();
 
-        let loop_encoded_2 = sp1_zkvm::io::read_vec();
-        let merkle_proof = MerkleProof::decode_vec(&loop_encoded_2).unwrap();
-
-        // loop_encoded_3 is the value we want to prove the membership of
+        // loop_encoded_2 is the value we want to prove the membership of
         // if it is empty, we are verifying non-membership
         let value = sp1_zkvm::io::read_vec();
 
-        (path_str, merkle_proof, value)
+        let loop_encoded_3 = sp1_zkvm::io::read_vec();
+        let merkle_proof = MerkleProof::decode_vec(&loop_encoded_3).unwrap();
+
+        (path, value, merkle_proof)
     });
 
     let output = membership(app_hash, request_iter);

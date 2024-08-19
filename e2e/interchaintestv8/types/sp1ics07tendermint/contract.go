@@ -29,78 +29,115 @@ var (
 	_ = abi.ConvertType
 )
 
-// ICS07TendermintClientState is an auto generated low-level Go binding around an user-defined struct.
-type ICS07TendermintClientState struct {
+// IICS02ClientMsgsHeight is an auto generated low-level Go binding around an user-defined struct.
+type IICS02ClientMsgsHeight struct {
+	RevisionNumber uint32
+	RevisionHeight uint32
+}
+
+// IICS07TendermintMsgsClientState is an auto generated low-level Go binding around an user-defined struct.
+type IICS07TendermintMsgsClientState struct {
 	ChainId         string
-	TrustLevel      ICS07TendermintTrustThreshold
-	LatestHeight    ICS07TendermintHeight
+	TrustLevel      IICS07TendermintMsgsTrustThreshold
+	LatestHeight    IICS02ClientMsgsHeight
 	TrustingPeriod  uint32
 	UnbondingPeriod uint32
 	IsFrozen        bool
 }
 
-// ICS07TendermintConsensusState is an auto generated low-level Go binding around an user-defined struct.
-type ICS07TendermintConsensusState struct {
+// IICS07TendermintMsgsConsensusState is an auto generated low-level Go binding around an user-defined struct.
+type IICS07TendermintMsgsConsensusState struct {
 	Timestamp          uint64
 	Root               [32]byte
 	NextValidatorsHash [32]byte
 }
 
-// ICS07TendermintHeight is an auto generated low-level Go binding around an user-defined struct.
-type ICS07TendermintHeight struct {
-	RevisionNumber uint32
-	RevisionHeight uint32
-}
-
-// ICS07TendermintTrustThreshold is an auto generated low-level Go binding around an user-defined struct.
-type ICS07TendermintTrustThreshold struct {
+// IICS07TendermintMsgsTrustThreshold is an auto generated low-level Go binding around an user-defined struct.
+type IICS07TendermintMsgsTrustThreshold struct {
 	Numerator   uint8
 	Denominator uint8
 }
 
-// MembershipProgramKVPair is an auto generated low-level Go binding around an user-defined struct.
-type MembershipProgramKVPair struct {
-	Key   string
+// ILightClientMsgsMsgMembership is an auto generated low-level Go binding around an user-defined struct.
+type ILightClientMsgsMsgMembership struct {
+	Proof       []byte
+	ProofHeight IICS02ClientMsgsHeight
+	Path        [][]byte
+	Value       []byte
+}
+
+// IMembershipMsgsKVPair is an auto generated low-level Go binding around an user-defined struct.
+type IMembershipMsgsKVPair struct {
+	Path  [][]byte
 	Value []byte
 }
 
-// MembershipProgramMembershipOutput is an auto generated low-level Go binding around an user-defined struct.
-type MembershipProgramMembershipOutput struct {
+// IMembershipMsgsMembershipOutput is an auto generated low-level Go binding around an user-defined struct.
+type IMembershipMsgsMembershipOutput struct {
 	CommitmentRoot [32]byte
-	KvPairs        []MembershipProgramKVPair
+	KvPairs        []IMembershipMsgsKVPair
 }
 
-// MisbehaviourProgramMisbehaviourOutput is an auto generated low-level Go binding around an user-defined struct.
-type MisbehaviourProgramMisbehaviourOutput struct {
+// IMembershipMsgsMembershipProof is an auto generated low-level Go binding around an user-defined struct.
+type IMembershipMsgsMembershipProof struct {
+	ProofType uint8
+	Proof     []byte
+}
+
+// IMembershipMsgsSP1MembershipAndUpdateClientProof is an auto generated low-level Go binding around an user-defined struct.
+type IMembershipMsgsSP1MembershipAndUpdateClientProof struct {
+	Sp1Proof ISP1MsgsSP1Proof
+}
+
+// IMembershipMsgsSP1MembershipProof is an auto generated low-level Go binding around an user-defined struct.
+type IMembershipMsgsSP1MembershipProof struct {
+	Sp1Proof              ISP1MsgsSP1Proof
+	TrustedConsensusState IICS07TendermintMsgsConsensusState
+}
+
+// IMisbehaviourMsgsMisbehaviourOutput is an auto generated low-level Go binding around an user-defined struct.
+type IMisbehaviourMsgsMisbehaviourOutput struct {
 	IsMisbehaviour bool
 }
 
-// UpdateClientAndMembershipProgramUcAndMembershipOutput is an auto generated low-level Go binding around an user-defined struct.
-type UpdateClientAndMembershipProgramUcAndMembershipOutput struct {
-	UpdateClientOutput UpdateClientProgramUpdateClientOutput
-	KvPairs            []MembershipProgramKVPair
+// ISP1MsgsSP1Proof is an auto generated low-level Go binding around an user-defined struct.
+type ISP1MsgsSP1Proof struct {
+	VKey         [32]byte
+	PublicValues []byte
+	Proof        []byte
 }
 
-// UpdateClientProgramEnv is an auto generated low-level Go binding around an user-defined struct.
-type UpdateClientProgramEnv struct {
+// IUpdateClientAndMembershipMsgsUcAndMembershipOutput is an auto generated low-level Go binding around an user-defined struct.
+type IUpdateClientAndMembershipMsgsUcAndMembershipOutput struct {
+	UpdateClientOutput IUpdateClientMsgsUpdateClientOutput
+	KvPairs            []IMembershipMsgsKVPair
+}
+
+// IUpdateClientMsgsEnv is an auto generated low-level Go binding around an user-defined struct.
+type IUpdateClientMsgsEnv struct {
 	ChainId        string
-	TrustThreshold ICS07TendermintTrustThreshold
+	TrustThreshold IICS07TendermintMsgsTrustThreshold
 	TrustingPeriod uint32
 	Now            uint64
 }
 
-// UpdateClientProgramUpdateClientOutput is an auto generated low-level Go binding around an user-defined struct.
-type UpdateClientProgramUpdateClientOutput struct {
-	TrustedConsensusState ICS07TendermintConsensusState
-	NewConsensusState     ICS07TendermintConsensusState
-	Env                   UpdateClientProgramEnv
-	TrustedHeight         ICS07TendermintHeight
-	NewHeight             ICS07TendermintHeight
+// IUpdateClientMsgsMsgUpdateClient is an auto generated low-level Go binding around an user-defined struct.
+type IUpdateClientMsgsMsgUpdateClient struct {
+	Sp1Proof ISP1MsgsSP1Proof
+}
+
+// IUpdateClientMsgsUpdateClientOutput is an auto generated low-level Go binding around an user-defined struct.
+type IUpdateClientMsgsUpdateClientOutput struct {
+	TrustedConsensusState IICS07TendermintMsgsConsensusState
+	NewConsensusState     IICS07TendermintMsgsConsensusState
+	Env                   IUpdateClientMsgsEnv
+	TrustedHeight         IICS02ClientMsgsHeight
+	NewHeight             IICS02ClientMsgsHeight
 }
 
 // ContractMetaData contains all meta data concerning the Contract contract.
 var ContractMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"updateClientProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"membershipProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"updateClientAndMembershipProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"verifier\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_clientState\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"_consensusState\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"ALLOWED_SP1_CLOCK_DRIFT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint16\",\"internalType\":\"uint16\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"abiPublicTypes\",\"inputs\":[{\"name\":\"output\",\"type\":\"tuple\",\"internalType\":\"structMembershipProgram.MembershipOutput\",\"components\":[{\"name\":\"commitmentRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"kvPairs\",\"type\":\"tuple[]\",\"internalType\":\"structMembershipProgram.KVPair[]\",\"components\":[{\"name\":\"key\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"value\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"output2\",\"type\":\"tuple\",\"internalType\":\"structUpdateClientAndMembershipProgram.UcAndMembershipOutput\",\"components\":[{\"name\":\"updateClientOutput\",\"type\":\"tuple\",\"internalType\":\"structUpdateClientProgram.UpdateClientOutput\",\"components\":[{\"name\":\"trustedConsensusState\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"nextValidatorsHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"newConsensusState\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"nextValidatorsHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"env\",\"type\":\"tuple\",\"internalType\":\"structUpdateClientProgram.Env\",\"components\":[{\"name\":\"chainId\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trustThreshold\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"trustingPeriod\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"now\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"trustedHeight\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"newHeight\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}]},{\"name\":\"kvPairs\",\"type\":\"tuple[]\",\"internalType\":\"structMembershipProgram.KVPair[]\",\"components\":[{\"name\":\"key\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"value\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"output3\",\"type\":\"tuple\",\"internalType\":\"structMisbehaviourProgram.MisbehaviourOutput\",\"components\":[{\"name\":\"isMisbehaviour\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"outputs\":[],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"batchVerifyMembership\",\"inputs\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"proofHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"trustedConsensusStateBz\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"kvPairHashes\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}],\"outputs\":[],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getClientState\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.ClientState\",\"components\":[{\"name\":\"chainId\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trustLevel\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"latestHeight\",\"type\":\"tuple\",\"internalType\":\"structICS07Tendermint.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"trustingPeriod\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"unbondingPeriod\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"isFrozen\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getConsensusStateHash\",\"inputs\":[{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getVerifierInfo\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"updateClient\",\"inputs\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumUpdateClientProgram.UpdateResult\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateClientAndBatchVerifyMembership\",\"inputs\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"kvPairHashes\",\"type\":\"bytes32[]\",\"internalType\":\"bytes32[]\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumUpdateClientProgram.UpdateResult\"}],\"stateMutability\":\"nonpayable\"}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"updateClientProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"membershipProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"updateClientAndMembershipProgramVkey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"verifier\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_clientState\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"_consensusState\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"ALLOWED_SP1_CLOCK_DRIFT\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"uint16\",\"internalType\":\"uint16\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"MEMBERSHIP_PROGRAM_VKEY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"UPDATE_CLIENT_PROGRAM_VKEY\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"VERIFIER\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"contractISP1Verifier\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"abiPublicTypes\",\"inputs\":[{\"name\":\"o1\",\"type\":\"tuple\",\"internalType\":\"structIMembershipMsgs.MembershipOutput\",\"components\":[{\"name\":\"commitmentRoot\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"kvPairs\",\"type\":\"tuple[]\",\"internalType\":\"structIMembershipMsgs.KVPair[]\",\"components\":[{\"name\":\"path\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"value\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"o2\",\"type\":\"tuple\",\"internalType\":\"structIUpdateClientAndMembershipMsgs.UcAndMembershipOutput\",\"components\":[{\"name\":\"updateClientOutput\",\"type\":\"tuple\",\"internalType\":\"structIUpdateClientMsgs.UpdateClientOutput\",\"components\":[{\"name\":\"trustedConsensusState\",\"type\":\"tuple\",\"internalType\":\"structIICS07TendermintMsgs.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"nextValidatorsHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"newConsensusState\",\"type\":\"tuple\",\"internalType\":\"structIICS07TendermintMsgs.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"nextValidatorsHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"name\":\"env\",\"type\":\"tuple\",\"internalType\":\"structIUpdateClientMsgs.Env\",\"components\":[{\"name\":\"chainId\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trustThreshold\",\"type\":\"tuple\",\"internalType\":\"structIICS07TendermintMsgs.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"trustingPeriod\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"now\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"name\":\"trustedHeight\",\"type\":\"tuple\",\"internalType\":\"structIICS02ClientMsgs.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"newHeight\",\"type\":\"tuple\",\"internalType\":\"structIICS02ClientMsgs.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]}]},{\"name\":\"kvPairs\",\"type\":\"tuple[]\",\"internalType\":\"structIMembershipMsgs.KVPair[]\",\"components\":[{\"name\":\"path\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"value\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"o3\",\"type\":\"tuple\",\"internalType\":\"structIUpdateClientMsgs.MsgUpdateClient\",\"components\":[{\"name\":\"sp1Proof\",\"type\":\"tuple\",\"internalType\":\"structISP1Msgs.SP1Proof\",\"components\":[{\"name\":\"vKey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"o4\",\"type\":\"tuple\",\"internalType\":\"structIMembershipMsgs.MembershipProof\",\"components\":[{\"name\":\"proofType\",\"type\":\"uint8\",\"internalType\":\"enumIMembershipMsgs.MembershipProofType\"},{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"o5\",\"type\":\"tuple\",\"internalType\":\"structIMembershipMsgs.SP1MembershipProof\",\"components\":[{\"name\":\"sp1Proof\",\"type\":\"tuple\",\"internalType\":\"structISP1Msgs.SP1Proof\",\"components\":[{\"name\":\"vKey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"name\":\"trustedConsensusState\",\"type\":\"tuple\",\"internalType\":\"structIICS07TendermintMsgs.ConsensusState\",\"components\":[{\"name\":\"timestamp\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"root\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"nextValidatorsHash\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}]},{\"name\":\"o6\",\"type\":\"tuple\",\"internalType\":\"structIMembershipMsgs.SP1MembershipAndUpdateClientProof\",\"components\":[{\"name\":\"sp1Proof\",\"type\":\"tuple\",\"internalType\":\"structISP1Msgs.SP1Proof\",\"components\":[{\"name\":\"vKey\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"publicValues\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}]},{\"name\":\"o7\",\"type\":\"tuple\",\"internalType\":\"structIMisbehaviourMsgs.MisbehaviourOutput\",\"components\":[{\"name\":\"isMisbehaviour\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"outputs\":[],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"getClientState\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"tuple\",\"internalType\":\"structIICS07TendermintMsgs.ClientState\",\"components\":[{\"name\":\"chainId\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"trustLevel\",\"type\":\"tuple\",\"internalType\":\"structIICS07TendermintMsgs.TrustThreshold\",\"components\":[{\"name\":\"numerator\",\"type\":\"uint8\",\"internalType\":\"uint8\"},{\"name\":\"denominator\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"name\":\"latestHeight\",\"type\":\"tuple\",\"internalType\":\"structIICS02ClientMsgs.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"trustingPeriod\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"unbondingPeriod\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"isFrozen\",\"type\":\"bool\",\"internalType\":\"bool\"}]}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getConsensusStateHash\",\"inputs\":[{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}],\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"membership\",\"inputs\":[{\"name\":\"msgMembership\",\"type\":\"tuple\",\"internalType\":\"structILightClientMsgs.MsgMembership\",\"components\":[{\"name\":\"proof\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"proofHeight\",\"type\":\"tuple\",\"internalType\":\"structIICS02ClientMsgs.Height\",\"components\":[{\"name\":\"revisionNumber\",\"type\":\"uint32\",\"internalType\":\"uint32\"},{\"name\":\"revisionHeight\",\"type\":\"uint32\",\"internalType\":\"uint32\"}]},{\"name\":\"path\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"},{\"name\":\"value\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]}],\"outputs\":[{\"name\":\"timestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"misbehaviour\",\"inputs\":[{\"name\":\"\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"pure\"},{\"type\":\"function\",\"name\":\"updateClient\",\"inputs\":[{\"name\":\"updateMsg\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[{\"name\":\"\",\"type\":\"uint8\",\"internalType\":\"enumILightClientMsgs.UpdateResult\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"upgradeClient\",\"inputs\":[{\"name\":\"\",\"type\":\"bytes\",\"internalType\":\"bytes\"}],\"outputs\":[],\"stateMutability\":\"pure\"},{\"type\":\"error\",\"name\":\"CannotHandleMisbehavior\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ChainIdMismatch\",\"inputs\":[{\"name\":\"expected\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"actual\",\"type\":\"string\",\"internalType\":\"string\"}]},{\"type\":\"error\",\"name\":\"ConsensusStateHashMismatch\",\"inputs\":[{\"name\":\"expected\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"actual\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"ConsensusStateNotFound\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"ConsensusStateRootMismatch\",\"inputs\":[{\"name\":\"expected\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"actual\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]},{\"type\":\"error\",\"name\":\"FeatureNotSupported\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"FrozenClientState\",\"inputs\":[]},{\"type\":\"error\",\"name\":\"LengthIsOutOfRange\",\"inputs\":[{\"name\":\"length\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"min\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"max\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"MembershipProofKeyNotFound\",\"inputs\":[{\"name\":\"path\",\"type\":\"bytes[]\",\"internalType\":\"bytes[]\"}]},{\"type\":\"error\",\"name\":\"MembershipProofValueMismatch\",\"inputs\":[{\"name\":\"expected\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"actual\",\"type\":\"bytes\",\"internalType\":\"bytes\"}]},{\"type\":\"error\",\"name\":\"ProofHeightMismatch\",\"inputs\":[{\"name\":\"expectedRevisionNumber\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"expectedRevisionHeight\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"actualRevisionNumber\",\"type\":\"uint64\",\"internalType\":\"uint64\"},{\"name\":\"actualRevisionHeight\",\"type\":\"uint64\",\"internalType\":\"uint64\"}]},{\"type\":\"error\",\"name\":\"ProofIsInTheFuture\",\"inputs\":[{\"name\":\"now\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"proofTimestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"ProofIsTooOld\",\"inputs\":[{\"name\":\"now\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"proofTimestamp\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"TrustThresholdMismatch\",\"inputs\":[{\"name\":\"expectedNumerator\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"expectedDenominator\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"actualNumerator\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"actualDenominator\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"TrustingPeriodMismatch\",\"inputs\":[{\"name\":\"expected\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"actual\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"TrustingPeriodTooLong\",\"inputs\":[{\"name\":\"trustingPeriod\",\"type\":\"uint256\",\"internalType\":\"uint256\"},{\"name\":\"unbondingPeriod\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]},{\"type\":\"error\",\"name\":\"UnknownMembershipProofType\",\"inputs\":[{\"name\":\"proofType\",\"type\":\"uint8\",\"internalType\":\"uint8\"}]},{\"type\":\"error\",\"name\":\"VerificationKeyMismatch\",\"inputs\":[{\"name\":\"expected\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"actual\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"}]}]",
 }
 
 // ContractABI is the input ABI used to generate the binding from.
@@ -280,12 +317,136 @@ func (_Contract *ContractCallerSession) ALLOWEDSP1CLOCKDRIFT() (uint16, error) {
 	return _Contract.Contract.ALLOWEDSP1CLOCKDRIFT(&_Contract.CallOpts)
 }
 
-// AbiPublicTypes is a free data retrieval call binding the contract method 0x887389cb.
+// MEMBERSHIPPROGRAMVKEY is a free data retrieval call binding the contract method 0xe45a6d0d.
 //
-// Solidity: function abiPublicTypes((bytes32,(string,bytes)[]) output, (((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint32,uint64),(uint32,uint32),(uint32,uint32)),(string,bytes)[]) output2, (bool) output3) pure returns()
-func (_Contract *ContractCaller) AbiPublicTypes(opts *bind.CallOpts, output MembershipProgramMembershipOutput, output2 UpdateClientAndMembershipProgramUcAndMembershipOutput, output3 MisbehaviourProgramMisbehaviourOutput) error {
+// Solidity: function MEMBERSHIP_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractCaller) MEMBERSHIPPROGRAMVKEY(opts *bind.CallOpts) ([32]byte, error) {
 	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "abiPublicTypes", output, output2, output3)
+	err := _Contract.contract.Call(opts, &out, "MEMBERSHIP_PROGRAM_VKEY")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// MEMBERSHIPPROGRAMVKEY is a free data retrieval call binding the contract method 0xe45a6d0d.
+//
+// Solidity: function MEMBERSHIP_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractSession) MEMBERSHIPPROGRAMVKEY() ([32]byte, error) {
+	return _Contract.Contract.MEMBERSHIPPROGRAMVKEY(&_Contract.CallOpts)
+}
+
+// MEMBERSHIPPROGRAMVKEY is a free data retrieval call binding the contract method 0xe45a6d0d.
+//
+// Solidity: function MEMBERSHIP_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractCallerSession) MEMBERSHIPPROGRAMVKEY() ([32]byte, error) {
+	return _Contract.Contract.MEMBERSHIPPROGRAMVKEY(&_Contract.CallOpts)
+}
+
+// UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY is a free data retrieval call binding the contract method 0x0225293e.
+//
+// Solidity: function UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractCaller) UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY is a free data retrieval call binding the contract method 0x0225293e.
+//
+// Solidity: function UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractSession) UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY() ([32]byte, error) {
+	return _Contract.Contract.UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY(&_Contract.CallOpts)
+}
+
+// UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY is a free data retrieval call binding the contract method 0x0225293e.
+//
+// Solidity: function UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractCallerSession) UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY() ([32]byte, error) {
+	return _Contract.Contract.UPDATECLIENTANDMEMBERSHIPPROGRAMVKEY(&_Contract.CallOpts)
+}
+
+// UPDATECLIENTPROGRAMVKEY is a free data retrieval call binding the contract method 0xca7242f9.
+//
+// Solidity: function UPDATE_CLIENT_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractCaller) UPDATECLIENTPROGRAMVKEY(opts *bind.CallOpts) ([32]byte, error) {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "UPDATE_CLIENT_PROGRAM_VKEY")
+
+	if err != nil {
+		return *new([32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([32]byte)).(*[32]byte)
+
+	return out0, err
+
+}
+
+// UPDATECLIENTPROGRAMVKEY is a free data retrieval call binding the contract method 0xca7242f9.
+//
+// Solidity: function UPDATE_CLIENT_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractSession) UPDATECLIENTPROGRAMVKEY() ([32]byte, error) {
+	return _Contract.Contract.UPDATECLIENTPROGRAMVKEY(&_Contract.CallOpts)
+}
+
+// UPDATECLIENTPROGRAMVKEY is a free data retrieval call binding the contract method 0xca7242f9.
+//
+// Solidity: function UPDATE_CLIENT_PROGRAM_VKEY() view returns(bytes32)
+func (_Contract *ContractCallerSession) UPDATECLIENTPROGRAMVKEY() ([32]byte, error) {
+	return _Contract.Contract.UPDATECLIENTPROGRAMVKEY(&_Contract.CallOpts)
+}
+
+// VERIFIER is a free data retrieval call binding the contract method 0x08c84e70.
+//
+// Solidity: function VERIFIER() view returns(address)
+func (_Contract *ContractCaller) VERIFIER(opts *bind.CallOpts) (common.Address, error) {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "VERIFIER")
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// VERIFIER is a free data retrieval call binding the contract method 0x08c84e70.
+//
+// Solidity: function VERIFIER() view returns(address)
+func (_Contract *ContractSession) VERIFIER() (common.Address, error) {
+	return _Contract.Contract.VERIFIER(&_Contract.CallOpts)
+}
+
+// VERIFIER is a free data retrieval call binding the contract method 0x08c84e70.
+//
+// Solidity: function VERIFIER() view returns(address)
+func (_Contract *ContractCallerSession) VERIFIER() (common.Address, error) {
+	return _Contract.Contract.VERIFIER(&_Contract.CallOpts)
+}
+
+// AbiPublicTypes is a free data retrieval call binding the contract method 0xb8e0c12e.
+//
+// Solidity: function abiPublicTypes((bytes32,(bytes[],bytes)[]) o1, (((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint32,uint64),(uint32,uint32),(uint32,uint32)),(bytes[],bytes)[]) o2, ((bytes32,bytes,bytes)) o3, (uint8,bytes) o4, ((bytes32,bytes,bytes),(uint64,bytes32,bytes32)) o5, ((bytes32,bytes,bytes)) o6, (bool) o7) pure returns()
+func (_Contract *ContractCaller) AbiPublicTypes(opts *bind.CallOpts, o1 IMembershipMsgsMembershipOutput, o2 IUpdateClientAndMembershipMsgsUcAndMembershipOutput, o3 IUpdateClientMsgsMsgUpdateClient, o4 IMembershipMsgsMembershipProof, o5 IMembershipMsgsSP1MembershipProof, o6 IMembershipMsgsSP1MembershipAndUpdateClientProof, o7 IMisbehaviourMsgsMisbehaviourOutput) error {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "abiPublicTypes", o1, o2, o3, o4, o5, o6, o7)
 
 	if err != nil {
 		return err
@@ -295,61 +456,32 @@ func (_Contract *ContractCaller) AbiPublicTypes(opts *bind.CallOpts, output Memb
 
 }
 
-// AbiPublicTypes is a free data retrieval call binding the contract method 0x887389cb.
+// AbiPublicTypes is a free data retrieval call binding the contract method 0xb8e0c12e.
 //
-// Solidity: function abiPublicTypes((bytes32,(string,bytes)[]) output, (((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint32,uint64),(uint32,uint32),(uint32,uint32)),(string,bytes)[]) output2, (bool) output3) pure returns()
-func (_Contract *ContractSession) AbiPublicTypes(output MembershipProgramMembershipOutput, output2 UpdateClientAndMembershipProgramUcAndMembershipOutput, output3 MisbehaviourProgramMisbehaviourOutput) error {
-	return _Contract.Contract.AbiPublicTypes(&_Contract.CallOpts, output, output2, output3)
+// Solidity: function abiPublicTypes((bytes32,(bytes[],bytes)[]) o1, (((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint32,uint64),(uint32,uint32),(uint32,uint32)),(bytes[],bytes)[]) o2, ((bytes32,bytes,bytes)) o3, (uint8,bytes) o4, ((bytes32,bytes,bytes),(uint64,bytes32,bytes32)) o5, ((bytes32,bytes,bytes)) o6, (bool) o7) pure returns()
+func (_Contract *ContractSession) AbiPublicTypes(o1 IMembershipMsgsMembershipOutput, o2 IUpdateClientAndMembershipMsgsUcAndMembershipOutput, o3 IUpdateClientMsgsMsgUpdateClient, o4 IMembershipMsgsMembershipProof, o5 IMembershipMsgsSP1MembershipProof, o6 IMembershipMsgsSP1MembershipAndUpdateClientProof, o7 IMisbehaviourMsgsMisbehaviourOutput) error {
+	return _Contract.Contract.AbiPublicTypes(&_Contract.CallOpts, o1, o2, o3, o4, o5, o6, o7)
 }
 
-// AbiPublicTypes is a free data retrieval call binding the contract method 0x887389cb.
+// AbiPublicTypes is a free data retrieval call binding the contract method 0xb8e0c12e.
 //
-// Solidity: function abiPublicTypes((bytes32,(string,bytes)[]) output, (((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint32,uint64),(uint32,uint32),(uint32,uint32)),(string,bytes)[]) output2, (bool) output3) pure returns()
-func (_Contract *ContractCallerSession) AbiPublicTypes(output MembershipProgramMembershipOutput, output2 UpdateClientAndMembershipProgramUcAndMembershipOutput, output3 MisbehaviourProgramMisbehaviourOutput) error {
-	return _Contract.Contract.AbiPublicTypes(&_Contract.CallOpts, output, output2, output3)
-}
-
-// BatchVerifyMembership is a free data retrieval call binding the contract method 0xa3b16959.
-//
-// Solidity: function batchVerifyMembership(bytes proof, bytes publicValues, uint32 proofHeight, bytes trustedConsensusStateBz, bytes32[] kvPairHashes) view returns()
-func (_Contract *ContractCaller) BatchVerifyMembership(opts *bind.CallOpts, proof []byte, publicValues []byte, proofHeight uint32, trustedConsensusStateBz []byte, kvPairHashes [][32]byte) error {
-	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "batchVerifyMembership", proof, publicValues, proofHeight, trustedConsensusStateBz, kvPairHashes)
-
-	if err != nil {
-		return err
-	}
-
-	return err
-
-}
-
-// BatchVerifyMembership is a free data retrieval call binding the contract method 0xa3b16959.
-//
-// Solidity: function batchVerifyMembership(bytes proof, bytes publicValues, uint32 proofHeight, bytes trustedConsensusStateBz, bytes32[] kvPairHashes) view returns()
-func (_Contract *ContractSession) BatchVerifyMembership(proof []byte, publicValues []byte, proofHeight uint32, trustedConsensusStateBz []byte, kvPairHashes [][32]byte) error {
-	return _Contract.Contract.BatchVerifyMembership(&_Contract.CallOpts, proof, publicValues, proofHeight, trustedConsensusStateBz, kvPairHashes)
-}
-
-// BatchVerifyMembership is a free data retrieval call binding the contract method 0xa3b16959.
-//
-// Solidity: function batchVerifyMembership(bytes proof, bytes publicValues, uint32 proofHeight, bytes trustedConsensusStateBz, bytes32[] kvPairHashes) view returns()
-func (_Contract *ContractCallerSession) BatchVerifyMembership(proof []byte, publicValues []byte, proofHeight uint32, trustedConsensusStateBz []byte, kvPairHashes [][32]byte) error {
-	return _Contract.Contract.BatchVerifyMembership(&_Contract.CallOpts, proof, publicValues, proofHeight, trustedConsensusStateBz, kvPairHashes)
+// Solidity: function abiPublicTypes((bytes32,(bytes[],bytes)[]) o1, (((uint64,bytes32,bytes32),(uint64,bytes32,bytes32),(string,(uint8,uint8),uint32,uint64),(uint32,uint32),(uint32,uint32)),(bytes[],bytes)[]) o2, ((bytes32,bytes,bytes)) o3, (uint8,bytes) o4, ((bytes32,bytes,bytes),(uint64,bytes32,bytes32)) o5, ((bytes32,bytes,bytes)) o6, (bool) o7) pure returns()
+func (_Contract *ContractCallerSession) AbiPublicTypes(o1 IMembershipMsgsMembershipOutput, o2 IUpdateClientAndMembershipMsgsUcAndMembershipOutput, o3 IUpdateClientMsgsMsgUpdateClient, o4 IMembershipMsgsMembershipProof, o5 IMembershipMsgsSP1MembershipProof, o6 IMembershipMsgsSP1MembershipAndUpdateClientProof, o7 IMisbehaviourMsgsMisbehaviourOutput) error {
+	return _Contract.Contract.AbiPublicTypes(&_Contract.CallOpts, o1, o2, o3, o4, o5, o6, o7)
 }
 
 // GetClientState is a free data retrieval call binding the contract method 0xef913a4b.
 //
 // Solidity: function getClientState() view returns((string,(uint8,uint8),(uint32,uint32),uint32,uint32,bool))
-func (_Contract *ContractCaller) GetClientState(opts *bind.CallOpts) (ICS07TendermintClientState, error) {
+func (_Contract *ContractCaller) GetClientState(opts *bind.CallOpts) (IICS07TendermintMsgsClientState, error) {
 	var out []interface{}
 	err := _Contract.contract.Call(opts, &out, "getClientState")
 
 	if err != nil {
-		return *new(ICS07TendermintClientState), err
+		return *new(IICS07TendermintMsgsClientState), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(ICS07TendermintClientState)).(*ICS07TendermintClientState)
+	out0 := *abi.ConvertType(out[0], new(IICS07TendermintMsgsClientState)).(*IICS07TendermintMsgsClientState)
 
 	return out0, err
 
@@ -358,14 +490,14 @@ func (_Contract *ContractCaller) GetClientState(opts *bind.CallOpts) (ICS07Tende
 // GetClientState is a free data retrieval call binding the contract method 0xef913a4b.
 //
 // Solidity: function getClientState() view returns((string,(uint8,uint8),(uint32,uint32),uint32,uint32,bool))
-func (_Contract *ContractSession) GetClientState() (ICS07TendermintClientState, error) {
+func (_Contract *ContractSession) GetClientState() (IICS07TendermintMsgsClientState, error) {
 	return _Contract.Contract.GetClientState(&_Contract.CallOpts)
 }
 
 // GetClientState is a free data retrieval call binding the contract method 0xef913a4b.
 //
 // Solidity: function getClientState() view returns((string,(uint8,uint8),(uint32,uint32),uint32,uint32,bool))
-func (_Contract *ContractCallerSession) GetClientState() (ICS07TendermintClientState, error) {
+func (_Contract *ContractCallerSession) GetClientState() (IICS07TendermintMsgsClientState, error) {
 	return _Contract.Contract.GetClientState(&_Contract.CallOpts)
 }
 
@@ -400,78 +532,102 @@ func (_Contract *ContractCallerSession) GetConsensusStateHash(revisionHeight uin
 	return _Contract.Contract.GetConsensusStateHash(&_Contract.CallOpts, revisionHeight)
 }
 
-// GetVerifierInfo is a free data retrieval call binding the contract method 0xe215abff.
+// Misbehaviour is a free data retrieval call binding the contract method 0xddba6537.
 //
-// Solidity: function getVerifierInfo() view returns(address, bytes32, bytes32, bytes32)
-func (_Contract *ContractCaller) GetVerifierInfo(opts *bind.CallOpts) (common.Address, [32]byte, [32]byte, [32]byte, error) {
+// Solidity: function misbehaviour(bytes ) pure returns()
+func (_Contract *ContractCaller) Misbehaviour(opts *bind.CallOpts, arg0 []byte) error {
 	var out []interface{}
-	err := _Contract.contract.Call(opts, &out, "getVerifierInfo")
+	err := _Contract.contract.Call(opts, &out, "misbehaviour", arg0)
 
 	if err != nil {
-		return *new(common.Address), *new([32]byte), *new([32]byte), *new([32]byte), err
+		return err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-	out1 := *abi.ConvertType(out[1], new([32]byte)).(*[32]byte)
-	out2 := *abi.ConvertType(out[2], new([32]byte)).(*[32]byte)
-	out3 := *abi.ConvertType(out[3], new([32]byte)).(*[32]byte)
-
-	return out0, out1, out2, out3, err
+	return err
 
 }
 
-// GetVerifierInfo is a free data retrieval call binding the contract method 0xe215abff.
+// Misbehaviour is a free data retrieval call binding the contract method 0xddba6537.
 //
-// Solidity: function getVerifierInfo() view returns(address, bytes32, bytes32, bytes32)
-func (_Contract *ContractSession) GetVerifierInfo() (common.Address, [32]byte, [32]byte, [32]byte, error) {
-	return _Contract.Contract.GetVerifierInfo(&_Contract.CallOpts)
+// Solidity: function misbehaviour(bytes ) pure returns()
+func (_Contract *ContractSession) Misbehaviour(arg0 []byte) error {
+	return _Contract.Contract.Misbehaviour(&_Contract.CallOpts, arg0)
 }
 
-// GetVerifierInfo is a free data retrieval call binding the contract method 0xe215abff.
+// Misbehaviour is a free data retrieval call binding the contract method 0xddba6537.
 //
-// Solidity: function getVerifierInfo() view returns(address, bytes32, bytes32, bytes32)
-func (_Contract *ContractCallerSession) GetVerifierInfo() (common.Address, [32]byte, [32]byte, [32]byte, error) {
-	return _Contract.Contract.GetVerifierInfo(&_Contract.CallOpts)
+// Solidity: function misbehaviour(bytes ) pure returns()
+func (_Contract *ContractCallerSession) Misbehaviour(arg0 []byte) error {
+	return _Contract.Contract.Misbehaviour(&_Contract.CallOpts, arg0)
 }
 
-// UpdateClient is a paid mutator transaction binding the contract method 0x195c0d3b.
+// UpgradeClient is a free data retrieval call binding the contract method 0x8a8e4c5d.
 //
-// Solidity: function updateClient(bytes proof, bytes publicValues) returns(uint8)
-func (_Contract *ContractTransactor) UpdateClient(opts *bind.TransactOpts, proof []byte, publicValues []byte) (*types.Transaction, error) {
-	return _Contract.contract.Transact(opts, "updateClient", proof, publicValues)
+// Solidity: function upgradeClient(bytes ) pure returns()
+func (_Contract *ContractCaller) UpgradeClient(opts *bind.CallOpts, arg0 []byte) error {
+	var out []interface{}
+	err := _Contract.contract.Call(opts, &out, "upgradeClient", arg0)
+
+	if err != nil {
+		return err
+	}
+
+	return err
+
 }
 
-// UpdateClient is a paid mutator transaction binding the contract method 0x195c0d3b.
+// UpgradeClient is a free data retrieval call binding the contract method 0x8a8e4c5d.
 //
-// Solidity: function updateClient(bytes proof, bytes publicValues) returns(uint8)
-func (_Contract *ContractSession) UpdateClient(proof []byte, publicValues []byte) (*types.Transaction, error) {
-	return _Contract.Contract.UpdateClient(&_Contract.TransactOpts, proof, publicValues)
+// Solidity: function upgradeClient(bytes ) pure returns()
+func (_Contract *ContractSession) UpgradeClient(arg0 []byte) error {
+	return _Contract.Contract.UpgradeClient(&_Contract.CallOpts, arg0)
 }
 
-// UpdateClient is a paid mutator transaction binding the contract method 0x195c0d3b.
+// UpgradeClient is a free data retrieval call binding the contract method 0x8a8e4c5d.
 //
-// Solidity: function updateClient(bytes proof, bytes publicValues) returns(uint8)
-func (_Contract *ContractTransactorSession) UpdateClient(proof []byte, publicValues []byte) (*types.Transaction, error) {
-	return _Contract.Contract.UpdateClient(&_Contract.TransactOpts, proof, publicValues)
+// Solidity: function upgradeClient(bytes ) pure returns()
+func (_Contract *ContractCallerSession) UpgradeClient(arg0 []byte) error {
+	return _Contract.Contract.UpgradeClient(&_Contract.CallOpts, arg0)
 }
 
-// UpdateClientAndBatchVerifyMembership is a paid mutator transaction binding the contract method 0xa51c335e.
+// Membership is a paid mutator transaction binding the contract method 0x4954b4ca.
 //
-// Solidity: function updateClientAndBatchVerifyMembership(bytes proof, bytes publicValues, bytes32[] kvPairHashes) returns(uint8)
-func (_Contract *ContractTransactor) UpdateClientAndBatchVerifyMembership(opts *bind.TransactOpts, proof []byte, publicValues []byte, kvPairHashes [][32]byte) (*types.Transaction, error) {
-	return _Contract.contract.Transact(opts, "updateClientAndBatchVerifyMembership", proof, publicValues, kvPairHashes)
+// Solidity: function membership((bytes,(uint32,uint32),bytes[],bytes) msgMembership) returns(uint256 timestamp)
+func (_Contract *ContractTransactor) Membership(opts *bind.TransactOpts, msgMembership ILightClientMsgsMsgMembership) (*types.Transaction, error) {
+	return _Contract.contract.Transact(opts, "membership", msgMembership)
 }
 
-// UpdateClientAndBatchVerifyMembership is a paid mutator transaction binding the contract method 0xa51c335e.
+// Membership is a paid mutator transaction binding the contract method 0x4954b4ca.
 //
-// Solidity: function updateClientAndBatchVerifyMembership(bytes proof, bytes publicValues, bytes32[] kvPairHashes) returns(uint8)
-func (_Contract *ContractSession) UpdateClientAndBatchVerifyMembership(proof []byte, publicValues []byte, kvPairHashes [][32]byte) (*types.Transaction, error) {
-	return _Contract.Contract.UpdateClientAndBatchVerifyMembership(&_Contract.TransactOpts, proof, publicValues, kvPairHashes)
+// Solidity: function membership((bytes,(uint32,uint32),bytes[],bytes) msgMembership) returns(uint256 timestamp)
+func (_Contract *ContractSession) Membership(msgMembership ILightClientMsgsMsgMembership) (*types.Transaction, error) {
+	return _Contract.Contract.Membership(&_Contract.TransactOpts, msgMembership)
 }
 
-// UpdateClientAndBatchVerifyMembership is a paid mutator transaction binding the contract method 0xa51c335e.
+// Membership is a paid mutator transaction binding the contract method 0x4954b4ca.
 //
-// Solidity: function updateClientAndBatchVerifyMembership(bytes proof, bytes publicValues, bytes32[] kvPairHashes) returns(uint8)
-func (_Contract *ContractTransactorSession) UpdateClientAndBatchVerifyMembership(proof []byte, publicValues []byte, kvPairHashes [][32]byte) (*types.Transaction, error) {
-	return _Contract.Contract.UpdateClientAndBatchVerifyMembership(&_Contract.TransactOpts, proof, publicValues, kvPairHashes)
+// Solidity: function membership((bytes,(uint32,uint32),bytes[],bytes) msgMembership) returns(uint256 timestamp)
+func (_Contract *ContractTransactorSession) Membership(msgMembership ILightClientMsgsMsgMembership) (*types.Transaction, error) {
+	return _Contract.Contract.Membership(&_Contract.TransactOpts, msgMembership)
+}
+
+// UpdateClient is a paid mutator transaction binding the contract method 0x0bece356.
+//
+// Solidity: function updateClient(bytes updateMsg) returns(uint8)
+func (_Contract *ContractTransactor) UpdateClient(opts *bind.TransactOpts, updateMsg []byte) (*types.Transaction, error) {
+	return _Contract.contract.Transact(opts, "updateClient", updateMsg)
+}
+
+// UpdateClient is a paid mutator transaction binding the contract method 0x0bece356.
+//
+// Solidity: function updateClient(bytes updateMsg) returns(uint8)
+func (_Contract *ContractSession) UpdateClient(updateMsg []byte) (*types.Transaction, error) {
+	return _Contract.Contract.UpdateClient(&_Contract.TransactOpts, updateMsg)
+}
+
+// UpdateClient is a paid mutator transaction binding the contract method 0x0bece356.
+//
+// Solidity: function updateClient(bytes updateMsg) returns(uint8)
+func (_Contract *ContractTransactorSession) UpdateClient(updateMsg []byte) (*types.Transaction, error) {
+	return _Contract.Contract.UpdateClient(&_Contract.TransactOpts, updateMsg)
 }

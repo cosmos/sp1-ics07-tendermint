@@ -7,7 +7,7 @@ repository = { workspace = true }
 license = { workspace = true }
 
 [features]
-rpc = ["dep:alloy-contract"]
+rpc = ["dep:alloy-contract", "dep:hex"]
 
 [dependencies]
 alloy-sol-types = { workspace = true, features = ["json"] }
@@ -18,6 +18,4 @@ ibc-client-tendermint-types = { workspace = true }
 tendermint = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 time = { workspace = true }
-
-[dev-dependencies]
-hex = { workspace = true }
+hex = { workspace = true, optional = true }

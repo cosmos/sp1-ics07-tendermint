@@ -1,48 +1,27 @@
 //! Runner for generating `update_client` fixtures
 
 use crate::{
-    cli::command::fixtures::UpdateClientAndMembershipCmd,
+    cli::command::{fixtures::UpdateClientAndMembershipCmd, OutputPath},
     helpers::light_block::LightBlockExt,
-    programs::{
-        MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
-    },
+    programs::UpdateClientAndMembershipProgram,
     prover::SP1ICS07TendermintProver,
     rpc::TendermintRpcExt,
+    runners::{
+        fixtures::membership::SP1ICS07MembershipFixture, genesis::SP1ICS07TendermintGenesis,
+    },
 };
 use alloy_sol_types::SolValue;
+use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
-use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UcAndMembershipOutput};
+use ibc_core_host_cosmos::IBC_QUERY_PATH;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
+    ClientState, ConsensusState as SolConsensusState, Env, MembershipProof,
+    SP1MembershipAndUpdateClientProof, SP1Proof, UcAndMembershipOutput,
+};
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::{Client, HttpClient};
-
-/// The fixture data to be used in [`UpdateClientProgram`] tests.
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct SP1ICS07UpdateClientAndMembershipFixture {
-    /// The encoded trusted client state.
-    trusted_client_state: String,
-    /// The encoded trusted consensus state.
-    trusted_consensus_state: String,
-    /// The encoded target consensus state.
-    target_consensus_state: String,
-    /// Target height.
-    target_height: u32,
-    /// The encoded key for the [`UpdateClientProgram`].
-    update_client_vkey: String,
-    /// The encoded key for the [`MembershipProgram`].
-    membership_vkey: String,
-    /// The encoded key for the [`UpdateClientAndMembershipProgram`].
-    uc_and_membership_vkey: String,
-    /// The encoded public values.
-    public_values: String,
-    /// The encoded proof.
-    proof: String,
-    /// Hex-encoded `KVPair` value.
-    kv_pairs: String,
-}
 
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
@@ -62,26 +41,16 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         .get_light_block(Some(args.target_block))
         .await?;
 
-    let unbonding_period = tm_rpc_client
-        .sdk_staking_params()
-        .await?
-        .unbonding_time
-        .ok_or_else(|| anyhow::anyhow!("No unbonding time found"))?
-        .seconds
-        .try_into()?;
+    let genesis = SP1ICS07TendermintGenesis::from_env(
+        &trusted_light_block,
+        args.trust_options.trusting_period,
+        args.trust_options.trust_level,
+    )
+    .await?;
+    let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;
+    let trusted_consensus_state: ConsensusState =
+        SolConsensusState::abi_decode(&genesis.trusted_consensus_state, false)?.into();
 
-    // Defaults to the recommended TrustingPeriod: 2/3 of the UnbondingPeriod
-    let trusting_period = args
-        .trust_options
-        .trusting_period
-        .unwrap_or(2 * (unbonding_period / 3));
-
-    let trusted_client_state = trusted_light_block.to_sol_client_state(
-        args.trust_options.trust_level.try_into()?,
-        unbonding_period,
-        trusting_period,
-    )?;
-    let trusted_consensus_state = trusted_light_block.to_consensus_state().into();
     let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {
         chainId: trusted_light_block.chain_id()?.to_string(),
@@ -92,12 +61,12 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
             .as_secs(),
     };
 
-    let kv_proofs: Vec<(String, MerkleProof, Vec<u8>)> =
-        futures::future::try_join_all(args.key_paths.into_iter().map(|key_path| async {
+    let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
+        futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
             let res = tm_rpc_client
                 .abci_query(
-                    Some("store/ibc/key".to_string()),
-                    key_path.as_bytes(),
+                    Some(IBC_QUERY_PATH.to_string()),
+                    path.as_bytes(),
                     // Proof height should be the block before the target block.
                     Some((args.target_block - 1).into()),
                     true,
@@ -105,7 +74,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
                 .await?;
 
             assert_eq!(u32::try_from(res.height.value())? + 1, args.target_block);
-            assert_eq!(res.key.as_slice(), key_path.as_bytes());
+            assert_eq!(res.key.as_slice(), path.as_bytes());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             let value = res.value;
             if value.is_empty() {
@@ -113,13 +82,15 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
             }
             assert!(!vm_proof.proofs.is_empty());
 
-            anyhow::Ok((key_path, vm_proof, value))
+            let key_path = vec![b"ibc".to_vec(), path.into()];
+            anyhow::Ok((key_path, value, vm_proof))
         }))
         .await?;
 
+    let kv_len = kv_proofs.len();
     // Generate a header update proof for the specified blocks.
     let proof_data = uc_mem_prover.generate_proof(
-        &trusted_consensus_state,
+        &trusted_consensus_state.into(),
         &proposed_header,
         &contract_env,
         kv_proofs,
@@ -127,27 +98,35 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
 
     let bytes = proof_data.public_values.as_slice();
     let output = UcAndMembershipOutput::abi_decode(bytes, false)?;
+    assert_eq!(output.kvPairs.len(), kv_len);
 
-    let fixture = SP1ICS07UpdateClientAndMembershipFixture {
-        trusted_consensus_state: hex::encode(trusted_consensus_state.abi_encode()),
-        trusted_client_state: hex::encode(trusted_client_state.abi_encode()),
-        target_consensus_state: hex::encode(
-            output.updateClientOutput.newConsensusState.abi_encode(),
+    let sp1_membership_proof = SP1MembershipAndUpdateClientProof {
+        sp1Proof: SP1Proof::new(
+            &uc_mem_prover.vkey.bytes32(),
+            proof_data.bytes(),
+            proof_data.public_values.to_vec(),
         ),
-        target_height: args.target_block,
-        update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
-        membership_vkey: MembershipProgram::get_vkey().bytes32(),
-        uc_and_membership_vkey: uc_mem_prover.vkey.bytes32(),
-        public_values: proof_data.public_values.raw(),
-        proof: format!("0x{}", hex::encode(proof_data.bytes())),
-        kv_pairs: hex::encode(output.kvPairs.abi_encode()),
     };
 
-    // Save the proof data to the file path.
-    std::fs::write(
-        PathBuf::from(args.output_path),
-        serde_json::to_string_pretty(&fixture).unwrap(),
-    )
-    .unwrap();
+    let fixture = SP1ICS07MembershipFixture {
+        genesis,
+        proof_height: output.updateClientOutput.newHeight.abi_encode(),
+        membership_proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
+    };
+
+    match args.output_path {
+        OutputPath::File(path) => {
+            // Save the proof data to the file path.
+            std::fs::write(
+                PathBuf::from(path),
+                serde_json::to_string_pretty(&fixture).unwrap(),
+            )
+            .unwrap();
+        }
+        OutputPath::Stdout => {
+            println!("{}", serde_json::to_string_pretty(&fixture).unwrap());
+        }
+    }
+
     Ok(())
 }

@@ -14,7 +14,7 @@ pub fn update_client_and_membership(
     trusted_consensus_state: ConsensusState,
     proposed_header: Header,
     env: Env,
-    request_iter: impl Iterator<Item = (String, MerkleProof, Vec<u8>)>,
+    request_iter: impl Iterator<Item = (Vec<Vec<u8>>, Vec<u8>, MerkleProof)>,
 ) -> UcAndMembershipOutput {
     let app_hash: [u8; 32] = proposed_header
         .signed_header

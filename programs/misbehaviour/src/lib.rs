@@ -10,12 +10,12 @@ use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::MisbehaviourOutput;
 /// The main function of the program without the zkVM wrapper.
 #[allow(clippy::missing_panics_doc)]
 #[must_use]
-pub fn check_for_misbehaviour(
-    misbehaviour: Misbehaviour,
-) -> MisbehaviourOutput {
-    let is_misbehaviour = check_for_misbehaviour_on_misbehavior(misbehaviour.header1(), misbehaviour.header2()).unwrap();
+pub fn check_for_misbehaviour(misbehaviour: Misbehaviour) -> MisbehaviourOutput {
+    let is_misbehaviour =
+        check_for_misbehaviour_on_misbehavior(misbehaviour.header1(), misbehaviour.header2())
+            .unwrap();
 
     MisbehaviourOutput {
-        isMisbehaviour: is_misbehaviour
+        isMisbehaviour: is_misbehaviour,
     }
 }

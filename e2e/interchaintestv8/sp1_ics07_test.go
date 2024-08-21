@@ -6,16 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/cometbft/cometbft/crypto/tmhash"
-	cometproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	comettypes "github.com/cometbft/cometbft/types"
-	comettime "github.com/cometbft/cometbft/types/time"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
-	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
-	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
-	ibcmocks "github.com/cosmos/ibc-go/v8/testing/mock"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"os"
 	"strconv"
 	"testing"
@@ -27,11 +17,23 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	cometproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	comettypes "github.com/cometbft/cometbft/types"
+	comettime "github.com/cometbft/cometbft/types/time"
+
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
+	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ibctesting "github.com/cosmos/ibc-go/v8/testing"
+	ibcmocks "github.com/cosmos/ibc-go/v8/testing/mock"
 
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
@@ -252,7 +254,7 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 		oldHeader.TrustedValidators = oldHeader.ValidatorSet // ?
 		s.Require().NoError(err)
 
-		// create a duplicate header
+		// create a duplicate header (with a different hash)
 		newHeader := s.createTMClientHeader(
 			ctx,
 			simd,
@@ -267,6 +269,7 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 			Header2: &oldHeader,
 		}
 
+		// TODO: Get fixture from operator and use it with the contract
 		err = operator.Misbehaviour(simd.GetCodec(), misbehaviour)
 		s.Require().NoError(err)
 	}))

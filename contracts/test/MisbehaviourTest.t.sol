@@ -41,8 +41,11 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     }
 
     function test_ValidMisbehaviour() public {
-        IMisbehaviourMsgs.MsgSubmitMisbehaviour memory submitMsg = abi.decode(fixture.submitMsg, (IMisbehaviourMsgs.MsgSubmitMisbehaviour));
-        IMisbehaviourMsgs.MisbehaviourOutput memory output = abi.decode(submitMsg.sp1Proof.publicValues, (IMisbehaviourMsgs.MisbehaviourOutput));
+        IMisbehaviourMsgs.MsgSubmitMisbehaviour memory submitMsg =
+            abi.decode(fixture.submitMsg, (IMisbehaviourMsgs.MsgSubmitMisbehaviour));
+        IMisbehaviourMsgs.MisbehaviourOutput memory output =
+            abi.decode(submitMsg.sp1Proof.publicValues, (IMisbehaviourMsgs.MisbehaviourOutput));
+        assertTrue(output.isMisbehaviour);
 
         // TODO: Write the actual test :P
     }

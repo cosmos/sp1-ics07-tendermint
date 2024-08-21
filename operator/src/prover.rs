@@ -1,7 +1,8 @@
 //! Prover for SP1 ICS07 Tendermint programs.
 
 use crate::programs::{
-    MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram, MisbehaviourProgram,
+    MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
+    UpdateClientProgram,
 };
 use ibc_client_tendermint::types::{Header, Misbehaviour};
 use ibc_core_commitment_types::merkle::MerkleProof;

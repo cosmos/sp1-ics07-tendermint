@@ -6,14 +6,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
-	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
 	abi "github.com/ethereum/go-ethereum/accounts/abi"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
 )
@@ -106,7 +108,7 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 
 func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
 	misbehaviourFileName := "misbehaviour.json"
-	args := append([]string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName})
+	args := []string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName}
 
 	misbehaviour.ClientId = "07-tendermint-0" // We just have to set it to something to make the unmarshalling to work :P
 	bzIntermediary, err := cdc.MarshalJSON(&misbehaviour)
@@ -167,7 +169,8 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
 	validators2 := jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
 	validators3 := jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
 	validators4 := jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
-	validators := append(validators1, validators2...)
+	validators := validators1
+	validators = append(validators, validators2...)
 	validators = append(validators, validators3...)
 	validators = append(validators, validators4...)
 	for _, val := range validators {
@@ -205,7 +208,8 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
 
 	header1Sigs := jsonIntermediary["header_1"].(map[string]interface{})["signed_header"].(map[string]interface{})["commit"].(map[string]interface{})["signatures"].([]interface{})
 	header2Sigs := jsonIntermediary["header_2"].(map[string]interface{})["signed_header"].(map[string]interface{})["commit"].(map[string]interface{})["signatures"].([]interface{})
-	sigs := append(header1Sigs, header2Sigs...)
+	sigs := header1Sigs
+	sigs = append(sigs, header2Sigs...)
 	for _, sig := range sigs {
 		sig := sig.(map[string]interface{})
 		if sig["block_id_flag"] == "BLOCK_ID_FLAG_COMMIT" {
@@ -231,7 +235,7 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
 	}
 
 	// TODO: Make file temporary and delete it after use
-	if err := os.WriteFile(misbehaviourFileName, misbehaviourBz, 0644); err != nil {
+	if err := os.WriteFile(misbehaviourFileName, misbehaviourBz, 0o600); err != nil {
 		return err
 	}
 

@@ -1,23 +1,23 @@
 //! Runner for generating `misbehaviour` fixtures
 
-use std::path::PathBuf;
 use crate::cli::command::fixtures::MisbehaviourCmd;
+use crate::cli::command::OutputPath;
+use crate::helpers::light_block::LightBlockExt;
 use crate::programs::MisbehaviourProgram;
 use crate::prover::SP1ICS07TendermintProver;
+use crate::rpc::TendermintRpcExt;
 use crate::runners::genesis::SP1ICS07TendermintGenesis;
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::Misbehaviour;
 use ibc_proto::ibc::lightclients::tendermint::v1::Misbehaviour as RawMisbehaviour;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use tendermint_rpc::HttpClient;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    Env, ClientState, ConsensusState, SP1Proof, MsgSubmitMisbehaviour,
+    ClientState, ConsensusState, Env, MsgSubmitMisbehaviour, SP1Proof,
 };
 use sp1_sdk::HashableKey;
-use crate::cli::command::OutputPath;
-use crate::helpers::light_block::LightBlockExt;
-use crate::rpc::TendermintRpcExt;
+use std::path::PathBuf;
+use tendermint_rpc::HttpClient;
 
 /// The fixture data to be used in [`SP1ICS07SubmitMisbehaviourFixture`] tests.
 #[serde_as]
@@ -27,7 +27,7 @@ struct SP1ICS07SubmitMisbehaviourFixture {
     /// The genesis data.
     #[serde(flatten)]
     genesis: SP1ICS07TendermintGenesis,
-    
+
     /// The encoded submit misbehaviour client message.
     #[serde_as(as = "serde_with::hex::Hex")]
     submit_msg: Vec<u8>,
@@ -43,22 +43,40 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
 
     let tm_rpc_client = HttpClient::from_env();
     let trusted_light_block_1 = tm_rpc_client
-        .get_light_block(Some(raw_misbehaviour.clone().header_1.unwrap().trusted_height.unwrap().revision_height as u32))
+        .get_light_block(Some(
+            raw_misbehaviour
+                .clone()
+                .header_1
+                .unwrap()
+                .trusted_height
+                .unwrap()
+                .revision_height as u32,
+        ))
         .await?;
     let trusted_light_block_2 = tm_rpc_client
-        .get_light_block(Some(raw_misbehaviour.clone().header_2.unwrap().trusted_height.unwrap().revision_height as u32))
+        .get_light_block(Some(
+            raw_misbehaviour
+                .clone()
+                .header_2
+                .unwrap()
+                .trusted_height
+                .unwrap()
+                .revision_height as u32,
+        ))
         .await?;
 
     let genesis_1 = SP1ICS07TendermintGenesis::from_env(
         &trusted_light_block_1,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
-    ).await?;
+    )
+    .await?;
     let genesis_2 = SP1ICS07TendermintGenesis::from_env(
         &trusted_light_block_2,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
-    ).await?;
+    )
+    .await?;
 
     let trusted_consensus_state_1 =
         ConsensusState::abi_decode(&genesis_1.trusted_consensus_state, false)?;
@@ -78,7 +96,12 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     };
 
     let misbehaviour: Misbehaviour = Misbehaviour::try_from(raw_misbehaviour).unwrap();
-    let proof_data = verify_misbehaviour_prover.generate_proof(&contract_env, &misbehaviour, &trusted_consensus_state_1, &trusted_consensus_state_2);
+    let proof_data = verify_misbehaviour_prover.generate_proof(
+        &contract_env,
+        &misbehaviour,
+        &trusted_consensus_state_1,
+        &trusted_consensus_state_2,
+    );
 
     let submit_msg = MsgSubmitMisbehaviour {
         sp1Proof: SP1Proof::new(
@@ -90,16 +113,13 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
 
     let fixture = SP1ICS07SubmitMisbehaviourFixture {
         genesis: genesis_2,
-        submit_msg: submit_msg.abi_encode(), 
+        submit_msg: submit_msg.abi_encode(),
     };
 
     match args.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
-            std::fs::write(
-                PathBuf::from(path),
-                serde_json::to_string_pretty(&fixture)?,
-            )?;
+            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?)?;
         }
         OutputPath::Stdout => {
             println!("{}", serde_json::to_string_pretty(&fixture)?);

@@ -3,7 +3,7 @@ use sp1_ics07_tendermint_operator::{
     cli::command::{fixtures, Commands, OperatorCli},
     runners::{
         self,
-        fixtures::{membership, uc_and_mem, update_client, misbehaviour},
+        fixtures::{membership, misbehaviour, uc_and_mem, update_client},
     },
 };
 use sp1_sdk::utils::setup_logger;

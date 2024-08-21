@@ -30,7 +30,7 @@ pub fn main() {
     let env = bincode::deserialize::<Env>(&encoded_1).unwrap();
     // input 2: the misbehaviour evidence
     let misbehaviour = serde_cbor::from_slice::<Misbehaviour>(&encoded_2).unwrap();
-    // input 3: header 1 trusted consensus state 
+    // input 3: header 1 trusted consensus state
     let trusted_consensus_state_1 = bincode::deserialize::<SolConsensusState>(&encoded_3)
         .unwrap()
         .into();
@@ -38,9 +38,13 @@ pub fn main() {
     let trusted_consensus_state_2 = bincode::deserialize::<SolConsensusState>(&encoded_4)
         .unwrap()
         .into();
-    
 
-    let output = check_for_misbehaviour(env, misbehaviour, trusted_consensus_state_1, trusted_consensus_state_2);
+    let output = check_for_misbehaviour(
+        env,
+        misbehaviour,
+        trusted_consensus_state_1,
+        trusted_consensus_state_2,
+    );
 
     sp1_zkvm::io::commit_slice(&output.abi_encode());
 }

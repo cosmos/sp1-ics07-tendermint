@@ -1,6 +1,5 @@
 //! Contains types and traits for `verify_misbehaviour` validation within the program.
 
-use std::collections::HashMap;
 use ibc_client_tendermint::{
     client_state::ClientState as ClientStateWrapper,
     consensus_state::ConsensusState as ConsensusStateWrapper, types::ConsensusState,
@@ -9,6 +8,7 @@ use ibc_core_client::context::{ClientValidationContext, ExtClientValidationConte
 use ibc_core_handler_types::error::ContextError;
 use ibc_primitives::Timestamp;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::Env;
+use std::collections::HashMap;
 
 /// The client validation context.
 pub struct MisbehaviourValidationContext<'a, 'b> {
@@ -39,9 +39,8 @@ impl<'a, 'b> ClientValidationContext for MisbehaviourValidationContext<'a, 'b> {
         client_cons_state_path: &ibc_core_host_types::path::ClientConsensusStatePath,
     ) -> Result<Self::ConsensusStateRef, ContextError> {
         let height = client_cons_state_path.revision_height;
-        let trusted_consensus_state = self
-            .trusted_consensus_states[&height];
-        
+        let trusted_consensus_state = self.trusted_consensus_states[&height];
+
         Ok(trusted_consensus_state.clone().into())
     }
 

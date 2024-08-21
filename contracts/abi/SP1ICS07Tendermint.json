@@ -416,6 +416,79 @@
             "name": "isMisbehaviour",
             "type": "bool",
             "internalType": "bool"
+          },
+          {
+            "name": "trustedConsensusState1",
+            "type": "tuple",
+            "internalType": "struct IICS07TendermintMsgs.ConsensusState",
+            "components": [
+              {
+                "name": "timestamp",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "root",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "nextValidatorsHash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          },
+          {
+            "name": "trustedConsensusState2",
+            "type": "tuple",
+            "internalType": "struct IICS07TendermintMsgs.ConsensusState",
+            "components": [
+              {
+                "name": "timestamp",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "root",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "nextValidatorsHash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "o8",
+        "type": "tuple",
+        "internalType": "struct IMisbehaviourMsgs.MsgSubmitMisbehaviour",
+        "components": [
+          {
+            "name": "sp1Proof",
+            "type": "tuple",
+            "internalType": "struct ISP1Msgs.SP1Proof",
+            "components": [
+              {
+                "name": "vKey",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "publicValues",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "proof",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
           }
         ]
       }

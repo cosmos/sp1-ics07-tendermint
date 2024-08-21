@@ -8,6 +8,8 @@ build-programs:
   @echo "ELF created at 'elf/membership-riscv32im-succinct-zkvm-elf'"
   cd programs/uc-and-membership && ~/.sp1/bin/cargo-prove prove build --elf-name uc-and-membership-riscv32im-succinct-zkvm-elf
   @echo "ELF created at 'elf/uc-and-membership-riscv32im-succinct-zkvm-elf'"
+  cd programs/misbehaviour && ~/.sp1/bin/cargo-prove prove build --elf-name misbehaviour-riscv32im-succinct-zkvm-elf
+  @echo "ELF created at 'elf/misbehaviour-riscv32im-succinct-zkvm-elf'"
 
 # Build the operator executable using `cargo build` command
 build-operator:

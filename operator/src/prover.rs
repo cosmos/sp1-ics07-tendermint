@@ -1,9 +1,9 @@
 //! Prover for SP1 ICS07 Tendermint programs.
 
 use crate::programs::{
-    MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
+    MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram, MisbehaviourProgram,
 };
-use ibc_client_tendermint::types::Header;
+use ibc_client_tendermint::types::{Header, Misbehaviour};
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
 use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
@@ -174,6 +174,49 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         }
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
+        let proof = self
+            .prover_client
+            .prove(&self.pkey, stdin)
+            .plonk()
+            .run()
+            .expect("proving failed");
+
+        // Verify proof.
+        self.prover_client
+            .verify(&proof, &self.vkey)
+            .expect("Verification failed");
+
+        // Return the proof.
+        proof
+    }
+}
+
+impl SP1ICS07TendermintProver<MisbehaviourProgram> {
+    /// Generate a proof of a misbehaviour.
+    ///
+    /// # Panics
+    /// Panics if the proof cannot be generated or the proof is invalid.
+    #[must_use]
+    pub fn generate_proof(
+        &self,
+        contract_env: &Env,
+        misbehaviour: &Misbehaviour,
+        trusted_consensus_state_1: &SolConsensusState,
+        trusted_consensus_state_2: &SolConsensusState,
+    ) -> SP1ProofWithPublicValues {
+        let encoded_1 = bincode::serialize(contract_env).unwrap();
+        let encoded_2 = serde_cbor::to_vec(misbehaviour).unwrap();
+        let encoded_3 = bincode::serialize(trusted_consensus_state_1).unwrap();
+        let encoded_4 = bincode::serialize(trusted_consensus_state_2).unwrap();
+
+        let mut stdin = SP1Stdin::new();
+        stdin.write_vec(encoded_1);
+        stdin.write_vec(encoded_2);
+        stdin.write_vec(encoded_3);
+        stdin.write_vec(encoded_4);
+
+        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
+        // network proof.
         let proof = self
             .prover_client
             .prove(&self.pkey, stdin)

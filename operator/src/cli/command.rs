@@ -107,6 +107,8 @@ pub mod fixtures {
         Membership(MembershipCmd),
         /// The subcommand to generate the update client and verify (non)membership fixtures.
         UpdateClientAndMembership(UpdateClientAndMembershipCmd),
+        /// The subcommand to generate the misbehaviour fixtures.
+        Misbehaviour(MisbehaviourCmd),
     }
 
     /// The arguments for the `UpdateClient` fixture executable.
@@ -166,6 +168,23 @@ pub mod fixtures {
         /// Key paths to prove membership.
         #[clap(long, value_delimiter = ',')]
         pub key_paths: Vec<String>,
+
+        /// Fixture path. If not provided, the output will be written to stdout.
+        #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]
+        pub output_path: super::OutputPath,
+
+        /// Trust options
+        #[clap(flatten)]
+        pub trust_options: super::TrustOptions,
+    }
+
+    /// The arguments for the `Misbehaviour` fixture executable.
+    #[derive(Parser, Debug, Clone)]
+    #[command(about = "Generate the misbehaviour fixture")]
+    pub struct MisbehaviourCmd {
+        /// Path to the misbehaviour json file.
+        #[clap(long)]
+        pub misbehaviour_path: String,
 
         /// Fixture path. If not provided, the output will be written to stdout.
         #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]

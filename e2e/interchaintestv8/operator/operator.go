@@ -1,9 +1,13 @@
 package operator
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
+	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	"os"
 	"os/exec"
 	"strconv"
@@ -98,4 +102,145 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 	}
 
 	return height, proofBz, nil
+}
+
+func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
+	misbehaviourFileName := "misbehaviour.json"
+	args := append([]string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName})
+
+	misbehaviour.ClientId = "07-tendermint-0" // We just have to set it to something to make the unmarshalling to work :P
+	bzIntermediary, err := cdc.MarshalJSON(&misbehaviour)
+	if err != nil {
+		return err
+	}
+	var jsonIntermediary map[string]interface{}
+	if err := json.Unmarshal(bzIntermediary, &jsonIntermediary); err != nil {
+		return err
+	}
+	headerHexPaths := []string{
+		"validator_set.proposer.address",
+		"trusted_validators.proposer.address",
+		"signed_header.header.last_block_id.hash",
+		"signed_header.header.last_block_id.part_set_header.hash",
+		"signed_header.header.app_hash",
+		"signed_header.header.consensus_hash",
+		"signed_header.header.data_hash",
+		"signed_header.header.evidence_hash",
+		"signed_header.header.last_commit_hash",
+		"signed_header.header.last_results_hash",
+		"signed_header.header.next_validators_hash",
+		"signed_header.header.proposer_address",
+		"signed_header.header.validators_hash",
+		"signed_header.commit.block_id.hash",
+		"signed_header.commit.block_id.part_set_header.hash",
+	}
+
+	var hexPaths []string
+	for _, path := range headerHexPaths {
+		hexPaths = append(hexPaths, "header_1."+path)
+		hexPaths = append(hexPaths, "header_2."+path)
+	}
+
+	for _, path := range hexPaths {
+		pathParts := strings.Split(path, ".")
+		tmpIntermediary := jsonIntermediary
+		for i := 0; i < len(pathParts)-1; i++ {
+			var ok bool
+			tmpIntermediary, ok = tmpIntermediary[pathParts[i]].(map[string]interface{})
+			if !ok {
+				fmt.Printf("path not found: %s\n", path)
+				continue
+			}
+		}
+		base64str, ok := tmpIntermediary[pathParts[len(pathParts)-1]].(string)
+		if !ok {
+			return fmt.Errorf("path not found: %s", path)
+		}
+		bz, err := base64.StdEncoding.DecodeString(base64str)
+		if err != nil {
+			return err
+		}
+		tmpIntermediary[pathParts[len(pathParts)-1]] = hex.EncodeToString(bz)
+	}
+
+	validators1 := jsonIntermediary["header_1"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
+	validators2 := jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
+	validators3 := jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
+	validators4 := jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
+	validators := append(validators1, validators2...)
+	validators = append(validators, validators3...)
+	validators = append(validators, validators4...)
+	for _, val := range validators {
+		val := val.(map[string]interface{})
+		valAddressBase64Str, ok := val["address"].(string)
+		if !ok {
+			return fmt.Errorf("address not found in path: %s", val)
+		}
+		valAddressBz, err := base64.StdEncoding.DecodeString(valAddressBase64Str)
+		if err != nil {
+			return err
+		}
+		val["address"] = hex.EncodeToString(valAddressBz)
+
+		pubKey, ok := val["pub_key"].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("pub_key not found in path: %s", val)
+		}
+		ed25519PubKey := pubKey["ed25519"].(string)
+		pubKey["type"] = "tendermint/PubKeyEd25519"
+		pubKey["value"] = ed25519PubKey
+	}
+
+	var pubKeys []map[string]interface{}
+	pubKeys = append(pubKeys, jsonIntermediary["header_1"].(map[string]interface{})["validator_set"].(map[string]interface{})["proposer"].(map[string]interface{})["pub_key"].(map[string]interface{}))
+	pubKeys = append(pubKeys, jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["proposer"].(map[string]interface{})["pub_key"].(map[string]interface{}))
+	pubKeys = append(pubKeys, jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["proposer"].(map[string]interface{})["pub_key"].(map[string]interface{}))
+	pubKeys = append(pubKeys, jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["proposer"].(map[string]interface{})["pub_key"].(map[string]interface{}))
+
+	for _, proposerPubKey := range pubKeys {
+		ed25519PubKey := proposerPubKey["ed25519"].(string)
+		proposerPubKey["type"] = "tendermint/PubKeyEd25519"
+		proposerPubKey["value"] = ed25519PubKey
+	}
+
+	header1Sigs := jsonIntermediary["header_1"].(map[string]interface{})["signed_header"].(map[string]interface{})["commit"].(map[string]interface{})["signatures"].([]interface{})
+	header2Sigs := jsonIntermediary["header_2"].(map[string]interface{})["signed_header"].(map[string]interface{})["commit"].(map[string]interface{})["signatures"].([]interface{})
+	sigs := append(header1Sigs, header2Sigs...)
+	for _, sig := range sigs {
+		sig := sig.(map[string]interface{})
+		if sig["block_id_flag"] == "BLOCK_ID_FLAG_COMMIT" {
+			sig["block_id_flag"] = 2
+		} else {
+			return fmt.Errorf("unexpected block_id_flag: %s", sig["block_id_flag"])
+		}
+
+		valAddressBase64Str, ok := sig["validator_address"].(string)
+		if !ok {
+			return fmt.Errorf("validator_address not found")
+		}
+		valAddressBz, err := base64.StdEncoding.DecodeString(valAddressBase64Str)
+		if err != nil {
+			return err
+		}
+		sig["validator_address"] = hex.EncodeToString(valAddressBz)
+	}
+
+	misbehaviourBz, err := json.Marshal(jsonIntermediary)
+	if err != nil {
+		return err
+	}
+
+	// TODO: Make file temporary and delete it after use
+	if err := os.WriteFile(misbehaviourFileName, misbehaviourBz, 0644); err != nil {
+		return err
+	}
+
+	stdout, err := exec.Command("target/release/operator", args...).CombinedOutput()
+	fmt.Println(string(stdout))
+	// TODO: Read in the fixture and return something that can be used against the contract
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

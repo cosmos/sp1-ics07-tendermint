@@ -3,10 +3,23 @@ package main
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
+	"github.com/cometbft/cometbft/crypto/tmhash"
+	cometproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	comettypes "github.com/cometbft/cometbft/types"
+	comettime "github.com/cometbft/cometbft/types/time"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
+	ibcmocks "github.com/cosmos/ibc-go/v8/testing/mock"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
@@ -213,4 +226,140 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().Equal(proofHeight.RevisionHeight, clientState.LatestHeight.RevisionHeight)
 		s.Require().False(clientState.IsFrozen)
 	}))
+}
+
+func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	eth, simd := s.ChainA, s.ChainB
+	_ = eth
+
+	s.Require().True(s.Run("Misbehave", func() {
+		// Based off of: https://github.com/cosmos/relayer/blob/f9aaf3dd0ebfe99fbe98d190a145861d7df93804/interchaintest/misbehaviour_test.go#L38
+		oldHeader, latestHeight, err := ibcclientutils.QueryTendermintHeader(simd.Validators[0].CliContext())
+		s.Require().NoError(err)
+		s.Require().NotZero(latestHeight)
+
+		height := clienttypes.NewHeight(clienttypes.ParseChainID(simd.Config().ChainID), uint64(latestHeight))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+		trustedHeight := clienttypes.NewHeight(uint64(clientState.LatestHeight.RevisionNumber), uint64(clientState.LatestHeight.RevisionHeight))
+
+		oldHeader.TrustedHeight = trustedHeight
+		oldHeader.TrustedValidators = oldHeader.ValidatorSet // ?
+		s.Require().NoError(err)
+
+		// create a duplicate header
+		newHeader := s.createTMClientHeader(
+			ctx,
+			simd,
+			int64(height.RevisionHeight),
+			oldHeader.GetTime().Add(time.Minute),
+			oldHeader,
+		)
+		_ = newHeader
+
+		misbehaviour := tmclient.Misbehaviour{
+			Header1: &newHeader,
+			Header2: &oldHeader,
+		}
+
+		err = operator.Misbehaviour(simd.GetCodec(), misbehaviour)
+		s.Require().NoError(err)
+	}))
+}
+
+func (s *SP1ICS07TendermintTestSuite) createTMClientHeader(
+	ctx context.Context,
+	chain *cosmos.CosmosChain,
+	blockHeight int64,
+	timestamp time.Time,
+	oldHeader tmclient.Header,
+) tmclient.Header {
+	keyBz, err := chain.Validators[0].ReadFile(ctx, "config/priv_validator_key.json")
+	s.Require().NoError(err)
+	var privValidatorKeyFile cosmos.PrivValidatorKeyFile
+	err = json.Unmarshal(keyBz, &privValidatorKeyFile)
+	s.Require().NoError(err)
+	decodedKeyBz, err := base64.StdEncoding.DecodeString(privValidatorKeyFile.PrivKey.Value)
+	s.Require().NoError(err)
+
+	privKey := &ed25519.PrivKey{
+		Key: decodedKeyBz,
+	}
+
+	privVal := ibcmocks.PV{PrivKey: privKey}
+	pubKey, err := privVal.GetPubKey()
+	s.Require().NoError(err)
+
+	val := comettypes.NewValidator(pubKey, oldHeader.ValidatorSet.Proposer.VotingPower)
+	valSet := comettypes.NewValidatorSet([]*comettypes.Validator{val})
+	signers := []comettypes.PrivValidator{privVal}
+
+	vsetHash := valSet.Hash()
+
+	tmHeader := comettypes.Header{
+		Version:            oldHeader.Header.Version,
+		ChainID:            oldHeader.Header.ChainID,
+		Height:             blockHeight,
+		Time:               timestamp,
+		LastBlockID:        ibctesting.MakeBlockID(make([]byte, tmhash.Size), 10_000, make([]byte, tmhash.Size)),
+		LastCommitHash:     oldHeader.Header.LastCommitHash,
+		DataHash:           tmhash.Sum([]byte("data_hash")),
+		ValidatorsHash:     vsetHash,
+		NextValidatorsHash: vsetHash,
+		ConsensusHash:      tmhash.Sum([]byte("consensus_hash")),
+		AppHash:            tmhash.Sum([]byte("app_hash")),
+		LastResultsHash:    tmhash.Sum([]byte("last_results_hash")),
+		EvidenceHash:       tmhash.Sum([]byte("evidence_hash")),
+		ProposerAddress:    valSet.Proposer.Address,
+	}
+
+	hhash := tmHeader.Hash()
+	blockID := ibctesting.MakeBlockID(hhash, 3, tmhash.Sum([]byte("part_set")))
+	voteSet := comettypes.NewVoteSet(oldHeader.Header.ChainID, blockHeight, 1, cometproto.PrecommitType, valSet)
+
+	voteProto := &comettypes.Vote{
+		ValidatorAddress: nil,
+		ValidatorIndex:   -1,
+		Height:           blockHeight,
+		Round:            1,
+		Timestamp:        comettime.Now(),
+		Type:             cometproto.PrecommitType,
+		BlockID:          blockID,
+	}
+
+	for i, sign := range signers {
+		pv, err := sign.GetPubKey()
+		s.Require().NoError(err)
+		addr := pv.Address()
+		vote := voteProto.Copy()
+		vote.ValidatorAddress = addr
+		vote.ValidatorIndex = int32(i)
+		_, err = comettypes.SignAndCheckVote(vote, sign, oldHeader.Header.ChainID, false)
+		s.Require().NoError(err)
+		added, err := voteSet.AddVote(vote)
+		s.Require().NoError(err)
+		s.Require().True(added)
+	}
+	extCommit := voteSet.MakeExtendedCommit(comettypes.DefaultABCIParams())
+	commit := extCommit.ToCommit()
+
+	signedHeader := &cometproto.SignedHeader{
+		Header: tmHeader.ToProto(),
+		Commit: commit.ToProto(),
+	}
+
+	valSetProto, err := valSet.ToProto()
+	s.Require().NoError(err)
+
+	return tmclient.Header{
+		SignedHeader:      signedHeader,
+		ValidatorSet:      valSetProto,
+		TrustedHeight:     oldHeader.TrustedHeight,
+		TrustedValidators: oldHeader.TrustedValidators,
+	}
 }

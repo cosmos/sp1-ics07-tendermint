@@ -2,20 +2,58 @@
 //! program.
 #![deny(missing_docs, clippy::nursery, clippy::pedantic, warnings)]
 
-use ibc_client_tendermint::client_state::check_for_misbehaviour_on_misbehavior;
-use ibc_client_tendermint::types::Misbehaviour;
+pub mod types;
 
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::MisbehaviourOutput;
+use std::collections::HashMap;
+use std::time::Duration;
+use ibc_client_tendermint::client_state::{verify_misbehaviour, check_for_misbehaviour_on_misbehavior};
+use ibc_client_tendermint::types::{ConsensusState, Misbehaviour, TENDERMINT_CLIENT_TYPE};
+use ibc_core_host_types::identifiers::{ChainId, ClientId};
+use tendermint_light_client_verifier::options::Options;
+use tendermint_light_client_verifier::ProdVerifier;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, MisbehaviourOutput};
 
 /// The main function of the program without the zkVM wrapper.
 #[allow(clippy::missing_panics_doc)]
 #[must_use]
-pub fn check_for_misbehaviour(misbehaviour: Misbehaviour) -> MisbehaviourOutput {
+pub fn check_for_misbehaviour(
+    env: Env,
+    misbehaviour: Misbehaviour, 
+    trusted_consensus_state_1: ConsensusState, 
+    trusted_consensus_state_2: ConsensusState
+) -> MisbehaviourOutput {
+
+    let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
+    let chain_id = env.clone().chainId;
+    assert_eq!(chain_id, misbehaviour.header1().signed_header.header.chain_id.to_string());
+    
+    let mut trusted_consensus_state_map = HashMap::new();
+    trusted_consensus_state_map.insert(misbehaviour.header1().trusted_height.revision_height(), &trusted_consensus_state_1);
+    trusted_consensus_state_map.insert(misbehaviour.header2().trusted_height.revision_height(), &trusted_consensus_state_2);
+    let ctx = types::validation::MisbehaviourValidationContext::new(&env, trusted_consensus_state_map);
+
+    let options = Options {
+        trust_threshold: env.trustThreshold.clone().into(),
+        trusting_period: Duration::from_secs(env.trustingPeriod.into()),
+        clock_drift: Duration::default(),
+    };
+
+    verify_misbehaviour::<_, sha2::Sha256>(
+        &ctx,
+        &misbehaviour,
+        &client_id,
+        &ChainId::new(chain_id.as_str()).unwrap(),
+        &options,
+        &ProdVerifier::default(), 
+    ).unwrap();
+    
     let is_misbehaviour =
         check_for_misbehaviour_on_misbehavior(misbehaviour.header1(), misbehaviour.header2())
             .unwrap();
 
     MisbehaviourOutput {
         isMisbehaviour: is_misbehaviour,
+        trustedConsensusState1: trusted_consensus_state_1.into(),
+        trustedConsensusState2: trusted_consensus_state_2.into(),
     }
 }

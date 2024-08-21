@@ -3,3 +3,4 @@
 pub mod membership;
 pub mod uc_and_mem;
 pub mod update_client;
+pub mod misbehaviour;

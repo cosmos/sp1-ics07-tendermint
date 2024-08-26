@@ -20,6 +20,7 @@ struct SP1ICS07GenesisFixtureJson {
     bytes32 updateClientVkey;
     bytes32 membershipVkey;
     bytes32 ucAndMembershipVkey;
+    bytes32 misbehaviourVkey;
 }
 
 abstract contract SP1ICS07TendermintTest is
@@ -51,6 +52,7 @@ abstract contract SP1ICS07TendermintTest is
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,
             genesisFixture.ucAndMembershipVkey,
+            genesisFixture.misbehaviourVkey,
             address(verifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
@@ -61,6 +63,7 @@ abstract contract SP1ICS07TendermintTest is
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,
             genesisFixture.ucAndMembershipVkey,
+            genesisFixture.misbehaviourVkey,
             address(mockVerifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
@@ -82,13 +85,15 @@ abstract contract SP1ICS07TendermintTest is
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
         bytes32 membershipVkey = json.readBytes32(".membershipVkey");
         bytes32 ucAndMembershipVkey = json.readBytes32(".ucAndMembershipVkey");
+        bytes32 misbehaviourVkey = json.readBytes32(".misbehaviourVkey");
 
         SP1ICS07GenesisFixtureJson memory fix = SP1ICS07GenesisFixtureJson({
             trustedClientState: trustedClientState,
             trustedConsensusState: trustedConsensusState,
             updateClientVkey: updateClientVkey,
             membershipVkey: membershipVkey,
-            ucAndMembershipVkey: ucAndMembershipVkey
+            ucAndMembershipVkey: ucAndMembershipVkey,
+            misbehaviourVkey: misbehaviourVkey
         });
 
         return fix;

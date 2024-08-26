@@ -14,6 +14,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 use tendermint_light_client_verifier::options::Options;
 use tendermint_light_client_verifier::ProdVerifier;
+use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint;
 
 /// The main function of the program without the zkVM wrapper.
 #[allow(clippy::missing_panics_doc)]
@@ -67,9 +68,24 @@ pub fn check_for_misbehaviour(
     let is_misbehaviour =
         check_for_misbehaviour_on_misbehavior(misbehaviour.header1(), misbehaviour.header2())
             .unwrap();
+    
+    if !is_misbehaviour {
+        panic!("Misbehaviour is not detected");
+    }
+    
+    let output_trusted_header_1 = sp1_ics07_tendermint::Height {
+        revisionNumber: misbehaviour.header1().trusted_height.revision_height().try_into().unwrap(),
+        revisionHeight: misbehaviour.header1().trusted_height.revision_height().try_into().unwrap(),
+    };
+    let output_trusted_header_2 = sp1_ics07_tendermint::Height {
+        revisionNumber: misbehaviour.header2().trusted_height.revision_height().try_into().unwrap(),
+        revisionHeight: misbehaviour.header2().trusted_height.revision_height().try_into().unwrap(),
+    };
 
     MisbehaviourOutput {
-        isMisbehaviour: is_misbehaviour,
+        env,
+        trustedHeight1: output_trusted_header_1,
+        trustedHeight2: output_trusted_header_2,
         trustedConsensusState1: trusted_consensus_state_1.into(),
         trustedConsensusState2: trusted_consensus_state_2.into(),
     }

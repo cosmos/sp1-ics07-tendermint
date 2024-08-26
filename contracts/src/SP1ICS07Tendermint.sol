@@ -22,6 +22,7 @@ contract SP1ICS07Tendermint is
     IUpdateClientMsgs,
     IMembershipMsgs,
     IUpdateClientAndMembershipMsgs,
+    IMisbehaviourMsgs,
     ISP1ICS07TendermintErrors,
     ILightClientMsgs,
     ISP1ICS07Tendermint
@@ -32,6 +33,8 @@ contract SP1ICS07Tendermint is
     bytes32 public immutable MEMBERSHIP_PROGRAM_VKEY;
     /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
+    /// @inheritdoc ISP1ICS07Tendermint
+    bytes32 public immutable MISBEHAVIOUR_PROGRAM_VKEY;
     /// @inheritdoc ISP1ICS07Tendermint
     ISP1Verifier public immutable VERIFIER;
 
@@ -48,6 +51,7 @@ contract SP1ICS07Tendermint is
     /// @param updateClientProgramVkey The verification key for the update client program.
     /// @param membershipProgramVkey The verification key for the verify (non)membership program.
     /// @param updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
+    /// @param misbehaviourProgramVkey The verification key for the misbehaviour program.
     /// @param verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
@@ -55,6 +59,7 @@ contract SP1ICS07Tendermint is
         bytes32 updateClientProgramVkey,
         bytes32 membershipProgramVkey,
         bytes32 updateClientAndMembershipProgramVkey,
+        bytes32 misbehaviourProgramVkey,
         address verifier,
         bytes memory _clientState,
         bytes32 _consensusState
@@ -62,6 +67,7 @@ contract SP1ICS07Tendermint is
         UPDATE_CLIENT_PROGRAM_VKEY = updateClientProgramVkey;
         MEMBERSHIP_PROGRAM_VKEY = membershipProgramVkey;
         UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY = updateClientAndMembershipProgramVkey;
+        MISBEHAVIOUR_PROGRAM_VKEY = misbehaviourProgramVkey;
         VERIFIER = ISP1Verifier(verifier);
 
         clientState = abi.decode(_clientState, (ClientState));
@@ -136,9 +142,40 @@ contract SP1ICS07Tendermint is
 
     /// @notice The entrypoint for misbehaviour.
     /// @inheritdoc ILightClient
-    function misbehaviour(bytes calldata) public pure {
-        // TODO: Not yet implemented. (#56)
-        revert FeatureNotSupported();
+    function misbehaviour(bytes calldata misbehaviourMsg) public {
+        MsgSubmitMisbehaviour memory msgSubmitMisbehaviour = abi.decode(misbehaviourMsg, (MsgSubmitMisbehaviour));
+        if (msgSubmitMisbehaviour.sp1Proof.vKey != MISBEHAVIOUR_PROGRAM_VKEY) {
+            revert VerificationKeyMismatch(MISBEHAVIOUR_PROGRAM_VKEY, msgSubmitMisbehaviour.sp1Proof.vKey);
+        }
+
+        MisbehaviourOutput memory output = abi.decode(msgSubmitMisbehaviour.sp1Proof.publicValues, (MisbehaviourOutput));
+        validateMisbehaviourOutput(output);
+
+        verifySP1Proof(msgSubmitMisbehaviour.sp1Proof);
+
+        // If the misbehaviour is valid, the client is frozen
+        clientState.isFrozen = true;
+    }
+
+    /// @notice Validates the SP1ICS07MisbehaviourOutput public values.
+    /// @param output The public values.
+    function validateMisbehaviourOutput(MisbehaviourOutput memory output) private view {
+        if (clientState.isFrozen) {
+            revert FrozenClientState();
+        }
+        validateEnv(output.env);
+
+        bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
+        bytes32 trustedConsensusState1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
+        if (outputConsensusStateHash1 != trustedConsensusState1) {
+            revert ConsensusStateHashMismatch(trustedConsensusState1, outputConsensusStateHash1);
+        }
+
+        bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
+        bytes32 trustedConsensusState2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
+        if (outputConsensusStateHash2 != trustedConsensusState2) {
+            revert ConsensusStateHashMismatch(trustedConsensusState2, outputConsensusStateHash2);
+        }
     }
 
     /// @notice The entrypoint for upgrading the client.
@@ -332,37 +369,43 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        if (output.env.now > block.timestamp) {
-            revert ProofIsInTheFuture(block.timestamp, output.env.now);
-        }
-        if (block.timestamp - output.env.now > ALLOWED_SP1_CLOCK_DRIFT) {
-            revert ProofIsTooOld(block.timestamp, output.env.now);
-        }
-        if (keccak256(bytes(output.env.chainId)) != keccak256(bytes(clientState.chainId))) {
-            revert ChainIdMismatch(clientState.chainId, output.env.chainId);
-        }
-        if (
-            output.env.trustThreshold.numerator != clientState.trustLevel.numerator
-                || output.env.trustThreshold.denominator != clientState.trustLevel.denominator
-        ) {
-            revert TrustThresholdMismatch(
-                clientState.trustLevel.numerator,
-                clientState.trustLevel.denominator,
-                output.env.trustThreshold.numerator,
-                output.env.trustThreshold.denominator
-            );
-        }
-        if (output.env.trustingPeriod != clientState.trustingPeriod) {
-            revert TrustingPeriodMismatch(clientState.trustingPeriod, output.env.trustingPeriod);
-        }
-        if (output.env.trustingPeriod > clientState.unbondingPeriod) {
-            revert TrustingPeriodTooLong(output.env.trustingPeriod, clientState.unbondingPeriod);
-        }
+        validateEnv(output.env);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
         bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
         if (outputConsensusStateHash != trustedConsensusStateHash) {
             revert ConsensusStateHashMismatch(trustedConsensusStateHash, outputConsensusStateHash);
+        }
+    }
+
+    /// @notice Validates the Env public values.
+    /// @param env The public values.
+    function validateEnv(Env memory env) private view {
+        if (env.now > block.timestamp) {
+            revert ProofIsInTheFuture(block.timestamp, env.now);
+        }
+        if (block.timestamp - env.now > ALLOWED_SP1_CLOCK_DRIFT) {
+            revert ProofIsTooOld(block.timestamp, env.now);
+        }
+        if (keccak256(bytes(env.chainId)) != keccak256(bytes(clientState.chainId))) {
+            revert ChainIdMismatch(clientState.chainId, env.chainId);
+        }
+        if (
+            env.trustThreshold.numerator != clientState.trustLevel.numerator
+            || env.trustThreshold.denominator != clientState.trustLevel.denominator
+        ) {
+            revert TrustThresholdMismatch(
+                clientState.trustLevel.numerator,
+                clientState.trustLevel.denominator,
+                env.trustThreshold.numerator,
+                env.trustThreshold.denominator
+            );
+        }
+        if (env.trustingPeriod != clientState.trustingPeriod) {
+            revert TrustingPeriodMismatch(clientState.trustingPeriod, env.trustingPeriod);
+        }
+        if (env.trustingPeriod > clientState.unbondingPeriod) {
+            revert TrustingPeriodTooLong(env.trustingPeriod, clientState.unbondingPeriod);
         }
     }
 
@@ -412,14 +455,14 @@ contract SP1ICS07Tendermint is
         MembershipProof memory o4,
         SP1MembershipProof memory o5,
         SP1MembershipAndUpdateClientProof memory o6,
-        IMisbehaviourMsgs.MisbehaviourOutput memory o7,
-        IMisbehaviourMsgs.MsgSubmitMisbehaviour memory o8
+        MisbehaviourOutput memory o7,
+        MsgSubmitMisbehaviour memory o8
     )
         public
         pure
     // solhint-disable-next-line no-empty-blocks
     {
-        // This is a dummy function to generate the ABI for MembershipOutput
+        // This is a dummy function to generate the ABI for outputs
         // so that it can be used in the SP1 verifier contract.
         // The function is not used in the contract.
     }

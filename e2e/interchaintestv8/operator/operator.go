@@ -28,6 +28,20 @@ type membershipFixture struct {
 	MembershipProof string `json:"membershipProof"`
 }
 
+type GenesisFixture struct {
+	TrustedClientState string `json:"trustedClientState"`
+	TrustedConsensusState string `json:"trustedConsensusState"`
+	UpdateClientVkey string `json:"updateClientVkey"`
+	MembershipVkey string `json:"membershipVkey"`
+	UcAndMembershipVkey string `json:"ucAndMembershipVkey"`
+	MisbehaviourVKey string `json:"misbehaviourVKey"`
+}
+
+type MisbehaviourFixture struct {
+	GenesisFixture
+	SubmitMsg string `json:"submitMsg"`
+}
+
 // RunGenesis is a function that runs the genesis script to generate genesis.json
 func RunGenesis(args ...string) error {
 	args = append([]string{"genesis"}, args...)
@@ -106,7 +120,7 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 	return height, proofBz, nil
 }
 
-func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
+func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixture bool) error {
 	misbehaviourFileName := "misbehaviour.json"
 	args := []string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName}
 
@@ -239,11 +253,32 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) error {
 		return err
 	}
 
-	stdout, err := exec.Command("target/release/operator", args...).CombinedOutput()
-	fmt.Println(string(stdout))
-	// TODO: Read in the fixture and return something that can be used against the contract
+	stdout, err := exec.Command("target/release/operator", args...).Output()
 	if err != nil {
 		return err
+	}
+
+	// NOTE: writing stdout to os.Stdout after execution due to how `.Output()` works
+	os.Stdout.Write(stdout)
+
+	// eliminate non-json characters
+	jsonStartIdx := strings.Index(string(stdout), "{")
+	if jsonStartIdx == -1 {
+		panic("no json found in output")
+	}
+	stdout = stdout[jsonStartIdx:]
+
+	var misbehaviourFixture MisbehaviourFixture
+	err = json.Unmarshal(stdout, &misbehaviour)
+	if err != nil {
+		return err
+	}
+	fmt.Println(misbehaviourFixture)
+
+	if writeFixture {
+		if err := os.WriteFile("contracts/fixtures/e2e_misbehaviour_fixture.json", stdout, 0o600); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -49,6 +49,9 @@ import (
 type SP1ICS07TendermintTestSuite struct {
 	e2esuite.TestSuite
 
+	// Whether to generate fixtures for the solidity tests
+	generateFixtures bool
+
 	// The private key of a test account
 	key *ecdsa.PrivateKey
 	// The SP1ICS07Tendermint contract
@@ -77,6 +80,9 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		os.Setenv(testvalues.EnvKeyTendermintRPC, simd.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeySp1Prover, "network")
 		os.Setenv(testvalues.EnvKeyPrivateKey, hexPrivateKey)
+		if os.Getenv(testvalues.EnvKeyGenerateFixtures) == testvalues.EnvValueGenerateFixtures_True {
+			s.generateFixtures = true
+		}
 		// make sure that the SP1_PRIVATE_KEY is set.
 		s.Require().NotEmpty(os.Getenv(testvalues.EnvKeySp1PrivateKey))
 
@@ -153,6 +159,10 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 
 	_, simd := s.ChainA, s.ChainB
 
+	if s.generateFixtures {
+		s.T().Log("Generate fixtures is set to true, but TestUpdateClient does not support it (yet)")
+	}
+
 	s.Require().True(s.Run("Update client", func() {
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -184,6 +194,10 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 	s.SetupSuite(ctx)
 
 	eth, simd := s.ChainA, s.ChainB
+
+	if s.generateFixtures {
+		s.T().Log("Generate fixtures is set to true, but TestUpdateClient does not support it (yet)")
+	}
 
 	s.Require().True(s.Run("Update and verify non-membership", func() {
 		s.Require().NoError(testutil.WaitForBlocks(ctx, 5, simd))
@@ -270,7 +284,7 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 		}
 
 		// TODO: Get fixture from operator and use it with the contract
-		err = operator.Misbehaviour(simd.GetCodec(), misbehaviour)
+		err = operator.Misbehaviour(simd.GetCodec(), misbehaviour, s.generateFixtures)
 		s.Require().NoError(err)
 	}))
 }

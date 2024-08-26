@@ -15,6 +15,7 @@ use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::path::PathBuf;
 use tendermint_light_client_verifier::types::{LightBlock, TrustThreshold};
 use tendermint_rpc::HttpClient;
+use crate::programs::MisbehaviourProgram;
 
 /// The genesis data for the SP1 ICS07 Tendermint contract.
 #[serde_as]
@@ -34,6 +35,8 @@ pub struct SP1ICS07TendermintGenesis {
     membership_vkey: String,
     /// The encoded key for [`UpdateClientAndMembershipProgram`].
     uc_and_membership_vkey: String,
+    /// The encoded key for [`MisbehaviourProgram`].
+    misbehaviour_vkey: String,
 }
 
 impl SP1ICS07TendermintGenesis {
@@ -81,6 +84,7 @@ impl SP1ICS07TendermintGenesis {
             update_client_vkey: UpdateClientProgram::get_vkey().bytes32(),
             membership_vkey: MembershipProgram::get_vkey().bytes32(),
             uc_and_membership_vkey: UpdateClientAndMembershipProgram::get_vkey().bytes32(),
+            misbehaviour_vkey: MisbehaviourProgram::get_vkey().bytes32(),
         })
     }
 }

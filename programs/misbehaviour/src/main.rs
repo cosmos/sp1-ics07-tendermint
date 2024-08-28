@@ -41,7 +41,7 @@ pub fn main() {
 
     let output = check_for_misbehaviour(
         env,
-        misbehaviour,
+        &misbehaviour,
         trusted_consensus_state_1,
         trusted_consensus_state_2,
     );

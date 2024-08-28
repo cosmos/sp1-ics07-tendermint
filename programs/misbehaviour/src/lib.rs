@@ -21,7 +21,7 @@ use tendermint_light_client_verifier::ProdVerifier;
 #[must_use]
 pub fn check_for_misbehaviour(
     env: Env,
-    misbehaviour: Misbehaviour,
+    misbehaviour: &Misbehaviour,
     trusted_consensus_state_1: ConsensusState,
     trusted_consensus_state_2: ConsensusState,
 ) -> MisbehaviourOutput {
@@ -57,7 +57,7 @@ pub fn check_for_misbehaviour(
 
     verify_misbehaviour::<_, sha2::Sha256>(
         &ctx,
-        &misbehaviour,
+        misbehaviour,
         &client_id,
         &ChainId::new(chain_id.as_str()).unwrap(),
         &options,
@@ -69,9 +69,7 @@ pub fn check_for_misbehaviour(
         check_for_misbehaviour_on_misbehavior(misbehaviour.header1(), misbehaviour.header2())
             .unwrap();
 
-    if !is_misbehaviour {
-        panic!("Misbehaviour is not detected");
-    }
+    assert!(is_misbehaviour, "Misbehaviour is not detected");
 
     let output_trusted_header_1 = sp1_ics07_tendermint::Height {
         revisionNumber: misbehaviour

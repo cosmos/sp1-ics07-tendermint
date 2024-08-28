@@ -42,6 +42,7 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     let raw_misbehaviour: RawMisbehaviour = serde_json::from_slice(&misbehaviour_bz)?;
 
     let tm_rpc_client = HttpClient::from_env();
+    #[allow(clippy::cast_possible_truncation)]
     let trusted_light_block_1 = tm_rpc_client
         .get_light_block(Some(
             raw_misbehaviour
@@ -53,6 +54,7 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
                 .revision_height as u32,
         ))
         .await?;
+    #[allow(clippy::cast_possible_truncation)]
     let trusted_light_block_2 = tm_rpc_client
         .get_light_block(Some(
             raw_misbehaviour

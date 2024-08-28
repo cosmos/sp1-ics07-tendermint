@@ -13,7 +13,7 @@ use time::OffsetDateTime;
 alloy_sol_types::sol!(
     #[sol(rpc)]
     #[derive(serde::Deserialize, serde::Serialize)]
-    #[allow(missing_docs, clippy::pedantic)]
+    #[allow(missing_docs, clippy::pedantic, warnings)]
     sp1_ics07_tendermint,
     "../../contracts/abi/SP1ICS07Tendermint.json"
 );

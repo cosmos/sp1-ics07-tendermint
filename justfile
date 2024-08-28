@@ -94,6 +94,7 @@ test-e2e testname:
 lint:
   @echo "Linting the Rust code..."
   cargo fmt --all -- --check
+  cargo clippy
   @echo "Linting the Solidity code..."
   forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
   @echo "Linting the Go code..."
@@ -103,6 +104,7 @@ lint:
 lint-fix:
   @echo "Fixing the Rust code..."
   cargo fmt --all
+  cargo clippy --fix
   @echo "Fixing the Solidity code..."
   forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
   @echo "Fixing the Go code..."

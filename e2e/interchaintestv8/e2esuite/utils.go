@@ -133,6 +133,9 @@ func (s *TestSuite) GetTxReciept(ctx context.Context, chain *ethereum.EthereumCh
 
 		return receipt != nil, nil
 	})
+
+	// TODO: This should check if the tx was actually successful and return a bool or err on that basis
+
 	s.Require().NoError(err)
 	return receipt
 }

@@ -23,7 +23,6 @@ import (
 	cometproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	comettypes "github.com/cometbft/cometbft/types"
 	comettime "github.com/cometbft/cometbft/types/time"
-
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
@@ -34,7 +33,7 @@ import (
 	ibcmocks "github.com/cosmos/ibc-go/v8/testing/mock"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
@@ -99,7 +98,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 			"-o", "contracts/script/genesis.json",
 		))
 
-		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
+		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), foundry.ForgeScriptOpts{
 			ContractRootDir:  ".",
 			SolidityContract: "contracts/script/SP1ICS07Tendermint.s.sol",
 			RawOptions:       []string{"--json"},
@@ -232,7 +231,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
 
 		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -283,9 +282,20 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 			Header2: &oldHeader,
 		}
 
-		// TODO: Get fixture from operator and use it with the contract
-		err = operator.Misbehaviour(simd.GetCodec(), misbehaviour, s.generateFixtures)
+		submitMsg, err := operator.Misbehaviour(simd.GetCodec(), misbehaviour, s.generateFixtures,
+			"--trust-level", testvalues.DefaultTrustLevel.String(),
+			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod))
 		s.Require().NoError(err)
+
+		tx, err := s.contract.Misbehaviour(s.GetTransactOpts(s.key), submitMsg)
+		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+
+		clientState, err = s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+		s.Require().True(clientState.IsFrozen)
 	}))
 }
 
@@ -296,27 +306,54 @@ func (s *SP1ICS07TendermintTestSuite) createTMClientHeader(
 	timestamp time.Time,
 	oldHeader tmclient.Header,
 ) tmclient.Header {
-	keyBz, err := chain.Validators[0].ReadFile(ctx, "config/priv_validator_key.json")
-	s.Require().NoError(err)
-	var privValidatorKeyFile cosmos.PrivValidatorKeyFile
-	err = json.Unmarshal(keyBz, &privValidatorKeyFile)
-	s.Require().NoError(err)
-	decodedKeyBz, err := base64.StdEncoding.DecodeString(privValidatorKeyFile.PrivKey.Value)
-	s.Require().NoError(err)
+	var privVals []comettypes.PrivValidator
+	var validators []*comettypes.Validator
+	for _, chainVal := range chain.Validators {
+		keyBz, err := chainVal.ReadFile(ctx, "config/priv_validator_key.json")
+		s.Require().NoError(err)
+		var privValidatorKeyFile cosmos.PrivValidatorKeyFile
+		err = json.Unmarshal(keyBz, &privValidatorKeyFile)
+		s.Require().NoError(err)
+		decodedKeyBz, err := base64.StdEncoding.DecodeString(privValidatorKeyFile.PrivKey.Value)
+		s.Require().NoError(err)
 
-	privKey := &ed25519.PrivKey{
-		Key: decodedKeyBz,
+		privKey := &ed25519.PrivKey{
+			Key: decodedKeyBz,
+		}
+
+		privVal := ibcmocks.PV{PrivKey: privKey}
+		privVals = append(privVals, privVal)
+
+		pubKey, err := privVal.GetPubKey()
+		s.Require().NoError(err)
+
+		val := comettypes.NewValidator(pubKey, oldHeader.ValidatorSet.Proposer.VotingPower)
+		validators = append(validators, val)
+
 	}
 
-	privVal := ibcmocks.PV{PrivKey: privKey}
-	pubKey, err := privVal.GetPubKey()
-	s.Require().NoError(err)
-
-	val := comettypes.NewValidator(pubKey, oldHeader.ValidatorSet.Proposer.VotingPower)
-	valSet := comettypes.NewValidatorSet([]*comettypes.Validator{val})
-	signers := []comettypes.PrivValidator{privVal}
-
+	valSet := comettypes.NewValidatorSet(validators)
 	vsetHash := valSet.Hash()
+
+	// Make sure all the signers are in the correct order as expected by the validator set
+	signers := make([]comettypes.PrivValidator, valSet.Size())
+	for i, _ := range signers {
+		_, val := valSet.GetByIndex(int32(i))
+
+		for _, pv := range privVals {
+			pk, err := pv.GetPubKey()
+			s.Require().NoError(err)
+
+			if pk.Equals(val.PubKey) {
+				signers[i] = pv
+				break
+			}
+		}
+
+		if signers[i] == nil {
+			s.Require().FailNow("could not find signer for validator")
+		}
+	}
 
 	tmHeader := comettypes.Header{
 		Version:            oldHeader.Header.Version,
@@ -336,7 +373,7 @@ func (s *SP1ICS07TendermintTestSuite) createTMClientHeader(
 	}
 
 	hhash := tmHeader.Hash()
-	blockID := ibctesting.MakeBlockID(hhash, 3, tmhash.Sum([]byte("part_set")))
+	blockID := ibctesting.MakeBlockID(hhash, oldHeader.Commit.BlockID.PartSetHeader.Total, tmhash.Sum([]byte("part_set")))
 	voteSet := comettypes.NewVoteSet(oldHeader.Header.ChainID, blockHeight, 1, cometproto.PrecommitType, valSet)
 
 	voteProto := &comettypes.Vote{

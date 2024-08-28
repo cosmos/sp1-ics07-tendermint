@@ -31,18 +31,15 @@ install-operator:
   @echo "Installed the operator executable"
 
 # Run the Solidity tests using `forge test` command
-test-foundry:
-  forge test -vvv
+test-foundry testname=".\\*":
+  forge test -vvv --match-test ^{{testname}}\(.\*\)\$
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:
   cargo test --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --locked --all-features
 
 # Generate the `genesis.json` file using $TENDERMINT_RPC_URL in the `.env` file
-genesis:
-  @echo "Generating the genesis file for the Celestia Mocha testnet"
-  @echo "Building the program..."
-  just build-programs
+genesis: build-programs
   @echo "Generating the genesis file..."
   RUST_LOG=info cargo run --bin operator --release -- genesis -o contracts/script/genesis.json
 
@@ -50,15 +47,18 @@ genesis:
 # The prover parameter should be one of: ["mock", "network", "local"]
 # This generates the fixtures for all programs in parallel using GNU parallel.
 # If prover is set to network, this command requires the `SP1_PRIVATE_KEY` environment variable to be set.
-fixtures prover:
-  @echo "Generating fixtures for the Celestia Mocha testnet"
-  @echo "Building the operator..."
-  just build-operator
+fixtures prover: build-operator
   @echo "Generating fixtures... This may take a while (up to 20 minutes)"
+  TENDERMINT_RPC_URL="${TENDERMINT_RPC_URL%/}" && \
+  CURRENT_HEIGHT=$(curl "$TENDERMINT_RPC_URL"/block | jq -r ".result.block.header.height") && \
+  TRUSTED_HEIGHT=$(($CURRENT_HEIGHT-100)) && \
+  TARGET_HEIGHT=$(($CURRENT_HEIGHT-10)) && \
+  echo "For celestia fixtures, trusted block: $TRUSTED_HEIGHT, target block: $TARGET_HEIGHT, from $TENDERMINT_RPC_URL" && \
   parallel --progress --shebang --ungroup -j 4 ::: \
-    "RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client --trusted-block 2438000 --target-block 2438010 -o 'contracts/fixtures/update_client_fixture.json'" \
-    "sleep 15 && RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block 2438000 --target-block 2438010 -o 'contracts/fixtures/uc_and_memberships_fixture.json'" \
-    "sleep 30 && RUST_LOG=info SP1_PROVER={{prover}} TENDERMINT_RPC_URL='https://rpc.celestia-mocha.com/' ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block 2438000 -o 'contracts/fixtures/memberships_fixture.json'"
+    "RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/update_client_fixture.json'" \
+    "sleep 15 && RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/uc_and_memberships_fixture.json'" \
+    "sleep 30 && RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -o 'contracts/fixtures/memberships_fixture.json'"
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestMisbehaviour$' -timeout 40m
   @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
@@ -73,11 +73,9 @@ generate-abi: clean
   @echo "Done."
 
 # Deploy the SP1ICS07Tendermint contract to the Eth Sepolia testnet if the `.env` file is present
-deploy-contracts:
+deploy-contracts: genesis
   @echo "Deploying the SP1ICS07Tendermint contract"
-  just genesis
   cd contracts && forge install
-  @echo "Deploying the contract..."
   cd contracts && forge script script/SP1ICS07Tendermint.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 
 # Run the operator using the `cargo run --bin operator` command.

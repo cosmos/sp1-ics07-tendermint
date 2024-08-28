@@ -4,7 +4,8 @@ use crate::{
     cli::command::{genesis::Args, OutputPath},
     helpers::light_block::LightBlockExt,
     programs::{
-        MembershipProgram, SP1Program, UpdateClientAndMembershipProgram, UpdateClientProgram,
+        MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
+        UpdateClientProgram,
     },
     rpc::TendermintRpcExt,
 };
@@ -15,7 +16,6 @@ use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::path::PathBuf;
 use tendermint_light_client_verifier::types::{LightBlock, TrustThreshold};
 use tendermint_rpc::HttpClient;
-use crate::programs::MisbehaviourProgram;
 
 /// The genesis data for the SP1 ICS07 Tendermint contract.
 #[serde_as]

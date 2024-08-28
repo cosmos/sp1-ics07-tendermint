@@ -149,33 +149,13 @@ contract SP1ICS07Tendermint is
         }
 
         MisbehaviourOutput memory output = abi.decode(msgSubmitMisbehaviour.sp1Proof.publicValues, (MisbehaviourOutput));
+
         validateMisbehaviourOutput(output);
 
         verifySP1Proof(msgSubmitMisbehaviour.sp1Proof);
 
-        // If the misbehaviour is valid, the client is frozen
+        // If the misbehaviour and proof is valid, the client needs to be frozen
         clientState.isFrozen = true;
-    }
-
-    /// @notice Validates the SP1ICS07MisbehaviourOutput public values.
-    /// @param output The public values.
-    function validateMisbehaviourOutput(MisbehaviourOutput memory output) private view {
-        if (clientState.isFrozen) {
-            revert FrozenClientState();
-        }
-        validateEnv(output.env);
-
-        bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
-        bytes32 trustedConsensusState1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
-        if (outputConsensusStateHash1 != trustedConsensusState1) {
-            revert ConsensusStateHashMismatch(trustedConsensusState1, outputConsensusStateHash1);
-        }
-
-        bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
-        bytes32 trustedConsensusState2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
-        if (outputConsensusStateHash2 != trustedConsensusState2) {
-            revert ConsensusStateHashMismatch(trustedConsensusState2, outputConsensusStateHash2);
-        }
     }
 
     /// @notice The entrypoint for upgrading the client.
@@ -378,6 +358,27 @@ contract SP1ICS07Tendermint is
         }
     }
 
+    /// @notice Validates the SP1ICS07MisbehaviourOutput public values.
+    /// @param output The public values.
+    function validateMisbehaviourOutput(MisbehaviourOutput memory output) private view {
+        if (clientState.isFrozen) {
+            revert FrozenClientState();
+        }
+        validateEnv(output.env);
+
+        bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
+        bytes32 trustedConsensusState1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
+        if (outputConsensusStateHash1 != trustedConsensusState1) {
+            revert ConsensusStateHashMismatch(trustedConsensusState1, outputConsensusStateHash1);
+        }
+
+        bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
+        bytes32 trustedConsensusState2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
+        if (outputConsensusStateHash2 != trustedConsensusState2) {
+            revert ConsensusStateHashMismatch(trustedConsensusState2, outputConsensusStateHash2);
+        }
+    }
+
     /// @notice Validates the Env public values.
     /// @param env The public values.
     function validateEnv(Env memory env) private view {
@@ -392,7 +393,7 @@ contract SP1ICS07Tendermint is
         }
         if (
             env.trustThreshold.numerator != clientState.trustLevel.numerator
-            || env.trustThreshold.denominator != clientState.trustLevel.denominator
+                || env.trustThreshold.denominator != clientState.trustLevel.denominator
         ) {
             revert TrustThresholdMismatch(
                 clientState.trustLevel.numerator,

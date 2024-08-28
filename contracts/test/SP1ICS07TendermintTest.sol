@@ -9,7 +9,9 @@ import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
 import { IUpdateClientMsgs } from "../src/msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "../src/msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "../src/msgs/IUcAndMembershipMsgs.sol";
+import { IMisbehaviourMsgs } from "../src/msgs/IMisbehaviourMsgs.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
+import { ISP1ICS07TendermintErrors } from "../src/errors/ISP1ICS07TendermintErrors.sol";
 import { SP1Verifier } from "@sp1-contracts/v1.1.0/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
@@ -29,6 +31,8 @@ abstract contract SP1ICS07TendermintTest is
     IUpdateClientMsgs,
     IMembershipMsgs,
     IUpdateClientAndMembershipMsgs,
+    IMisbehaviourMsgs,
+    ISP1ICS07TendermintErrors,
     ILightClientMsgs
 {
     using stdJson for string;

@@ -36,7 +36,7 @@ test-foundry testname=".\\*":
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:
-  cargo test --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --locked --all-features
+  cargo test --workspace --exclude sp1-ics07-tendermint-update-client --exclude sp1-ics07-tendermint-membership --exclude sp1-ics07-tendermint-uc-and-membership --exclude sp1-ics07-tendermint-misbehaviour --locked --all-features
 
 # Generate the `genesis.json` file using $TENDERMINT_RPC_URL in the `.env` file
 genesis: build-programs

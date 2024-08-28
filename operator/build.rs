@@ -29,4 +29,12 @@ fn main() {
             ..Default::default()
         },
     );
+    
+    build_program_with_args(
+        "../programs/misbehaviour",
+        BuildArgs {
+            elf_name: "misbehaviour-riscv32im-succinct-zkvm-elf".to_string(),
+            ..Default::default()
+        },
+    )
 }

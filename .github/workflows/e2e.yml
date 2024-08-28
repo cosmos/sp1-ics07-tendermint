@@ -41,6 +41,7 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestDeploy
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership
+          - TestWithSP1ICS07TendermintTestSuite/TestMisbehaviour
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:

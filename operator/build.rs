@@ -11,7 +11,6 @@ fn main() {
             ..Default::default()
         },
     );
-
     // Build the membership program.
     build_program_with_args(
         "../programs/membership",
@@ -20,7 +19,6 @@ fn main() {
             ..Default::default()
         },
     );
-
     // Build the uc-and-membership program.
     build_program_with_args(
         "../programs/uc-and-membership",
@@ -29,7 +27,7 @@ fn main() {
             ..Default::default()
         },
     );
-    
+    // Build the misbehaviour program.
     build_program_with_args(
         "../programs/misbehaviour",
         BuildArgs {

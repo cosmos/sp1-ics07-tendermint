@@ -23,6 +23,7 @@ import (
 	cometproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	comettypes "github.com/cometbft/cometbft/types"
 	comettime "github.com/cometbft/cometbft/types/time"
+
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
@@ -337,7 +338,7 @@ func (s *SP1ICS07TendermintTestSuite) createTMClientHeader(
 
 	// Make sure all the signers are in the correct order as expected by the validator set
 	signers := make([]comettypes.PrivValidator, valSet.Size())
-	for i, _ := range signers {
+	for i := range signers {
 		_, val := valSet.GetByIndex(int32(i))
 
 		for _, pv := range privVals {

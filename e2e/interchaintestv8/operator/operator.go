@@ -20,14 +20,6 @@ import (
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
 )
 
-// membershipFixture is a struct that contains the membership proof and proof height
-type membershipFixture struct {
-	// hex encoded height
-	ProofHeight string `json:"proofHeight"`
-	// hex encoded proof
-	MembershipProof string `json:"membershipProof"`
-}
-
 type GenesisFixture struct {
 	TrustedClientState    string `json:"trustedClientState"`
 	TrustedConsensusState string `json:"trustedConsensusState"`
@@ -37,7 +29,16 @@ type GenesisFixture struct {
 	MisbehaviourVKey      string `json:"misbehaviourVKey"`
 }
 
-type MisbehaviourFixture struct {
+// membershipFixture is a struct that contains the membership proof and proof height
+type membershipFixture struct {
+	GenesisFixture
+	// hex encoded height
+	ProofHeight string `json:"proofHeight"`
+	// hex encoded proof
+	MembershipProof string `json:"membershipProof"`
+}
+
+type misbehaviourFixture struct {
 	GenesisFixture
 	SubmitMsg string `json:"submitMsg"`
 }
@@ -117,10 +118,59 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 	return height, proofBz, nil
 }
 
+// Misbehaviour is a function that generates a misbehaviour proof and returns the submit message
 func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixture bool, args ...string) ([]byte, error) {
-	misbehaviourFileName := "misbehaviour.json"
-	args = append([]string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName}, args...)
+	misbehaviourBz, err := marshalMisbehaviour(cdc, misbehaviour)
+	if err != nil {
+		return nil, err
+	}
 
+	// write misbehaviour to file for the operator to use
+	misbehaviourFileName := "misbehaviour.json"
+	if err := os.WriteFile(misbehaviourFileName, misbehaviourBz, 0o600); err != nil {
+		return nil, err
+	}
+	defer os.Remove(misbehaviourFileName)
+
+	args = append([]string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName}, args...)
+	output, err := exec.Command("target/release/operator", args...).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("operator misbehaviour failed: %w, output: %s", err, output)
+	}
+
+	// eliminate non-json characters
+	jsonStartIdx := strings.Index(string(output), "{")
+	if jsonStartIdx == -1 {
+		panic("no json found in output")
+	}
+	output = output[jsonStartIdx:]
+
+	var misbehaviourFixture misbehaviourFixture
+	err = json.Unmarshal(output, &misbehaviourFixture)
+	if err != nil {
+		return nil, err
+	}
+
+	if writeFixture {
+		if err := os.WriteFile("contracts/fixtures/e2e_misbehaviour_fixture.json", output, 0o600); err != nil {
+			return nil, err
+		}
+	}
+
+	submitMsgBz, err := hex.DecodeString(misbehaviourFixture.SubmitMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	return submitMsgBz, nil
+}
+
+// TODO: This is a mighty ugly piece of code. Hopefully there is a better way to do this.
+// marshalMisbehaviour takes a Misbehaviour struct and marshals it into a JSON byte slice that can be unmarshalled by the operator.
+// It first marshals to JSON directly, and then modifies all the incompatible types (mostly base64 encoded bytes) to be hex encoded.
+// Ideally, we can update the types in the operator to be more compatible with the type we have here.
+// It might be enough to get out a new version of the rust crate "ibc-proto" and update the operator to use it.
+func marshalMisbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) ([]byte, error) {
 	misbehaviour.ClientId = "07-tendermint-0" // We just have to set it to something to make the unmarshalling to work :P
 	bzIntermediary, err := cdc.MarshalJSON(&misbehaviour)
 	if err != nil {
@@ -240,44 +290,5 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixt
 		sig["validator_address"] = hex.EncodeToString(valAddressBz)
 	}
 
-	misbehaviourBz, err := json.Marshal(jsonIntermediary)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: Make file temporary and delete it after use
-	if err := os.WriteFile(misbehaviourFileName, misbehaviourBz, 0o600); err != nil {
-		return nil, err
-	}
-
-	output, err := exec.Command("target/release/operator", args...).CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("operator misbehaviour failed: %w, output: %s", err, output)
-	}
-
-	// eliminate non-json characters
-	jsonStartIdx := strings.Index(string(output), "{")
-	if jsonStartIdx == -1 {
-		panic("no json found in output")
-	}
-	output = output[jsonStartIdx:]
-
-	var misbehaviourFixture MisbehaviourFixture
-	err = json.Unmarshal(output, &misbehaviourFixture)
-	if err != nil {
-		return nil, err
-	}
-
-	if writeFixture {
-		if err := os.WriteFile("contracts/fixtures/e2e_misbehaviour_fixture.json", output, 0o600); err != nil {
-			return nil, err
-		}
-	}
-
-	submitMsgBz, err := hex.DecodeString(misbehaviourFixture.SubmitMsg)
-	if err != nil {
-		return nil, err
-	}
-
-	return submitMsgBz, nil
+	return json.Marshal(jsonIntermediary)
 }

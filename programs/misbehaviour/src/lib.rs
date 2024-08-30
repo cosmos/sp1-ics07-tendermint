@@ -57,6 +57,7 @@ pub fn check_for_misbehaviour(
         clock_drift: Duration::default(),
     };
 
+    // Call into ibc-rs verify_misbehaviour function to verify that both headers are valid given their respective trusted consensus states
     verify_misbehaviour::<_, sha2::Sha256>(
         &ctx,
         misbehaviour,

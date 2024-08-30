@@ -366,12 +366,16 @@ contract SP1ICS07Tendermint is
         }
         validateEnv(output.env);
 
+        // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
+        // mapping
         bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
         bytes32 trustedConsensusState1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
         if (outputConsensusStateHash1 != trustedConsensusState1) {
             revert ConsensusStateHashMismatch(trustedConsensusState1, outputConsensusStateHash1);
         }
 
+        // make sure the trusted consensus state from header 2 is known (trusted) by matching it with the the one in the
+        // mapping
         bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
         bytes32 trustedConsensusState2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
         if (outputConsensusStateHash2 != trustedConsensusState2) {

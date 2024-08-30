@@ -42,6 +42,8 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     let raw_misbehaviour: RawMisbehaviour = serde_json::from_slice(&misbehaviour_bz)?;
 
     let tm_rpc_client = HttpClient::from_env();
+
+    // get light block for trusted height of header 1
     #[allow(clippy::cast_possible_truncation)]
     let trusted_light_block_1 = tm_rpc_client
         .get_light_block(Some(
@@ -55,6 +57,7 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
         ))
         .await?;
     #[allow(clippy::cast_possible_truncation)]
+    // get light block for trusted height of header 2
     let trusted_light_block_2 = tm_rpc_client
         .get_light_block(Some(
             raw_misbehaviour
@@ -67,12 +70,14 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
         ))
         .await?;
 
+    // use trusted light block 1 to instantiate a new SP1 tendermint client with light block 1 as initial trusted consensus state
     let genesis_1 = SP1ICS07TendermintGenesis::from_env(
         &trusted_light_block_1,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
     )
     .await?;
+    // use trusted light block 2 to instantiate a new SP1 tendermint client with light block 2 as initial trusted consensus state
     let genesis_2 = SP1ICS07TendermintGenesis::from_env(
         &trusted_light_block_2,
         args.trust_options.trusting_period,
@@ -80,14 +85,18 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     )
     .await?;
 
+    // use the clients to convert the Tendermint light blocks into the IBC Tendermint trusted consensus states
     let trusted_consensus_state_1 =
         ConsensusState::abi_decode(&genesis_1.trusted_consensus_state, false)?;
     let trusted_consensus_state_2 =
         ConsensusState::abi_decode(&genesis_2.trusted_consensus_state, false)?;
+
+    // ise the client state from genesis_2 as the client state since they will both be the same
     let trusted_client_state_2 = ClientState::abi_decode(&genesis_2.trusted_client_state, false)?;
 
     let verify_misbehaviour_prover = SP1ICS07TendermintProver::<MisbehaviourProgram>::default();
 
+    // construct contract env from the client state, which will be used by the light client contract
     let contract_env = Env {
         chainId: trusted_light_block_2.chain_id()?.to_string(),
         trustThreshold: trusted_client_state_2.trustLevel,

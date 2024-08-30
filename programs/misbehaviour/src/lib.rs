@@ -37,8 +37,8 @@ pub fn check_for_misbehaviour(
             .to_string()
     );
 
-   // Insert the two trusted consensus states into the trusted consensus state map that exists in the ClientValidationContext that is expected by verifyMisbehaviour
-   // Since we are mocking the existence of prior trusted consensus states, we are only filling in the two consensus states that are passed in into the map
+    // Insert the two trusted consensus states into the trusted consensus state map that exists in the ClientValidationContext that is expected by verifyMisbehaviour
+    // Since we are mocking the existence of prior trusted consensus states, we are only filling in the two consensus states that are passed in into the map
     let mut trusted_consensus_state_map = HashMap::new();
     trusted_consensus_state_map.insert(
         misbehaviour.header1().trusted_height.revision_height(),
@@ -76,7 +76,7 @@ pub fn check_for_misbehaviour(
 
     assert!(is_misbehaviour, "Misbehaviour is not detected");
 
-    let output_trusted_header_1 = sp1_ics07_tendermint::Height {
+    let output_trusted_height_1 = sp1_ics07_tendermint::Height {
         revisionNumber: misbehaviour
             .header1()
             .trusted_height
@@ -90,7 +90,7 @@ pub fn check_for_misbehaviour(
             .try_into()
             .unwrap(),
     };
-    let output_trusted_header_2 = sp1_ics07_tendermint::Height {
+    let output_trusted_height_2 = sp1_ics07_tendermint::Height {
         revisionNumber: misbehaviour
             .header2()
             .trusted_height
@@ -110,8 +110,8 @@ pub fn check_for_misbehaviour(
     // states stored in its own internal state before it can accept the misbehaviour proof as valid.
     MisbehaviourOutput {
         env,
-        trustedHeight1: output_trusted_header_1,
-        trustedHeight2: output_trusted_header_2,
+        trustedHeight1: output_trusted_height_1,
+        trustedHeight2: output_trusted_height_2,
         trustedConsensusState1: trusted_consensus_state_1.into(),
         trustedConsensusState2: trusted_consensus_state_2.into(),
     }

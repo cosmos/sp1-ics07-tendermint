@@ -37,6 +37,8 @@ pub fn check_for_misbehaviour(
             .to_string()
     );
 
+   // Insert the two trusted consensus states into the trusted consensus state map that exists in the ClientValidationContext that is expected by verifyMisbehaviour
+   // Since we are mocking the existence of prior trusted consensus states, we are only filling in the two consensus states that are passed in into the map
     let mut trusted_consensus_state_map = HashMap::new();
     trusted_consensus_state_map.insert(
         misbehaviour.header1().trusted_height.revision_height(),

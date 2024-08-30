@@ -68,6 +68,8 @@ pub fn check_for_misbehaviour(
     )
     .unwrap();
 
+    // Call into ibc-rs check_for_misbehaviour_on_misbehaviour method to ensure that the misbehaviour is valid
+    // i.e. the headers are same height but different commits, or headers are not monotonically increasing in time
     let is_misbehaviour =
         check_for_misbehaviour_on_misbehavior(misbehaviour.header1(), misbehaviour.header2())
             .unwrap();

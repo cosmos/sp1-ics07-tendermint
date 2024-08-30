@@ -105,6 +105,9 @@ pub fn check_for_misbehaviour(
             .unwrap(),
     };
 
+    // The prover takes in the trusted headers as an input but does not maintain its own internal state
+    // Thus, the verifier must ensure that the trusted headers that were used in the proof are trusted consensus
+    // states stored in its own internal state before it can accept the misbehaviour proof as valid.
     MisbehaviourOutput {
         env,
         trustedHeight1: output_trusted_header_1,

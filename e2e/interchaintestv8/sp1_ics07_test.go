@@ -186,7 +186,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 	eth, simd := s.ChainA, s.ChainB
 
 	if s.generateFixtures {
-		s.T().Log("Generate fixtures is set to true, but TestUpdateClient does not support it (yet)")
+		s.T().Log("Generate fixtures is set to true, but TestUpdateClientAndMembership does not support it (yet)")
 	}
 
 	s.Require().True(s.Run("Update and verify non-membership", func() {

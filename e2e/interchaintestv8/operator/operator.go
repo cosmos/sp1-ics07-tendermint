@@ -118,8 +118,8 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 	return height, proofBz, nil
 }
 
-// Misbehaviour is a function that generates a misbehaviour proof and returns the submit message
-func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixture bool, args ...string) ([]byte, error) {
+// MisbehaviourProof is a function that generates a misbehaviour proof and returns the submit message
+func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixture bool, args ...string) ([]byte, error) {
 	misbehaviourBz, err := marshalMisbehaviour(cdc, misbehaviour)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixt
 	}
 
 	if writeFixture {
-		if err := os.WriteFile("contracts/fixtures/e2e_misbehaviour_fixture.json", output, 0o600); err != nil {
+		if err := os.WriteFile("contracts/fixtures/misbehaviour_fixture.json", output, 0o600); err != nil {
 			return nil, err
 		}
 	}
@@ -166,7 +166,7 @@ func Misbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixt
 }
 
 // TODO: This is a mighty ugly piece of code. Hopefully there is a better way to do this.
-// marshalMisbehaviour takes a Misbehaviour struct and marshals it into a JSON byte slice that can be unmarshalled by the operator.
+// marshalMisbehaviour takes a MisbehaviourProof struct and marshals it into a JSON byte slice that can be unmarshalled by the operator.
 // It first marshals to JSON directly, and then modifies all the incompatible types (mostly base64 encoded bytes) to be hex encoded.
 // Ideally, we can update the types in the operator to be more compatible with the type we have here.
 // It might be enough to get out a new version of the rust crate "ibc-proto" and update the operator to use it.
@@ -226,15 +226,15 @@ func marshalMisbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) ([
 		tmpIntermediary[pathParts[len(pathParts)-1]] = hex.EncodeToString(bz)
 	}
 
-	validators1 := jsonIntermediary["header_1"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
-	validators2 := jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
-	validators3 := jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
-	validators4 := jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
-	validators := validators1
-	validators = append(validators, validators2...)
-	validators = append(validators, validators3...)
-	validators = append(validators, validators4...)
-	for _, val := range validators {
+	trustedValidators1 := jsonIntermediary["header_1"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
+	trustedValidators2 := jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
+	trustedValidators3 := jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
+	trustedValidators4 := jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
+	trustedValidators := trustedValidators1
+	trustedValidators = append(trustedValidators, trustedValidators2...)
+	trustedValidators = append(trustedValidators, trustedValidators3...)
+	trustedValidators = append(trustedValidators, trustedValidators4...)
+	for _, val := range trustedValidators {
 		val := val.(map[string]interface{})
 		valAddressBase64Str, ok := val["address"].(string)
 		if !ok {

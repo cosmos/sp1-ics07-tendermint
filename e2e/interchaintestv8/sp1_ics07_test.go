@@ -245,11 +245,11 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 	_ = eth
 
 	var height clienttypes.Height
-	var oldHeader tmclient.Header
-	s.Require().True(s.Run("Get old header", func() {
+	var trustedHeader tmclient.Header
+	s.Require().True(s.Run("Get trusted header", func() {
 		var latestHeight int64
 		var err error
-		oldHeader, latestHeight, err = ibcclientutils.QueryTendermintHeader(simd.Validators[0].CliContext())
+		trustedHeader, latestHeight, err = ibcclientutils.QueryTendermintHeader(simd.Validators[0].CliContext())
 		s.Require().NoError(err)
 		s.Require().NotZero(latestHeight)
 
@@ -259,8 +259,8 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 		s.Require().NoError(err)
 		trustedHeight := clienttypes.NewHeight(uint64(clientState.LatestHeight.RevisionNumber), uint64(clientState.LatestHeight.RevisionHeight))
 
-		oldHeader.TrustedHeight = trustedHeight
-		oldHeader.TrustedValidators = oldHeader.ValidatorSet
+		trustedHeader.TrustedHeight = trustedHeight
+		trustedHeader.TrustedValidators = trustedHeader.ValidatorSet
 	}))
 
 	s.Require().True(s.Run("Invalid misbehaviour", func() {
@@ -269,20 +269,20 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 			ctx,
 			simd,
 			int64(height.RevisionHeight+1),
-			oldHeader.GetTime().Add(time.Minute),
-			oldHeader,
+			trustedHeader.GetTime().Add(time.Minute),
+			trustedHeader,
 		)
 
 		invalidMisbehaviour := tmclient.Misbehaviour{
 			Header1: &newHeader,
-			Header2: &oldHeader,
+			Header2: &trustedHeader,
 		}
 
 		// The proof should fail because this is not misbehaviour (valid header for a new block)
-		_, err := operator.Misbehaviour(simd.GetCodec(), invalidMisbehaviour, false,
+		_, err := operator.MisbehaviourProof(simd.GetCodec(), invalidMisbehaviour, false,
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod))
-		s.Require().ErrorContains(err, "Misbehaviour is not detected")
+		s.Require().ErrorContains(err, "MisbehaviourProof is not detected")
 	}))
 
 	s.Require().True(s.Run("Valid misbehaviour", func() {
@@ -291,16 +291,16 @@ func (s *SP1ICS07TendermintTestSuite) TestMisbehaviour() {
 			ctx,
 			simd,
 			int64(height.RevisionHeight),
-			oldHeader.GetTime().Add(time.Minute),
-			oldHeader,
+			trustedHeader.GetTime().Add(time.Minute),
+			trustedHeader,
 		)
 
 		misbehaviour := tmclient.Misbehaviour{
 			Header1: &newHeader,
-			Header2: &oldHeader,
+			Header2: &trustedHeader,
 		}
 
-		submitMsg, err := operator.Misbehaviour(simd.GetCodec(), misbehaviour, s.generateFixtures,
+		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, s.generateFixtures,
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod))
 		s.Require().NoError(err)

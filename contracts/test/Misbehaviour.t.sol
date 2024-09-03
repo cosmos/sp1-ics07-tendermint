@@ -24,9 +24,9 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     Env public env;
 
     function setUp() public {
-        fixture = loadFixture("e2e_misbehaviour_fixture.json");
+        fixture = loadFixture("misbehaviour_fixture.json");
 
-        setUpTest("e2e_misbehaviour_fixture.json");
+        setUpTest("misbehaviour_fixture.json");
 
         submitMsg = abi.decode(fixture.submitMsg, (IMisbehaviourMsgs.MsgSubmitMisbehaviour));
         output = abi.decode(submitMsg.sp1Proof.publicValues, (IMisbehaviourMsgs.MisbehaviourOutput));
@@ -52,7 +52,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
 
     function test_ValidMisbehaviour() public {
         // set a correct timestamp
-        vm.warp(env.now + 300);
+        vm.warp(env.now);
         ics07Tendermint.misbehaviour(fixture.submitMsg);
 
         // to console

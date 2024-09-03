@@ -119,7 +119,7 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 }
 
 // MisbehaviourProof is a function that generates a misbehaviour proof and returns the submit message
-func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixture bool, args ...string) ([]byte, error) {
+func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writeFixtureName string, args ...string) ([]byte, error) {
 	misbehaviourBz, err := marshalMisbehaviour(cdc, misbehaviour)
 	if err != nil {
 		return nil, err
@@ -151,8 +151,9 @@ func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writ
 		return nil, err
 	}
 
-	if writeFixture {
-		if err := os.WriteFile("contracts/fixtures/misbehaviour_fixture.json", output, 0o600); err != nil {
+	if writeFixtureName != "" {
+		fixtureFileName := fmt.Sprintf("contracts/fixtures/misbehaviour_%s_fixture.json", writeFixtureName)
+		if err := os.WriteFile(fixtureFileName, output, 0o600); err != nil {
 			return nil, err
 		}
 	}

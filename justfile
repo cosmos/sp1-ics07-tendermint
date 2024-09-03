@@ -58,7 +58,8 @@ fixtures prover: build-operator
     "RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/update_client_fixture.json'" \
     "sleep 15 && RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/uc_and_memberships_fixture.json'" \
     "sleep 30 && RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -o 'contracts/fixtures/memberships_fixture.json'"
-  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestMisbehaviour$' -timeout 40m
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour$' -timeout 40m
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour' -timeout 40m
   @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
@@ -104,7 +105,7 @@ lint:
 lint-fix:
   @echo "Fixing the Rust code..."
   cargo fmt --all
-  cargo clippy --fix --allow-dirty
+  cargo clippy --fix --allow-dirty --allow-staged
   @echo "Fixing the Solidity code..."
   forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
   @echo "Fixing the Go code..."

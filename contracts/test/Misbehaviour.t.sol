@@ -23,17 +23,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
 
     Env public env;
 
-    function setUp() public {
-        fixture = loadFixture("misbehaviour_fixture.json");
-
-        setUpTest("misbehaviour_fixture.json");
-
-        submitMsg = abi.decode(fixture.submitMsg, (IMisbehaviourMsgs.MsgSubmitMisbehaviour));
-        output = abi.decode(submitMsg.sp1Proof.publicValues, (IMisbehaviourMsgs.MisbehaviourOutput));
-        env = output.env;
-    }
-
-    function loadFixture(string memory fileName) public view returns (SP1ICS07MisbehaviourFixtureJson memory) {
+    function setUpMisbehaviour(string memory fileName) public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/contracts/fixtures/", fileName);
         string memory json = vm.readFile(path);
@@ -41,16 +31,37 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         bytes memory trustedConsensusStateBz = json.readBytes(".trustedConsensusState");
         bytes memory submitMsgBz = json.readBytes(".submitMsg");
 
-        SP1ICS07MisbehaviourFixtureJson memory fix = SP1ICS07MisbehaviourFixtureJson({
+        fixture = SP1ICS07MisbehaviourFixtureJson({
             trustedClientState: trustedClientStateBz,
             trustedConsensusState: trustedConsensusStateBz,
             submitMsg: submitMsgBz
         });
 
-        return fix;
+        setUpTest(fileName);
+
+        submitMsg = abi.decode(fixture.submitMsg, (IMisbehaviourMsgs.MsgSubmitMisbehaviour));
+        output = abi.decode(submitMsg.sp1Proof.publicValues, (IMisbehaviourMsgs.MisbehaviourOutput));
+        env = output.env;
     }
 
-    function test_ValidMisbehaviour() public {
+    function test_ValidDoubleSignMisbehaviour() public {
+        setUpMisbehaviour("misbehaviour_double_sign_fixture.json");
+
+        // set a correct timestamp
+        vm.warp(env.now);
+        ics07Tendermint.misbehaviour(fixture.submitMsg);
+
+        // to console
+        console.log("Misbehaviour gas used: ", vm.lastCallGas().gasTotalUsed);
+
+        // verify that the client is frozen
+        ClientState memory clientState = ics07Tendermint.getClientState();
+        assertTrue(clientState.isFrozen);
+    }
+
+    function test_ValidBreakingTimeMonotonicityMisbehaviour() public {
+        setUpMisbehaviour("misbehaviour_breaking_time_monotonicity_fixture.json");
+
         // set a correct timestamp
         vm.warp(env.now);
         ics07Tendermint.misbehaviour(fixture.submitMsg);
@@ -64,6 +75,8 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     }
 
     function test_InvalidMisbehaviour() public {
+        setUpMisbehaviour("misbehaviour_double_sign_fixture.json");
+
         // proof is in the future
         vm.warp(env.now - 300);
         vm.expectRevert(abi.encodeWithSelector(ProofIsInTheFuture.selector, block.timestamp, env.now));

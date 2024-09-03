@@ -41,7 +41,8 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestDeploy
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership
-          - TestWithSP1ICS07TendermintTestSuite/TestMisbehaviour
+          - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour
+          - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:

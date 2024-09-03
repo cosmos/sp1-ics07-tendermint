@@ -64,7 +64,7 @@ linters-settings:
       - prefix(github.com/cosmos/ibc-go)
       - prefix(github.com/CosmWasm/wasmd)
       - prefix(github.com/strangelove-ventures/interchaintest)
-      - prefix(github.com/srdtrk/sp1-ics07-tendermint/e2e/v8)
+      - prefix(github.com/cosmos/sp1-ics07-tendermint/e2e/v8)
 
     custom-order: true
   dogsled:

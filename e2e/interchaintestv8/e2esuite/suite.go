@@ -16,8 +16,8 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testreporter"
 
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/chainconfig"
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/chainconfig"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
 )
 
 // TestSuite is a suite of tests that require two chains and a relayer

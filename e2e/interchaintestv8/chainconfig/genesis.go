@@ -12,7 +12,7 @@ import (
 
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
 )
 
 func defaultModifyGenesis() func(ibc.ChainConfig, []byte) ([]byte, error) {

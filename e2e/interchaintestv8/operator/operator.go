@@ -11,7 +11,7 @@ import (
 
 	abi "github.com/ethereum/go-ethereum/accounts/abi"
 
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/types/sp1ics07tendermint"
 )
 
 // membershipFixture is a struct that contains the membership proof and proof height

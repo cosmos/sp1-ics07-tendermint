@@ -23,10 +23,10 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
-	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/e2esuite"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/operator"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/types/sp1ics07tendermint"
 )
 
 // SP1ICS07TendermintTestSuite is a suite of tests that wraps TestSuite

@@ -3,6 +3,8 @@ package e2esuite
 import (
 	"context"
 
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/chainconfig"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
 	dockerclient "github.com/docker/docker/client"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
@@ -15,9 +17,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testreporter"
-
-	"github.com/cosmos/sp1-ics07-tendermint/e2e/chainconfig"
-	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
 )
 
 // TestSuite is a suite of tests that require two chains and a relayer

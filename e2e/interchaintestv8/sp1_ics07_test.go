@@ -8,6 +8,10 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/e2esuite"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/operator"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
+	"github.com/cosmos/sp1-ics07-tendermint/e2e/types/sp1ics07tendermint"
 	"github.com/stretchr/testify/suite"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -22,11 +26,6 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
-
-	"github.com/cosmos/sp1-ics07-tendermint/e2e/e2esuite"
-	"github.com/cosmos/sp1-ics07-tendermint/e2e/operator"
-	"github.com/cosmos/sp1-ics07-tendermint/e2e/testvalues"
-	"github.com/cosmos/sp1-ics07-tendermint/e2e/types/sp1ics07tendermint"
 )
 
 // SP1ICS07TendermintTestSuite is a suite of tests that wraps TestSuite

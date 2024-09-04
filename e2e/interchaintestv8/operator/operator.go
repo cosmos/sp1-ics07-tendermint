@@ -227,15 +227,15 @@ func marshalMisbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) ([
 		tmpIntermediary[pathParts[len(pathParts)-1]] = hex.EncodeToString(bz)
 	}
 
-	trustedValidators1 := jsonIntermediary["header_1"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
-	trustedValidators2 := jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
-	trustedValidators3 := jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
-	trustedValidators4 := jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
-	trustedValidators := trustedValidators1
-	trustedValidators = append(trustedValidators, trustedValidators2...)
-	trustedValidators = append(trustedValidators, trustedValidators3...)
-	trustedValidators = append(trustedValidators, trustedValidators4...)
-	for _, val := range trustedValidators {
+	validators1 := jsonIntermediary["header_1"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
+	validators2 := jsonIntermediary["header_2"].(map[string]interface{})["validator_set"].(map[string]interface{})["validators"].([]interface{})
+	trustedValidators1 := jsonIntermediary["header_1"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
+	trustedValidators2 := jsonIntermediary["header_2"].(map[string]interface{})["trusted_validators"].(map[string]interface{})["validators"].([]interface{})
+	validators := validators1
+	validators = append(validators, validators2...)
+	validators = append(validators, trustedValidators1...)
+	validators = append(validators, trustedValidators2...)
+	for _, val := range validators {
 		val := val.(map[string]interface{})
 		valAddressBase64Str, ok := val["address"].(string)
 		if !ok {

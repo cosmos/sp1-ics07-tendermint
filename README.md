@@ -154,6 +154,12 @@ After generating the verify the proof with the SP1 EVM verifier.
 just test-foundry
 ```
 
+The recipe also accepts a `testname` argument that will only run the test with the given name. For example:
+
+```shell
+just test-foundry test_success_sendTransfer
+```
+
 ## End to End Testing
 
 There are several end-to-end tests in the `e2e/interchaintestv8` directory. These tests are written in Go and use the [`interchaintest`](https://github.com/strangelove-ventures/interchaintest) library. It spins up a local Ethereum and a Tendermint network and runs the tests found in [`e2e/interchaintestv8/sp1_ics07_test.go`](e2e/interchaintestv8/sp1_ics07_test.go). Some of the tests use the prover network to generate the proofs, so you need to provide your SP1 network private key to `.env` for these tests to pass.

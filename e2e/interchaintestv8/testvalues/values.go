@@ -3,8 +3,6 @@ package testvalues
 import (
 	"time"
 
-	"cosmossdk.io/math"
-
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
@@ -26,11 +24,15 @@ const (
 	EnvKeySp1Prover = "SP1_PROVER"
 	// Private key for the prover network.
 	EnvKeySp1PrivateKey = "SP1_PRIVATE_KEY"
+	// EnvKeyGenerateFixtures Generate fixtures for the solidity tests if set to true.
+	EnvKeyGenerateFixtures = "GENERATE_FIXTURES"
 	// The log level for the Rust logger.
 	EnvKeyRustLog = "RUST_LOG"
 
 	// Log level for the Rust logger.
 	EnvValueRustLog_Info = "info"
+	// EnvValueGenerateFixtures_True is the value to set to generate fixtures for the solidity tests.
+	EnvValueGenerateFixtures_True = "true"
 )
 
 var (
@@ -42,7 +44,7 @@ var (
 	VotingPeriod = time.Second * 30
 
 	// StartingEthBalance is the amount of ETH to give to each user at the start of the test.
-	StartingEthBalance = math.NewInt(5 * ethereum.ETHER)
+	StartingEthBalance = ethereum.ETHER.MulRaw(5)
 
 	// DefaultTrustLevel is the trust level used by the SP1ICS07Tendermint contract.
 	DefaultTrustLevel = ibctm.Fraction{Numerator: 2, Denominator: 3}.ToTendermint()

@@ -16,6 +16,7 @@ jobs:
           - programs/update-client
           - programs/membership
           - programs/uc-and-membership
+          - programs/misbehaviour
     name: 'build: ${{ matrix.programs }}'
     runs-on: ubuntu-latest
     steps:

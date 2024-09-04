@@ -7,7 +7,7 @@ linters:
   disable-all: true
   enable:
     - dogsled
-    - exportloopref
+    - copyloopvar
     - errcheck
     - gci
     - goconst
@@ -51,6 +51,10 @@ issues:
   max-same-issues: 10000
 
 linters-settings:
+  gosec:
+    excludes:
+      # Flags for potentially-unsafe casting of ints, similar problem to globally-disabled G103
+      - G115
   gci:
     sections:
       - standard # Standard section: captures all standard packages.
@@ -65,7 +69,6 @@ linters-settings:
       - prefix(github.com/CosmWasm/wasmd)
       - prefix(github.com/strangelove-ventures/interchaintest)
       - prefix(github.com/srdtrk/sp1-ics07-tendermint/e2e/v8)
-
     custom-order: true
   dogsled:
     max-blank-identifiers: 3

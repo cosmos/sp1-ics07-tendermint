@@ -5878,6 +5878,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-ics07-tendermint-misbehaviour"
+version = "0.1.0"
+dependencies = [
+ "alloy-sol-types",
+ "bincode",
+ "ibc-client-tendermint",
+ "ibc-core-client",
+ "ibc-core-handler-types",
+ "ibc-core-host-types",
+ "ibc-primitives",
+ "serde",
+ "serde_cbor",
+ "sha2 0.10.8",
+ "sp1-ics07-tendermint-solidity",
+ "sp1-zkvm",
+ "tendermint-light-client-verifier",
+]
+
+[[package]]
 name = "sp1-ics07-tendermint-operator"
 version = "0.1.0"
 dependencies = [

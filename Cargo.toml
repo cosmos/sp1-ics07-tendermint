@@ -21,6 +21,8 @@ sp1-zkvm = "1.1"
 sp1-ics07-tendermint-solidity = { path = "./packages/solidity/" }
 sp1-ics07-tendermint-update-client = { path = "./programs/update-client/" }
 sp1-ics07-tendermint-membership = { path = "./programs/membership/" }
+sp1-ics07-tendermint-uc-and-membership = { path = "./programs/uc-and-membership/" }
+sp1-ics07-tendermint-misbehaviour = { path = "./programs/misbehaviour/" }
 
 # ibc-proto
 ibc-proto = { version = "0.47", default-features = false }

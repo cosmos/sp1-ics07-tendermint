@@ -22,14 +22,14 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3.7.0
+        uses: golangci/golangci-lint-action@v6.1.0
         with:
-          version: v1.59
+          version: v1.60
           args: --timeout 5m
           working-directory: e2e/interchaintestv8
   e2e:
@@ -41,13 +41,15 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestDeploy
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership
+          - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour
+          - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: "1.22"
           check-latest: true

@@ -14,7 +14,7 @@ import (
 
 	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testreporter"
 )
@@ -23,7 +23,7 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	ChainA       *ethereum.EthereumChain
+	ChainA       *foundry.AnvilChain
 	ChainB       *cosmos.CosmosChain
 	UserA        ibc.Wallet
 	UserB        ibc.Wallet
@@ -36,6 +36,7 @@ type TestSuite struct {
 // SetupSuite sets up the chains, relayer, user accounts, clients, and connections
 func (s *TestSuite) SetupSuite(ctx context.Context) {
 	chainSpecs := chainconfig.DefaultChainSpecs
+	chainSpecs[0].AdditionalStartArgs = append(chainSpecs[0].AdditionalStartArgs, "--steps-tracing")
 
 	if len(chainSpecs) != 2 {
 		panic("TestSuite requires exactly 2 chain specs")
@@ -50,7 +51,7 @@ func (s *TestSuite) SetupSuite(ctx context.Context) {
 
 	chains, err := cf.Chains(t.Name())
 	s.Require().NoError(err)
-	s.ChainA = chains[0].(*ethereum.EthereumChain)
+	s.ChainA = chains[0].(*foundry.AnvilChain)
 	s.ChainB = chains[1].(*cosmos.CosmosChain)
 
 	s.ExecRep = testreporter.NewNopReporter().RelayerExecReporter(t)

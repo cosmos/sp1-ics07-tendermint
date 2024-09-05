@@ -9,7 +9,9 @@ import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
 import { IUpdateClientMsgs } from "../src/msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "../src/msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "../src/msgs/IUcAndMembershipMsgs.sol";
+import { IMisbehaviourMsgs } from "../src/msgs/IMisbehaviourMsgs.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
+import { ISP1ICS07TendermintErrors } from "../src/errors/ISP1ICS07TendermintErrors.sol";
 import { SP1Verifier } from "@sp1-contracts/v1.1.0/SP1Verifier.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
@@ -20,6 +22,7 @@ struct SP1ICS07GenesisFixtureJson {
     bytes32 updateClientVkey;
     bytes32 membershipVkey;
     bytes32 ucAndMembershipVkey;
+    bytes32 misbehaviourVkey;
 }
 
 abstract contract SP1ICS07TendermintTest is
@@ -28,6 +31,8 @@ abstract contract SP1ICS07TendermintTest is
     IUpdateClientMsgs,
     IMembershipMsgs,
     IUpdateClientAndMembershipMsgs,
+    IMisbehaviourMsgs,
+    ISP1ICS07TendermintErrors,
     ILightClientMsgs
 {
     using stdJson for string;
@@ -51,6 +56,7 @@ abstract contract SP1ICS07TendermintTest is
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,
             genesisFixture.ucAndMembershipVkey,
+            genesisFixture.misbehaviourVkey,
             address(verifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
@@ -61,6 +67,7 @@ abstract contract SP1ICS07TendermintTest is
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,
             genesisFixture.ucAndMembershipVkey,
+            genesisFixture.misbehaviourVkey,
             address(mockVerifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
@@ -82,13 +89,15 @@ abstract contract SP1ICS07TendermintTest is
         bytes32 updateClientVkey = json.readBytes32(".updateClientVkey");
         bytes32 membershipVkey = json.readBytes32(".membershipVkey");
         bytes32 ucAndMembershipVkey = json.readBytes32(".ucAndMembershipVkey");
+        bytes32 misbehaviourVkey = json.readBytes32(".misbehaviourVkey");
 
         SP1ICS07GenesisFixtureJson memory fix = SP1ICS07GenesisFixtureJson({
             trustedClientState: trustedClientState,
             trustedConsensusState: trustedConsensusState,
             updateClientVkey: updateClientVkey,
             membershipVkey: membershipVkey,
-            ucAndMembershipVkey: ucAndMembershipVkey
+            ucAndMembershipVkey: ucAndMembershipVkey,
+            misbehaviourVkey: misbehaviourVkey
         });
 
         return fix;

@@ -5,6 +5,7 @@ import { IICS07TendermintMsgs } from "./msgs/IICS07TendermintMsgs.sol";
 import { IUpdateClientMsgs } from "./msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "./msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "./msgs/IUcAndMembershipMsgs.sol";
+import { IMisbehaviourMsgs } from "./msgs/IMisbehaviourMsgs.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.sol";
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
@@ -21,6 +22,7 @@ contract SP1ICS07Tendermint is
     IUpdateClientMsgs,
     IMembershipMsgs,
     IUpdateClientAndMembershipMsgs,
+    IMisbehaviourMsgs,
     ISP1ICS07TendermintErrors,
     ILightClientMsgs,
     ISP1ICS07Tendermint
@@ -31,6 +33,8 @@ contract SP1ICS07Tendermint is
     bytes32 public immutable MEMBERSHIP_PROGRAM_VKEY;
     /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY;
+    /// @inheritdoc ISP1ICS07Tendermint
+    bytes32 public immutable MISBEHAVIOUR_PROGRAM_VKEY;
     /// @inheritdoc ISP1ICS07Tendermint
     ISP1Verifier public immutable VERIFIER;
 
@@ -47,6 +51,7 @@ contract SP1ICS07Tendermint is
     /// @param updateClientProgramVkey The verification key for the update client program.
     /// @param membershipProgramVkey The verification key for the verify (non)membership program.
     /// @param updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
+    /// @param misbehaviourProgramVkey The verification key for the misbehaviour program.
     /// @param verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
@@ -54,6 +59,7 @@ contract SP1ICS07Tendermint is
         bytes32 updateClientProgramVkey,
         bytes32 membershipProgramVkey,
         bytes32 updateClientAndMembershipProgramVkey,
+        bytes32 misbehaviourProgramVkey,
         address verifier,
         bytes memory _clientState,
         bytes32 _consensusState
@@ -61,6 +67,7 @@ contract SP1ICS07Tendermint is
         UPDATE_CLIENT_PROGRAM_VKEY = updateClientProgramVkey;
         MEMBERSHIP_PROGRAM_VKEY = membershipProgramVkey;
         UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY = updateClientAndMembershipProgramVkey;
+        MISBEHAVIOUR_PROGRAM_VKEY = misbehaviourProgramVkey;
         VERIFIER = ISP1Verifier(verifier);
 
         clientState = abi.decode(_clientState, (ClientState));
@@ -135,9 +142,20 @@ contract SP1ICS07Tendermint is
 
     /// @notice The entrypoint for misbehaviour.
     /// @inheritdoc ILightClient
-    function misbehaviour(bytes calldata) public pure {
-        // TODO: Not yet implemented. (#56)
-        revert FeatureNotSupported();
+    function misbehaviour(bytes calldata misbehaviourMsg) public {
+        MsgSubmitMisbehaviour memory msgSubmitMisbehaviour = abi.decode(misbehaviourMsg, (MsgSubmitMisbehaviour));
+        if (msgSubmitMisbehaviour.sp1Proof.vKey != MISBEHAVIOUR_PROGRAM_VKEY) {
+            revert VerificationKeyMismatch(MISBEHAVIOUR_PROGRAM_VKEY, msgSubmitMisbehaviour.sp1Proof.vKey);
+        }
+
+        MisbehaviourOutput memory output = abi.decode(msgSubmitMisbehaviour.sp1Proof.publicValues, (MisbehaviourOutput));
+
+        validateMisbehaviourOutput(output);
+
+        verifySP1Proof(msgSubmitMisbehaviour.sp1Proof);
+
+        // If the misbehaviour and proof is valid, the client needs to be frozen
+        clientState.isFrozen = true;
     }
 
     /// @notice The entrypoint for upgrading the client.
@@ -331,32 +349,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        if (output.env.now > block.timestamp) {
-            revert ProofIsInTheFuture(block.timestamp, output.env.now);
-        }
-        if (block.timestamp - output.env.now > ALLOWED_SP1_CLOCK_DRIFT) {
-            revert ProofIsTooOld(block.timestamp, output.env.now);
-        }
-        if (keccak256(bytes(output.env.chainId)) != keccak256(bytes(clientState.chainId))) {
-            revert ChainIdMismatch(clientState.chainId, output.env.chainId);
-        }
-        if (
-            output.env.trustThreshold.numerator != clientState.trustLevel.numerator
-                || output.env.trustThreshold.denominator != clientState.trustLevel.denominator
-        ) {
-            revert TrustThresholdMismatch(
-                clientState.trustLevel.numerator,
-                clientState.trustLevel.denominator,
-                output.env.trustThreshold.numerator,
-                output.env.trustThreshold.denominator
-            );
-        }
-        if (output.env.trustingPeriod != clientState.trustingPeriod) {
-            revert TrustingPeriodMismatch(clientState.trustingPeriod, output.env.trustingPeriod);
-        }
-        if (output.env.trustingPeriod > clientState.unbondingPeriod) {
-            revert TrustingPeriodTooLong(output.env.trustingPeriod, clientState.unbondingPeriod);
-        }
+        validateEnv(output.env);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
         bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
@@ -365,9 +358,66 @@ contract SP1ICS07Tendermint is
         }
     }
 
+    /// @notice Validates the SP1ICS07MisbehaviourOutput public values.
+    /// @param output The public values.
+    function validateMisbehaviourOutput(MisbehaviourOutput memory output) private view {
+        if (clientState.isFrozen) {
+            revert FrozenClientState();
+        }
+        validateEnv(output.env);
+
+        // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
+        // mapping
+        bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
+        bytes32 trustedConsensusState1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
+        if (outputConsensusStateHash1 != trustedConsensusState1) {
+            revert ConsensusStateHashMismatch(trustedConsensusState1, outputConsensusStateHash1);
+        }
+
+        // make sure the trusted consensus state from header 2 is known (trusted) by matching it with the the one in the
+        // mapping
+        bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
+        bytes32 trustedConsensusState2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
+        if (outputConsensusStateHash2 != trustedConsensusState2) {
+            revert ConsensusStateHashMismatch(trustedConsensusState2, outputConsensusStateHash2);
+        }
+    }
+
+    /// @notice Validates the Env public values.
+    /// @param env The public values.
+    function validateEnv(Env memory env) private view {
+        if (env.now > block.timestamp) {
+            revert ProofIsInTheFuture(block.timestamp, env.now);
+        }
+        if (block.timestamp - env.now > ALLOWED_SP1_CLOCK_DRIFT) {
+            revert ProofIsTooOld(block.timestamp, env.now);
+        }
+        if (keccak256(bytes(env.chainId)) != keccak256(bytes(clientState.chainId))) {
+            revert ChainIdMismatch(clientState.chainId, env.chainId);
+        }
+        if (
+            env.trustThreshold.numerator != clientState.trustLevel.numerator
+                || env.trustThreshold.denominator != clientState.trustLevel.denominator
+        ) {
+            revert TrustThresholdMismatch(
+                clientState.trustLevel.numerator,
+                clientState.trustLevel.denominator,
+                env.trustThreshold.numerator,
+                env.trustThreshold.denominator
+            );
+        }
+        if (env.trustingPeriod != clientState.trustingPeriod) {
+            revert TrustingPeriodMismatch(clientState.trustingPeriod, env.trustingPeriod);
+        }
+        if (env.trustingPeriod > clientState.unbondingPeriod) {
+            revert TrustingPeriodTooLong(env.trustingPeriod, clientState.unbondingPeriod);
+        }
+    }
+
     /// @notice Checks for basic misbehaviour.
-    /// @dev This function checks if the consensus state at the new height is different than the one in the mapping.
-    /// @dev This function does not check timestamp misbehaviour (a niche case).
+    /// @dev This function checks if the consensus state at the new height is different than the one in the mapping
+    /// @dev or if the timestamp is not increasing.
+    /// @dev If any of these conditions are met, it returns a Misbehaviour UpdateResult.
     /// @param output The public values of the update client program.
     /// @return The result of the update.
     function checkUpdateResult(UpdateClientOutput memory output) private view returns (UpdateResult) {
@@ -375,8 +425,12 @@ contract SP1ICS07Tendermint is
         if (consensusStateHash == bytes32(0)) {
             // No consensus state at the new height, so no misbehaviour
             return UpdateResult.Update;
-        } else if (consensusStateHash != keccak256(abi.encode(output.newConsensusState))) {
+        } else if (
+            consensusStateHash != keccak256(abi.encode(output.newConsensusState))
+                || output.trustedConsensusState.timestamp >= output.newConsensusState.timestamp
+        ) {
             // The consensus state at the new height is different than the one in the mapping
+            // or the timestamp is not increasing
             return UpdateResult.Misbehaviour;
         } else {
             // The consensus state at the new height is the same as the one in the mapping
@@ -397,19 +451,23 @@ contract SP1ICS07Tendermint is
     /// @param o4 The MembershipProof.
     /// @param o5 The SP1MembershipProof.
     /// @param o6 The SP1MembershipAndUpdateClientProof.
+    /// @param o7 The MisbehaviourOutput.
+    /// @param o8 The MsgSubmitMisbehaviour.
     function abiPublicTypes(
         MembershipOutput memory o1,
         UcAndMembershipOutput memory o2,
         MsgUpdateClient memory o3,
         MembershipProof memory o4,
         SP1MembershipProof memory o5,
-        SP1MembershipAndUpdateClientProof memory o6
+        SP1MembershipAndUpdateClientProof memory o6,
+        MisbehaviourOutput memory o7,
+        MsgSubmitMisbehaviour memory o8
     )
         public
         pure
     // solhint-disable-next-line no-empty-blocks
     {
-        // This is a dummy function to generate the ABI for MembershipOutput
+        // This is a dummy function to generate the ABI for outputs
         // so that it can be used in the SP1 verifier contract.
         // The function is not used in the contract.
     }

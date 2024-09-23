@@ -67,7 +67,7 @@ jobs:
 
       - name: Get SP1 version
         id: sp1-version
-        run: cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "sp1-sdk") | .version'
+        run: cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "sp1-sdk") | .version' >> $GITHUB_OUTPUT
       - name: Cache SP1 toolchain
         id: cache-sp1
         uses: actions/cache@v4

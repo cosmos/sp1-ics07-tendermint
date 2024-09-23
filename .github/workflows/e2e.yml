@@ -69,16 +69,16 @@ jobs:
         id: sp1-version
         run: |
           sp1_version=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "sp1-sdk") | .version')
-          echo "sp1_version=$sp1_version" >> $GITHUB_OUTPUT
+          echo "sp1_version=v$sp1_version" >> $GITHUB_OUTPUT
       - name: Cache SP1 toolchain
         id: cache-sp1
         uses: actions/cache@v4
         with:
           path: ~/.sp1
-          key: ${{ runner.os }}-sp1-v${{ steps.get-sp1-sdk-version.outputs.sp1_version }}
+          key: ${{ runner.os }}-sp1-${{ steps.sp1-version.outputs.sp1_version }}
       - name: Install SP1 toolchain
         run: |
-          curl -L https://raw.githubusercontent.com/succinctlabs/sp1/v${{ steps.get-sp1-sdk-version.outputs.sp1_version }}/sp1up/install | bash
+          curl -L https://raw.githubusercontent.com/succinctlabs/sp1/${{ steps.sp1-version.outputs.sp1_version }}/sp1up/install | bash
           ~/.sp1/bin/sp1up 
           ~/.sp1/bin/cargo-prove prove --version
       - name: Install just

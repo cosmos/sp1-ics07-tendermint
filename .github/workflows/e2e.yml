@@ -46,13 +46,6 @@ jobs:
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:
-      - name: Maximize free space
-        uses: easimon/maximize-build-space@master
-        with:
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Setup Go

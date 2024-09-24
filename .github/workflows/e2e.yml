@@ -74,6 +74,7 @@ jobs:
           path: ~/.sp1
           key: ${{ runner.os }}-sp1-${{ steps.sp1-version.outputs.sp1_version }}
       - name: Install SP1 toolchain
+        if: steps.cache-sp1.outputs.cache-hit != 'true'
         run: |
           curl -L https://raw.githubusercontent.com/succinctlabs/sp1/${{ steps.sp1-version.outputs.sp1_version }}/sp1up/install | bash
           ~/.sp1/bin/sp1up 

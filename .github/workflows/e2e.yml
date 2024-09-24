@@ -46,8 +46,14 @@ jobs:
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:
-      - name: Free some space (we are running out of it)
-        run: rm -rf /opt/hostedtoolcache
+      - name: Maximize free space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
 
       - name: Checkout sources
         uses: actions/checkout@v4

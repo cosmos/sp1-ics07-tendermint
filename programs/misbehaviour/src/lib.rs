@@ -26,9 +26,8 @@ pub fn check_for_misbehaviour(
     trusted_consensus_state_2: ConsensusState,
 ) -> MisbehaviourOutput {
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
-    let chain_id = env.clone().chainId;
     assert_eq!(
-        chain_id,
+        env.chainId,
         misbehaviour
             .header1()
             .signed_header
@@ -62,7 +61,7 @@ pub fn check_for_misbehaviour(
         &ctx,
         misbehaviour,
         &client_id,
-        &ChainId::new(chain_id.as_str()).unwrap(),
+        &ChainId::new(&env.chainId).unwrap(),
         &options,
         &ProdVerifier::default(),
     )

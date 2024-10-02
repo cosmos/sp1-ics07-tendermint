@@ -48,7 +48,7 @@ impl<'a, 'b> ClientValidationContext for MisbehaviourValidationContext<'a, 'b> {
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
     ) -> Result<Self::ClientStateRef, ContextError> {
-        // not needed by the `verify_header` function
+        // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 
@@ -57,7 +57,7 @@ impl<'a, 'b> ClientValidationContext for MisbehaviourValidationContext<'a, 'b> {
         _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
     ) -> Result<(Timestamp, ibc_core_client::types::Height), ContextError> {
-        // not needed by the `verify_header` function
+        // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 }
@@ -68,7 +68,7 @@ impl<'a, 'b> ExtClientValidationContext for MisbehaviourValidationContext<'a, 'b
     }
 
     fn host_height(&self) -> Result<ibc_core_client::types::Height, ContextError> {
-        // not needed by the `verify_header` function
+        // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 
@@ -76,7 +76,7 @@ impl<'a, 'b> ExtClientValidationContext for MisbehaviourValidationContext<'a, 'b
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
     ) -> Result<Vec<ibc_core_client::types::Height>, ContextError> {
-        // not needed by the `verify_header` function
+        // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 
@@ -85,7 +85,7 @@ impl<'a, 'b> ExtClientValidationContext for MisbehaviourValidationContext<'a, 'b
         _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
     ) -> Result<Option<Self::ConsensusStateRef>, ContextError> {
-        // not needed by the `verify_header` function
+        // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 
@@ -94,7 +94,7 @@ impl<'a, 'b> ExtClientValidationContext for MisbehaviourValidationContext<'a, 'b
         _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
     ) -> Result<Option<Self::ConsensusStateRef>, ContextError> {
-        // not needed by the `verify_header` function
+        // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 }

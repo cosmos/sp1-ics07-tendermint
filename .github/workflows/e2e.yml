@@ -48,6 +48,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
+        with:
+          lfs: true
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -79,6 +81,9 @@ jobs:
           curl -L https://raw.githubusercontent.com/succinctlabs/sp1/${{ steps.sp1-version.outputs.sp1_version }}/sp1up/install | bash
           ~/.sp1/bin/sp1up 
           ~/.sp1/bin/cargo-prove prove --version
+      - name: Install SP1 circuit artifacts (plonky only)
+        run: |
+          mv e2e/interchaintestv8/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0/
       - name: Install just
         uses: extractions/setup-just@v2
       - name: Build operator

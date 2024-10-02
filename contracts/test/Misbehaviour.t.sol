@@ -6,7 +6,7 @@ import "forge-std/console.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
 import { IMisbehaviourMsgs } from "../src/msgs/IMisbehaviourMsgs.sol";
-import { SP1Verifier } from "@sp1-contracts/v1.1.0/SP1Verifier.sol";
+import { SP1Verifier } from "@sp1-contracts/v2.0.0/SP1VerifierPlonk.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 
 struct SP1ICS07MisbehaviourFixtureJson {

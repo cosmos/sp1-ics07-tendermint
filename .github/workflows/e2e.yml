@@ -48,24 +48,46 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
+
+      - name: Create LFS file list
+        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
+      - name: LFS Cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs/objects
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: |
+            ${{ runner.os }}-lfs-
+      - name: Git LFS Pull
+        run: git lfs pull
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
           check-latest: true
-          cache-dependency-path: |
-             e2e/interchaintestv8/go.sum
+          cache-dependency-path: e2e/interchaintestv8/go.sum
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
+
+      - name: Get SP1 version
+        id: sp1-version
+        run: |
+          sp1_version=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "sp1-sdk") | .version')
+          echo "sp1_version=v$sp1_version" >> $GITHUB_OUTPUT
       - name: Install SP1 toolchain
         run: |
-          curl -L https://sp1.succinct.xyz | bash
-          ~/.sp1/bin/sp1up 
+          curl -L https://raw.githubusercontent.com/succinctlabs/sp1/${{ steps.sp1-version.outputs.sp1_version }}/sp1up/install | bash
+          ~/.sp1/bin/sp1up --token ${{ secrets.GITHUB_TOKEN }}
           ~/.sp1/bin/cargo-prove prove --version
+      - name: Install SP1 circuit artifacts (plonky only)
+        run: |
+          mkdir ~/.sp1/circuits
+          mv e2e/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0
       - name: Install just
         uses: extractions/setup-just@v2
       - name: Build operator

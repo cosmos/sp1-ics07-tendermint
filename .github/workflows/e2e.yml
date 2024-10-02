@@ -83,7 +83,7 @@ jobs:
           ~/.sp1/bin/cargo-prove prove --version
       - name: Install SP1 circuit artifacts (plonky only)
         run: |
-          mv e2e/interchaintestv8/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0/
+          mv e2e/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0/
       - name: Install just
         uses: extractions/setup-just@v2
       - name: Build operator

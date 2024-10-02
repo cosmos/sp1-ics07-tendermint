@@ -79,11 +79,12 @@ jobs:
         if: steps.cache-sp1.outputs.cache-hit != 'true'
         run: |
           curl -L https://raw.githubusercontent.com/succinctlabs/sp1/${{ steps.sp1-version.outputs.sp1_version }}/sp1up/install | bash
-          ~/.sp1/bin/sp1up 
+          ~/.sp1/bin/sp1up --token ${{ secrets.GITHUB_TOKEN }}
           ~/.sp1/bin/cargo-prove prove --version
       - name: Install SP1 circuit artifacts (plonky only)
         run: |
-          mv e2e/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0/
+          mkdir ~/.sp1/circuits
+          mv e2e/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0
       - name: Install just
         uses: extractions/setup-just@v2
       - name: Build operator

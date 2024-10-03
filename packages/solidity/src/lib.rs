@@ -4,7 +4,6 @@
 
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint_types::ConsensusState as ICS07TendermintConsensusState;
-use ibc_core_client_types::Height;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use tendermint::{hash::Algorithm, Time};
 use tendermint_light_client_verifier::types::{Hash, TrustThreshold as TendermintTrustThreshold};
@@ -133,10 +132,10 @@ impl From<sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof>
     }
 }
 
-impl TryFrom<Height> for sp1_ics07_tendermint::Height {
+impl TryFrom<ibc_core_client_types::Height> for sp1_ics07_tendermint::Height {
     type Error = <u64 as TryInto<u32>>::Error;
 
-    fn try_from(height: Height) -> Result<Self, Self::Error> {
+    fn try_from(height: ibc_core_client_types::Height) -> Result<Self, Self::Error> {
         Ok(Self {
             revisionNumber: height.revision_number().try_into()?,
             revisionHeight: height.revision_height().try_into()?,

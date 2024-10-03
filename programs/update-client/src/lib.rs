@@ -11,7 +11,9 @@ use ibc_client_tendermint::{
     types::{ConsensusState, Header, TENDERMINT_CLIENT_TYPE},
 };
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env, UpdateClientOutput};
+use sp1_ics07_tendermint_solidity::{
+    IICS02ClientMsgs::Height, IICS07TendermintMsgs::Env, IUpdateClientMsgs::UpdateClientOutput,
+};
 
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 
@@ -43,7 +45,7 @@ pub fn update_client(
     )
     .unwrap();
 
-    let trusted_height = sp1_ics07_tendermint::Height {
+    let trusted_height = Height {
         revisionNumber: proposed_header
             .trusted_height
             .revision_number()
@@ -55,7 +57,7 @@ pub fn update_client(
             .try_into()
             .unwrap(),
     };
-    let new_height = sp1_ics07_tendermint::Height {
+    let new_height = Height {
         revisionNumber: proposed_header
             .height()
             .revision_number()

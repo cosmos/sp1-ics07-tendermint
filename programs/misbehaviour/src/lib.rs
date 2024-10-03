@@ -9,8 +9,9 @@ use ibc_client_tendermint::client_state::{
 };
 use ibc_client_tendermint::types::{ConsensusState, Misbehaviour, TENDERMINT_CLIENT_TYPE};
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, MisbehaviourOutput};
+use sp1_ics07_tendermint_solidity::{
+    IICS02ClientMsgs::Height, IICS07TendermintMsgs::Env, IMisbehaviourMsgs::MisbehaviourOutput,
+};
 use std::collections::HashMap;
 use std::time::Duration;
 use tendermint_light_client_verifier::options::Options;
@@ -76,7 +77,7 @@ pub fn check_for_misbehaviour(
 
     assert!(is_misbehaviour, "Misbehaviour is not detected");
 
-    let output_trusted_height_1 = sp1_ics07_tendermint::Height {
+    let output_trusted_height_1 = Height {
         revisionNumber: misbehaviour
             .header1()
             .trusted_height
@@ -90,7 +91,7 @@ pub fn check_for_misbehaviour(
             .try_into()
             .unwrap(),
     };
-    let output_trusted_height_2 = sp1_ics07_tendermint::Height {
+    let output_trusted_height_2 = Height {
         revisionNumber: misbehaviour
             .header2()
             .trusted_height

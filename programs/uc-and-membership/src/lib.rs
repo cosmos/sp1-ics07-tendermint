@@ -1,7 +1,9 @@
 //! The crate that contains the types and utilities for `sp1-ics07-tendermint-membership` program.
 #![deny(missing_docs, clippy::nursery, clippy::pedantic, warnings)]
 
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{Env, UcAndMembershipOutput};
+use sp1_ics07_tendermint_solidity::{
+    IICS07TendermintMsgs::Env, IUpdateClientAndMembershipMsgs::UcAndMembershipOutput,
+};
 
 use ibc_client_tendermint_types::{ConsensusState, Header};
 

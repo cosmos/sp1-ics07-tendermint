@@ -7,7 +7,7 @@ use ibc_client_tendermint::{
 use ibc_core_client::context::{ClientValidationContext, ExtClientValidationContext};
 use ibc_core_handler_types::error::ContextError;
 use ibc_primitives::Timestamp;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::Env;
+use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::Env;
 use std::collections::HashMap;
 
 /// The client validation context.

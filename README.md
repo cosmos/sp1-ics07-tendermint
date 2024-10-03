@@ -70,7 +70,7 @@ This project contains the following SP1 programs
 This repository contains large files stored using Git LFS. These are only needed for the GitHub workflows and are not needed for local development/testing until [succinctlabs/sp1#1565](https://github.com/succinctlabs/sp1/issues/1565) is resolved. You can clone the repository without the large files by running the following command:
 
 ```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/cosmos/sp1-ics07-tendermint sp1-test
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/cosmos/sp1-ics07-tendermint
 ```
 
 ## Requirements

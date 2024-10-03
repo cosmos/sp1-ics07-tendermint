@@ -17,5 +17,6 @@ serde = { workspace = true }
 ibc-client-tendermint-types = { workspace = true }
 tendermint = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
+ibc-core-client-types = { workspace = true }
 time = { workspace = true }
 hex = { workspace = true, optional = true }

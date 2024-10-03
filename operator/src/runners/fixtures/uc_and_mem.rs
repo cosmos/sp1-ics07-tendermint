@@ -56,7 +56,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let proposed_header = target_light_block.into_header(&trusted_light_block);
     let contract_env = Env {
         chainId: trusted_light_block.chain_id()?.to_string(),
-        trustThreshold: trusted_client_state.trustLevel.clone(),
+        trustThreshold: trusted_client_state.trustLevel,
         trustingPeriod: trusted_client_state.trustingPeriod,
         now: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)?

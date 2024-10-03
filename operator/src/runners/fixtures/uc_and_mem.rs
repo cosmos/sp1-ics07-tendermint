@@ -14,9 +14,11 @@ use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_core_host_cosmos::IBC_QUERY_PATH;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ClientState, ConsensusState as SolConsensusState, Env, MembershipProof,
-    SP1MembershipAndUpdateClientProof, SP1Proof, UcAndMembershipOutput,
+use sp1_ics07_tendermint_solidity::{
+    IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState, Env},
+    IMembershipMsgs::{MembershipProof, SP1MembershipAndUpdateClientProof},
+    ISP1Msgs::SP1Proof,
+    IUpdateClientAndMembershipMsgs::UcAndMembershipOutput,
 };
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;

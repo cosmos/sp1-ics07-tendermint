@@ -11,8 +11,10 @@ use crate::{
 use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ClientState, ConsensusState, Env, MsgUpdateClient, SP1Proof, UpdateClientOutput,
+use sp1_ics07_tendermint_solidity::{
+    IICS07TendermintMsgs::{ClientState, ConsensusState, Env},
+    ISP1Msgs::SP1Proof,
+    IUpdateClientMsgs::{MsgUpdateClient, UpdateClientOutput},
 };
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;

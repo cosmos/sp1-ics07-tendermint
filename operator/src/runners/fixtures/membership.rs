@@ -13,9 +13,10 @@ use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_core_host_cosmos::IBC_QUERY_PATH;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ClientState, ConsensusState as SolConsensusState, MembershipOutput, MembershipProof,
-    SP1MembershipProof, SP1Proof,
+use sp1_ics07_tendermint_solidity::{
+    IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState},
+    IMembershipMsgs::{MembershipOutput, MembershipProof, SP1MembershipProof},
+    ISP1Msgs::SP1Proof,
 };
 use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;

@@ -11,7 +11,7 @@ use crate::{
 };
 use alloy_sol_types::SolValue;
 use serde_with::serde_as;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::ConsensusState as SolConsensusState;
+use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::path::PathBuf;
 use tendermint_light_client_verifier::types::{LightBlock, TrustThreshold};

@@ -1,5 +1,4 @@
 #![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
 #![deny(clippy::nursery, clippy::pedantic, warnings)]
 
 use alloy_sol_types::SolValue;
@@ -28,7 +27,7 @@ alloy_sol_types::sol!(
 );
 
 #[cfg(feature = "rpc")]
-impl sp1_ics07_tendermint::SP1Proof {
+impl ISP1Msgs::SP1Proof {
     /// Create a new [`sp1_ics07_tendermint::SP1Proof`] instance.
     ///
     /// # Panics
@@ -49,8 +48,8 @@ impl sp1_ics07_tendermint::SP1Proof {
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
-    fn from(trust_threshold: sp1_ics07_tendermint::TrustThreshold) -> Self {
+impl From<IICS07TendermintMsgs::TrustThreshold> for TendermintTrustThreshold {
+    fn from(trust_threshold: IICS07TendermintMsgs::TrustThreshold) -> Self {
         Self::new(
             trust_threshold.numerator.into(),
             trust_threshold.denominator.into(),
@@ -59,7 +58,7 @@ impl From<sp1_ics07_tendermint::TrustThreshold> for TendermintTrustThreshold {
     }
 }
 
-impl TryFrom<TendermintTrustThreshold> for sp1_ics07_tendermint::TrustThreshold {
+impl TryFrom<TendermintTrustThreshold> for IICS07TendermintMsgs::TrustThreshold {
     type Error = <u64 as TryInto<u32>>::Error;
 
     fn try_from(trust_threshold: TendermintTrustThreshold) -> Result<Self, Self::Error> {
@@ -71,7 +70,7 @@ impl TryFrom<TendermintTrustThreshold> for sp1_ics07_tendermint::TrustThreshold 
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusState {
+impl From<ICS07TendermintConsensusState> for IICS07TendermintMsgs::ConsensusState {
     fn from(ics07_tendermint_consensus_state: ICS07TendermintConsensusState) -> Self {
         let root: [u8; 32] = ics07_tendermint_consensus_state
             .root
@@ -93,8 +92,8 @@ impl From<ICS07TendermintConsensusState> for sp1_ics07_tendermint::ConsensusStat
 }
 
 #[allow(clippy::fallible_impl_from)]
-impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusState {
-    fn from(consensus_state: sp1_ics07_tendermint::ConsensusState) -> Self {
+impl From<IICS07TendermintMsgs::ConsensusState> for ICS07TendermintConsensusState {
+    fn from(consensus_state: IICS07TendermintMsgs::ConsensusState) -> Self {
         let time =
             OffsetDateTime::from_unix_timestamp(consensus_state.timestamp.try_into().unwrap())
                 .unwrap();
@@ -112,8 +111,8 @@ impl From<sp1_ics07_tendermint::ConsensusState> for ICS07TendermintConsensusStat
     }
 }
 
-impl From<sp1_ics07_tendermint::SP1MembershipProof> for sp1_ics07_tendermint::MembershipProof {
-    fn from(proof: sp1_ics07_tendermint::SP1MembershipProof) -> Self {
+impl From<IMembershipMsgs::SP1MembershipProof> for IMembershipMsgs::MembershipProof {
+    fn from(proof: IMembershipMsgs::SP1MembershipProof) -> Self {
         Self {
             proofType: 0,
             proof: proof.abi_encode().into(),
@@ -121,10 +120,8 @@ impl From<sp1_ics07_tendermint::SP1MembershipProof> for sp1_ics07_tendermint::Me
     }
 }
 
-impl From<sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof>
-    for sp1_ics07_tendermint::MembershipProof
-{
-    fn from(proof: sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof) -> Self {
+impl From<IMembershipMsgs::SP1MembershipAndUpdateClientProof> for IMembershipMsgs::MembershipProof {
+    fn from(proof: IMembershipMsgs::SP1MembershipAndUpdateClientProof) -> Self {
         Self {
             proofType: 1,
             proof: proof.abi_encode().into(),

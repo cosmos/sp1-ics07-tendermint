@@ -14,7 +14,7 @@
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
-This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
+This is an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
 
 ![Light Mode Diagram](./sp1-ics07-tendermint-light.svg#gh-light-mode-only)![Dark Mode Diagram](./sp1-ics07-tendermint-dark.svg#gh-dark-mode-only)
 
@@ -39,7 +39,12 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
 
 ## Overview
 
-`sp1-ics07-tendermint` is an example ZK IBC tendermint light client on Ethereum.
+`sp1-ics07-tendermint` is a ZK IBC tendermint light client on Ethereum that can:
+
+- Update the client with new consensus states
+- Verify the membership of any key-value pair in the counterparty's state at a given height.
+- Verify the non-membership of any key in the counterparty's state at a given height.
+- Detect misbehaviour in the counterparty's consensus (e.g. double signing, non-monotonic heights).
 
 ### Project Structure
 
@@ -51,7 +56,7 @@ This project is structured as a cargo workspace with the following directories:
 
 ### Programs
 
-This project contains the following programs
+This project contains the following SP1 programs
 
 |     **Programs**    |                                                                                                                                     **Description**                                                                                                                                     | **Status** |
 |:-------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|

@@ -131,3 +131,14 @@ impl From<sp1_ics07_tendermint::SP1MembershipAndUpdateClientProof>
         }
     }
 }
+
+impl TryFrom<ibc_core_client_types::Height> for sp1_ics07_tendermint::Height {
+    type Error = <u64 as TryInto<u32>>::Error;
+
+    fn try_from(height: ibc_core_client_types::Height) -> Result<Self, Self::Error> {
+        Ok(Self {
+            revisionNumber: height.revision_number().try_into()?,
+            revisionHeight: height.revision_height().try_into()?,
+        })
+    }
+}

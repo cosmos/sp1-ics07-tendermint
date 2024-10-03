@@ -48,8 +48,8 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     let trusted_light_block_1 = tm_rpc_client
         .get_light_block(Some(
             raw_misbehaviour
-                .clone()
                 .header_1
+                .as_ref()
                 .unwrap()
                 .trusted_height
                 .unwrap()
@@ -61,8 +61,8 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     let trusted_light_block_2 = tm_rpc_client
         .get_light_block(Some(
             raw_misbehaviour
-                .clone()
                 .header_2
+                .as_ref()
                 .unwrap()
                 .trusted_height
                 .unwrap()

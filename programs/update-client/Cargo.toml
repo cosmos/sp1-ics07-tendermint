@@ -16,7 +16,6 @@ ibc-core-host-types = { workspace = true }
 ibc-core-client = { workspace = true }
 ibc-primitives = { workspace = true }
 ibc-core-handler-types = { workspace = true }
-serde = { workspace = true }
 sha2 = { workspace = true }
 alloy-sol-types = { workspace = true }
 serde_cbor = { workspace = true }

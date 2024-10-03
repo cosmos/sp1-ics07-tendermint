@@ -13,7 +13,10 @@ use alloy::providers::ProviderBuilder;
 use alloy_sol_types::SolValue;
 use log::{debug, info};
 use reqwest::Url;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{self, Env, MsgUpdateClient, SP1Proof};
+use sp1_ics07_tendermint_solidity::{
+    sp1_ics07_tendermint, IICS07TendermintMsgs::Env, ISP1Msgs::SP1Proof,
+    IUpdateClientMsgs::MsgUpdateClient,
+};
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use tendermint_rpc::HttpClient;
 

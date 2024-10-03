@@ -12,7 +12,7 @@ sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::Misbehaviour;
 use sp1_ics07_tendermint_misbehaviour::check_for_misbehaviour;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
+use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::{
     ConsensusState as SolConsensusState, Env,
 };
 

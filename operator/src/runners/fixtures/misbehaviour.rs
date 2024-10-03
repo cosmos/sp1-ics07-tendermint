@@ -12,8 +12,10 @@ use ibc_client_tendermint::types::Misbehaviour;
 use ibc_proto::ibc::lightclients::tendermint::v1::Misbehaviour as RawMisbehaviour;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
-    ClientState, ConsensusState, Env, MsgSubmitMisbehaviour, SP1Proof,
+use sp1_ics07_tendermint_solidity::{
+    IICS07TendermintMsgs::{ClientState, ConsensusState, Env},
+    IMisbehaviourMsgs::MsgSubmitMisbehaviour,
+    ISP1Msgs::SP1Proof,
 };
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;

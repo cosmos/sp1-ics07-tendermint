@@ -4,7 +4,10 @@ use ibc_client_tendermint::types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::{error::IdentifierError, identifiers::ChainId};
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{ClientState, Height, TrustThreshold};
+use sp1_ics07_tendermint_solidity::{
+    IICS02ClientMsgs::Height,
+    IICS07TendermintMsgs::{ClientState, TrustThreshold},
+};
 use std::str::FromStr;
 use tendermint_light_client_verifier::types::LightBlock;
 

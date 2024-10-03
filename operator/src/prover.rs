@@ -7,7 +7,7 @@ use crate::programs::{
 use ibc_client_tendermint::types::{Header, Misbehaviour};
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
-use sp1_ics07_tendermint_solidity::sp1_ics07_tendermint::{
+use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::{
     ConsensusState as SolConsensusState, Env,
 };
 use sp1_sdk::{ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};

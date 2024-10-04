@@ -26,7 +26,7 @@ type GenesisFixture struct {
 	UpdateClientVkey      string `json:"updateClientVkey"`
 	MembershipVkey        string `json:"membershipVkey"`
 	UcAndMembershipVkey   string `json:"ucAndMembershipVkey"`
-	MisbehaviourVKey      string `json:"misbehaviourVKey"`
+	MisbehaviourVKey      string `json:"misbehaviourVkey"`
 }
 
 // membershipFixture is a struct that contains the membership proof and proof height

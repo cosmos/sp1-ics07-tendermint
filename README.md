@@ -14,7 +14,7 @@
 [license]: https://opensource.org/licenses/MIT
 [license-badge]: https://img.shields.io/badge/License-MIT-blue.svg
 
-This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
+This is an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-tendermint-client) IBC light client on Ethereum powered by [SP1](https://github.com/succinctlabs/sp1) and [`ibc-rs`](https://github.com/cosmos/ibc-rs).
 
 ![Light Mode Diagram](./sp1-ics07-tendermint-light.svg#gh-light-mode-only)![Dark Mode Diagram](./sp1-ics07-tendermint-dark.svg#gh-dark-mode-only)
 
@@ -27,6 +27,7 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
     - [Overview](#overview)
         - [Project Structure](#project-structure)
         - [Programs](#programs)
+    - [Cloning the Repository](#cloning-the-repository)
     - [Requirements](#requirements)
     - [Build the programs](#build-the-programs)
     - [Run ICS-07 Tendermint Light Client End to End](#run-ics-07-tendermint-light-client-end-to-end)
@@ -38,7 +39,12 @@ This is a WIP example of an [ICS-07](https://github.com/cosmos/ibc/tree/main/spe
 
 ## Overview
 
-`sp1-ics07-tendermint` is an example ZK IBC tendermint light client on Ethereum.
+`sp1-ics07-tendermint` is a ZK IBC tendermint light client on Ethereum that can:
+
+- Update the client with new consensus states
+- Verify the membership of any key-value pair in the counterparty's state at a given height.
+- Verify the non-membership of any key in the counterparty's state at a given height.
+- Detect misbehaviour in the counterparty's consensus (e.g. double signing, non-monotonic heights).
 
 ### Project Structure
 
@@ -50,7 +56,7 @@ This project is structured as a cargo workspace with the following directories:
 
 ### Programs
 
-This project contains the following programs
+This project contains the following SP1 programs
 
 |     **Programs**    |                                                                                                                                     **Description**                                                                                                                                     | **Status** |
 |:-------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|
@@ -58,7 +64,14 @@ This project contains the following programs
 |     `membership`    | As consensus states are added to the client, they can be used for proof verification by relayers wishing to prove packet flow messages against a particular height on the counterparty. This uses the `verify_membership` and `verify_non_membership` methods on the tendermint client. |      ✅     |
 | `uc-and-membership` | This is a program that combines `update-client` and `membership` to update the client, and prove membership of packet flow messages against the new consensus state.                                                                                                                    |      ✅     |
 |    `misbehaviour`   | In case, the malicious subset of the validators exceeds the trust level of the client; then the client can be deceived into accepting invalid blocks and the connection is no longer secure. The tendermint client has some mitigations in place to prevent this.                       |      ✅     |
-|   `upgrade-client`   | The chain which this light client is tracking can elect to write a special pre-determined key in state to allow the light client to update its client state (e.g. with a new chain ID or revision).                                                                                    |      ⏳     |
+
+## Cloning the Repository
+
+This repository contains large files stored using Git LFS. These are only needed for the GitHub workflows and are not needed for local development/testing until [succinctlabs/sp1#1565](https://github.com/succinctlabs/sp1/issues/1565) is resolved. You can clone the repository without the large files by running the following command:
+
+```sh
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/cosmos/sp1-ics07-tendermint
+```
 
 ## Requirements
 

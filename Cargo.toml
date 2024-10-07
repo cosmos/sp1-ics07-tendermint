@@ -10,9 +10,9 @@ resolver = "2"
 version       = "0.1.0"
 edition       = "2021"
 license       = "Apache-2.0"
-repository    = "https://github.com/srdtrk/sp1-ics07-tendermint"
+repository    = "https://github.com/cosmos/sp1-ics07-tendermint"
 keywords      = ["cosmos", "ibc", "sp1", "tendermint", "ethereum", "bridge"]
-authors       = ["srdtrk <srdtrk@hotmail.com>"]
+authors       = ["srdtrk <serdar@interchain.io>", "gjermundgaraba <gjermund@interchain.io>"]
 
 [workspace.dependencies]
 # Used by the programs

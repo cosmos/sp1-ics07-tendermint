@@ -1,4 +1,4 @@
-module github.com/srdtrk/sp1-ics07-tendermint/e2e/v8
+module github.com/cosmos/sp1-ics07-tendermint/e2e
 
 go 1.22.2
 

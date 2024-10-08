@@ -223,7 +223,11 @@ contract SP1ICS07Tendermint is
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
 
-        verifySP1ProofCached(proof.sp1Proof);
+        if (output.kvPairs.length == 1) {
+            verifySP1Proof(proof.sp1Proof);
+        } else {
+            verifySP1ProofCached(proof.sp1Proof);
+        }
 
         return proof.trustedConsensusState.timestamp;
     }
@@ -271,7 +275,11 @@ contract SP1ICS07Tendermint is
 
             validateUpdateClientPublicValues(output.updateClientOutput);
 
-            verifySP1Proof(proof.sp1Proof);
+            if (output.kvPairs.length == 1) {
+                verifySP1Proof(proof.sp1Proof);
+            } else {
+                verifySP1ProofCached(proof.sp1Proof);
+            }
         }
 
         // check update result

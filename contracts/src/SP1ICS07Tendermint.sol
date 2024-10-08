@@ -42,6 +42,8 @@ contract SP1ICS07Tendermint is
     ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
+    /// @notice The mapping from verified SP1 proof hash to boolean.
+    mapping(bytes32 sp1ProofHash => bool) private verifiedProofs;
 
     /// @notice Allowed clock drift in seconds.
     /// @inheritdoc ISP1ICS07Tendermint
@@ -178,7 +180,6 @@ contract SP1ICS07Tendermint is
         bytes calldata kvValue
     )
         private
-        view
         returns (uint256)
     {
         if (proofHeight.revisionNumber != clientState.latestHeight.revisionNumber) {
@@ -438,10 +439,16 @@ contract SP1ICS07Tendermint is
         }
     }
 
-    /// @notice Verifies the SP1 proof.
+    /// @notice Verifies the SP1 proof and stores the hash of the proof.
     /// @param proof The SP1 proof.
-    function verifySP1Proof(SP1Proof memory proof) private view {
+    function verifySP1Proof(SP1Proof memory proof) private {
+        bytes32 proofHash = keccak256(abi.encode(proof));
+        if (verifiedProofs[proofHash]) {
+            return;
+        }
+
         VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
+        verifiedProofs[proofHash] = true;
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

@@ -43,7 +43,7 @@ contract SP1ICS07Tendermint is
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
     /// @notice The mapping from verified SP1 proof hash to boolean.
-    mapping(bytes32 sp1ProofHash => bool) private verifiedProofs;
+    mapping(bytes32 sp1ProofHash => bool isVerified) private verifiedProofs;
 
     /// @notice Allowed clock drift in seconds.
     /// @inheritdoc ISP1ICS07Tendermint
@@ -239,6 +239,7 @@ contract SP1ICS07Tendermint is
     /// @param kvPath The path of the key-value pair.
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the new consensus state.
+    // solhint-disable-next-line code-complexity
     function handleSP1UpdateClientAndMembership(
         Height calldata proofHeight,
         bytes memory proofBytes,

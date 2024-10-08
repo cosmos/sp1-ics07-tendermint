@@ -85,7 +85,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     }
 
     // Confirm that submitting a real proof passes the verifier.
-    function test_Valid_UpdateClientVerifyMembershipAndNonMembership() public {
+    function test_Valid_CachedUpdateClientAndMembership() public {
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
         vm.warp(output.updateClientOutput.env.now + 300);

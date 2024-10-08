@@ -60,7 +60,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         console.log("VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
-    function test_ValidVerifyMembershipAndNonMembership() public {
+    function test_ValidCachedMembership() public {
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,

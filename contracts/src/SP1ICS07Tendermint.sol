@@ -223,7 +223,7 @@ contract SP1ICS07Tendermint is
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
 
-        verifySP1Proof(proof.sp1Proof);
+        verifySP1ProofCached(proof.sp1Proof);
 
         return proof.trustedConsensusState.timestamp;
     }
@@ -439,9 +439,16 @@ contract SP1ICS07Tendermint is
         }
     }
 
-    /// @notice Verifies the SP1 proof and stores the hash of the proof.
+    /// @notice Verifies the SP1 proof
     /// @param proof The SP1 proof.
-    function verifySP1Proof(SP1Proof memory proof) private {
+    function verifySP1Proof(SP1Proof memory proof) private view {
+        VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
+    }
+
+    /// @notice Verifies the SP1 proof and stores the hash of the proof.
+    /// @dev If the proof is already cached, it does not verify the proof again.
+    /// @param proof The SP1 proof.
+    function verifySP1ProofCached(SP1Proof memory proof) private {
         bytes32 proofHash = keccak256(abi.encode(proof));
         if (verifiedProofs[proofHash]) {
             return;

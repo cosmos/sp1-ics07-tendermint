@@ -41,22 +41,49 @@ contract SP1ICS07MembershipTest is MembershipTest {
 
         ics07Tendermint.membership(membershipMsg);
 
-        // to console
-        console.log("VerifyMultiMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+        console.log("VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
     // Modify the proof to make it a non-membership proof.
     function test_ValidVerifyNonMembership() public {
-        MsgMembership memory membershipMsg = MsgMembership({
+        MsgMembership memory nonMembershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: verifyNonMembershipPath,
             value: bytes("")
         });
 
-        ics07Tendermint.membership(membershipMsg);
-        // to console
+        ics07Tendermint.membership(nonMembershipMsg);
+
         console.log("VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+    }
+
+    function test_ValidCachedMembership() public {
+        MsgMembership memory membershipMsg = MsgMembership({
+            proof: abi.encode(fixture.membershipProof),
+            proofHeight: fixture.proofHeight,
+            path: verifyMembershipPath,
+            value: verifyMembershipValue()
+        });
+
+        ics07Tendermint.membership(membershipMsg);
+
+        // resubmit the same proof
+        ics07Tendermint.membership(membershipMsg);
+
+        console.log("Cached VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+
+        // resubmit the same proof as non-membership
+        MsgMembership memory nonMembershipMsg = MsgMembership({
+            proof: abi.encode(fixture.membershipProof),
+            proofHeight: fixture.proofHeight,
+            path: verifyNonMembershipPath,
+            value: bytes("")
+        });
+
+        ics07Tendermint.membership(nonMembershipMsg);
+
+        console.log("Cached VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
     // Confirm that submitting an invalid proof with the real verifier fails.

@@ -42,6 +42,8 @@ contract SP1ICS07Tendermint is
     ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
+    /// @notice The collection of verified SP1 proofs for caching.
+    mapping(bytes32 sp1ProofHash => bool isVerified) private verifiedProofs;
 
     /// @notice Allowed clock drift in seconds.
     /// @inheritdoc ISP1ICS07Tendermint
@@ -178,7 +180,6 @@ contract SP1ICS07Tendermint is
         bytes calldata kvValue
     )
         private
-        view
         returns (uint256)
     {
         if (proofHeight.revisionNumber != clientState.latestHeight.revisionNumber) {
@@ -222,7 +223,12 @@ contract SP1ICS07Tendermint is
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
 
-        verifySP1Proof(proof.sp1Proof);
+        // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
+        if (output.kvPairs.length == 1) {
+            verifySP1Proof(proof.sp1Proof);
+        } else {
+            verifySP1ProofCached(proof.sp1Proof);
+        }
 
         return proof.trustedConsensusState.timestamp;
     }
@@ -234,6 +240,7 @@ contract SP1ICS07Tendermint is
     /// @param kvPath The path of the key-value pair.
     /// @param kvValue The value of the key-value pair.
     /// @return The timestamp of the new consensus state.
+    // solhint-disable-next-line code-complexity
     function handleSP1UpdateClientAndMembership(
         Height calldata proofHeight,
         bytes memory proofBytes,
@@ -270,7 +277,12 @@ contract SP1ICS07Tendermint is
 
             validateUpdateClientPublicValues(output.updateClientOutput);
 
-            verifySP1Proof(proof.sp1Proof);
+            // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
+            if (output.kvPairs.length == 1) {
+                verifySP1Proof(proof.sp1Proof);
+            } else {
+                verifySP1ProofCached(proof.sp1Proof);
+            }
         }
 
         // check update result
@@ -438,10 +450,23 @@ contract SP1ICS07Tendermint is
         }
     }
 
-    /// @notice Verifies the SP1 proof.
+    /// @notice Verifies the SP1 proof
     /// @param proof The SP1 proof.
     function verifySP1Proof(SP1Proof memory proof) private view {
         VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
+    }
+
+    /// @notice Verifies the SP1 proof and stores the hash of the proof.
+    /// @dev If the proof is already cached, it does not verify the proof again.
+    /// @param proof The SP1 proof.
+    function verifySP1ProofCached(SP1Proof memory proof) private {
+        bytes32 proofHash = keccak256(abi.encode(proof));
+        if (verifiedProofs[proofHash]) {
+            return;
+        }
+
+        VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
+        verifiedProofs[proofHash] = true;
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

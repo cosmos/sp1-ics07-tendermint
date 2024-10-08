@@ -41,7 +41,6 @@ contract SP1ICS07MembershipTest is MembershipTest {
 
         ics07Tendermint.membership(membershipMsg);
 
-        // to console
         console.log("VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
@@ -56,7 +55,6 @@ contract SP1ICS07MembershipTest is MembershipTest {
 
         ics07Tendermint.membership(nonMembershipMsg);
 
-        // to console
         console.log("VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
@@ -73,7 +71,6 @@ contract SP1ICS07MembershipTest is MembershipTest {
         // resubmit the same proof
         ics07Tendermint.membership(membershipMsg);
 
-        // to console
         console.log("Cached VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         // resubmit the same proof as non-membership
@@ -86,7 +83,6 @@ contract SP1ICS07MembershipTest is MembershipTest {
 
         ics07Tendermint.membership(nonMembershipMsg);
 
-        // to console
         console.log("Cached VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 

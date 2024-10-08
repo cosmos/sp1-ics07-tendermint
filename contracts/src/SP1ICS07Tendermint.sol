@@ -42,7 +42,7 @@ contract SP1ICS07Tendermint is
     ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
-    /// @notice The mapping from verified SP1 proof hash to boolean.
+    /// @notice The collection of verified SP1 proofs for caching.
     mapping(bytes32 sp1ProofHash => bool isVerified) private verifiedProofs;
 
     /// @notice Allowed clock drift in seconds.
@@ -223,6 +223,7 @@ contract SP1ICS07Tendermint is
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
 
+        // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
         if (output.kvPairs.length == 1) {
             verifySP1Proof(proof.sp1Proof);
         } else {
@@ -276,6 +277,7 @@ contract SP1ICS07Tendermint is
 
             validateUpdateClientPublicValues(output.updateClientOutput);
 
+            // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
             if (output.kvPairs.length == 1) {
                 verifySP1Proof(proof.sp1Proof);
             } else {

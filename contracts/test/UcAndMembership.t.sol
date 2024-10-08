@@ -44,7 +44,6 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         // run verify
         ics07Tendermint.membership(membershipMsg);
 
-        // to console
         console.log("UpdateClientAndVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         ClientState memory clientState = ics07Tendermint.getClientState();
@@ -72,7 +71,6 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         // run verify
         ics07Tendermint.membership(nonMembershipMsg);
 
-        // to console
         console.log("UpdateClientAndVerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         ClientState memory clientState = ics07Tendermint.getClientState();
@@ -111,7 +109,6 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         // resubmit the same proof
         ics07Tendermint.membership(membershipMsg);
 
-        // to console
         console.log("Cached UpdateClientAndVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         MsgMembership memory nonMembershipMsg = MsgMembership({
@@ -124,7 +121,6 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         // run verify
         ics07Tendermint.membership(nonMembershipMsg);
 
-        // to console
         console.log("Cached UpdateClientAndNonVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 

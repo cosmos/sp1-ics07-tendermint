@@ -152,8 +152,8 @@ pub mod fixtures {
         #[clap(flatten)]
         pub trust_options: super::TrustOptions,
 
-        /// Indicates that the key paths are base64 encoded (and separated by commas).
-        /// Otherwise, they are assumed to be UTF-8 strings (and separated by commas).
+        /// Indicates that the key paths are base64 encoded.
+        /// Module store keys seperated by '/', eg. 'aWJj/a2V5' for 'ibc/key'.
         #[clap(long)]
         pub base64: bool,
     }
@@ -162,25 +162,13 @@ pub mod fixtures {
     #[derive(Parser, Debug, Clone)]
     #[command(about = "Generate the update client and membership fixture")]
     pub struct UpdateClientAndMembershipCmd {
-        /// Trusted block.
-        #[clap(long)]
-        pub trusted_block: u32,
-
         /// Target block.
         #[clap(long, env)]
         pub target_block: u32,
 
-        /// Key paths to prove membership.
-        #[clap(long, value_delimiter = ',')]
-        pub key_paths: Vec<String>,
-
-        /// Fixture path. If not provided, the output will be written to stdout.
-        #[clap(long, short = 'o', value_parser = super::parse_output_path, default_value = "-")]
-        pub output_path: super::OutputPath,
-
-        /// Trust options
+        /// Membership arguments.
         #[clap(flatten)]
-        pub trust_options: super::TrustOptions,
+        pub membership: MembershipCmd,
     }
 
     /// The arguments for the `Misbehaviour` fixture executable.

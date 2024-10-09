@@ -11,9 +11,9 @@ use crate::{
     },
 };
 use alloy_sol_types::SolValue;
+use core::str;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
-use ibc_core_host_cosmos::IBC_QUERY_PATH;
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState, Env},
     IMembershipMsgs::{MembershipProof, SP1MembershipAndUpdateClientProof},
@@ -29,7 +29,7 @@ use tendermint_rpc::{Client, HttpClient};
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     assert!(
-        args.trusted_block < args.target_block,
+        args.membership.trusted_block < args.target_block,
         "The target block must be greater than the trusted block"
     );
 
@@ -37,7 +37,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
 
     let trusted_light_block = tm_rpc_client
-        .get_light_block(Some(args.trusted_block))
+        .get_light_block(Some(args.membership.trusted_block))
         .await?;
     let target_light_block = tm_rpc_client
         .get_light_block(Some(args.target_block))
@@ -45,8 +45,8 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
 
     let genesis = SP1ICS07TendermintGenesis::from_env(
         &trusted_light_block,
-        args.trust_options.trusting_period,
-        args.trust_options.trust_level,
+        args.membership.trust_options.trusting_period,
+        args.membership.trust_options.trust_level,
     )
     .await?;
     let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;
@@ -64,11 +64,20 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     };
 
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
-        futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
+        futures::future::try_join_all(args.membership.key_paths.into_iter().map(|path| async {
+            let path: Vec<Vec<u8>> = if args.membership.base64 {
+                path.split('/')
+                    .map(subtle_encoding::base64::decode)
+                    .collect::<Result<_, _>>()?
+            } else {
+                vec![b"ibc".into(), path.into_bytes()]
+            };
+            assert_eq!(path.len(), 2);
+
             let res = tm_rpc_client
                 .abci_query(
-                    Some(IBC_QUERY_PATH.to_string()),
-                    path.as_bytes(),
+                    Some(format!("store/{}/key", str::from_utf8(&path[0])?)),
+                    path[1].as_slice(),
                     // Proof height should be the block before the target block.
                     Some((args.target_block - 1).into()),
                     true,
@@ -76,16 +85,11 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
                 .await?;
 
             assert_eq!(u32::try_from(res.height.value())? + 1, args.target_block);
-            assert_eq!(res.key.as_slice(), path.as_bytes());
+            assert_eq!(res.key.as_slice(), path[1].as_slice());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
-            let value = res.value;
-            if value.is_empty() {
-                log::info!("Verifying non-membership");
-            }
             assert!(!vm_proof.proofs.is_empty());
 
-            let key_path = vec![b"ibc".to_vec(), path.into()];
-            anyhow::Ok((key_path, value, vm_proof))
+            anyhow::Ok((path, res.value, vm_proof))
         }))
         .await?;
 
@@ -116,7 +120,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         membership_proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
     };
 
-    match args.output_path {
+    match args.membership.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
             std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?)?;

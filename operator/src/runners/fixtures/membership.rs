@@ -8,9 +8,9 @@ use crate::{
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
+use core::str;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
-use ibc_core_host_cosmos::IBC_QUERY_PATH;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use sp1_ics07_tendermint_solidity::{
@@ -68,16 +68,19 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
 
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
         futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
-            let path = if args.base64 {
-                subtle_encoding::base64::decode(path)?
+            let path: Vec<Vec<u8>> = if args.base64 {
+                path.split('/')
+                    .map(subtle_encoding::base64::decode)
+                    .collect::<Result<_, _>>()?
             } else {
-                path.into_bytes()
+                vec![b"ibc".into(), path.into_bytes()]
             };
+            assert_eq!(path.len(), 2);
 
             let res = tm_rpc_client
                 .abci_query(
-                    Some(IBC_QUERY_PATH.to_string()),
-                    path.as_slice(),
+                    Some(format!("store/{}/key", str::from_utf8(&path[0])?)),
+                    path[1].as_slice(),
                     // Proof height should be the block before the target block.
                     Some((args.trusted_block - 1).into()),
                     true,
@@ -85,16 +88,11 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
                 .await?;
 
             assert_eq!(u32::try_from(res.height.value())? + 1, args.trusted_block);
-            assert_eq!(res.key.as_slice(), path);
+            assert_eq!(res.key.as_slice(), path[1].as_slice());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
-            let value = res.value;
-            if value.is_empty() {
-                log::info!("Verifying non-membership");
-            }
             assert!(!vm_proof.proofs.is_empty());
 
-            let key_path = vec![b"ibc".into(), path];
-            anyhow::Ok((key_path, value, vm_proof))
+            anyhow::Ok((path, res.value, vm_proof))
         }))
         .await?;
 

@@ -15,12 +15,13 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	// banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	abci "github.com/cometbft/cometbft/abci/types"
 
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
-	// commitmenttypes "github.com/cosmos/ibc-go/v8/modules/core/23-commitment/types"
 	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
@@ -33,7 +34,7 @@ import (
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
-	// "github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types"
+	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
 )
 
@@ -180,23 +181,6 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
-// // TestGenericKeyMembership tests the membership program when the key can be a generic byte array
-// func (s *SP1ICS07TendermintTestSuite) TestGenericKeyMembership() {
-// 	ctx := context.Background()
-//
-// 	s.SetupSuite(ctx)
-//
-// 	eth, simd := s.ChainA, s.ChainB
-//
-// 	s.Require().True(s.Run("Verify generic membership", func() {
-// 		key, err := types.BankBalanceKey(s.UserA.Address(), simd.Config().Denom)
-// 		s.Require().NoError(err)
-// 		merklePath = commitmenttypes.NewMerklePath(key)
-// 		merklePath, err = commitmenttypes.ApplyPrefix(commitmenttypes.NewMerklePrefix([]byte(banktypes.StoreKey)), merklePath)
-// 		s.Require().NoError(err)
-// 	}))
-// }
-
 // TestUpdateClientAndMembership tests the update client and membership functionality
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 	ctx := context.Background()
@@ -209,7 +193,24 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.T().Log("Generate fixtures is set to true, but TestUpdateClientAndMembership does not support it (yet)")
 	}
 
-	s.Require().True(s.Run("Update and verify non-membership", func() {
+	s.Require().True(s.Run("Update and verify (non)membership", func() {
+		var (
+			membershipKey    [][]byte
+			nonMembershipKey [][]byte
+		)
+		s.Require().True(s.Run("Generate keys", func() {
+			// Prove the bank balance of UserA
+			key, err := types.BankBalanceKey(s.UserA.Address(), simd.Config().Denom)
+			s.Require().NoError(err)
+
+			membershipKey = [][]byte{[]byte(banktypes.StoreKey), key}
+
+			// A non-membership key:
+			packetReceiptPath := ibchost.PacketReceiptKey(transfertypes.PortID, ibctesting.FirstChannelID, 1)
+
+			nonMembershipKey = [][]byte{[]byte(ibcexported.StoreKey), packetReceiptPath}
+		}))
+
 		s.Require().NoError(testutil.WaitForBlocks(ctx, 5, simd))
 
 		clientState, err := s.contract.GetClientState(nil)
@@ -222,20 +223,33 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 
 		s.Require().Greater(uint32(latestHeight), trustedHeight)
 
-		// This will be a non-membership proof since no packets have been sent
-		packetReceiptPath := ibchost.PacketReceiptPath(transfertypes.PortID, ibctesting.FirstChannelID, 1)
+		var expValue []byte
+		s.Require().True(s.Run("Get expected value for the verify membership", func() {
+			resp, err := e2esuite.ABCIQuery(ctx, simd, &abci.RequestQuery{
+				Path:   "store/" + string(membershipKey[0]) + "/key",
+				Data:   membershipKey[1],
+				Height: latestHeight - 1,
+			})
+			s.Require().NoError(err)
+			s.Require().NotEmpty(resp.Value)
+
+			expValue = resp.Value
+		}))
+
 		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(
-			uint64(trustedHeight), uint64(latestHeight), packetReceiptPath,
+			uint64(trustedHeight), uint64(latestHeight),
+			operator.ToBase64KeyPaths(membershipKey, nonMembershipKey),
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+			"--base64",
 		)
 		s.Require().NoError(err)
 
 		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
 			ProofHeight: *proofHeight,
 			Proof:       ucAndMemProof,
-			Path:        [][]byte{[]byte(ibcexported.StoreKey), []byte(packetReceiptPath)},
-			Value:       []byte(""),
+			Path:        membershipKey,
+			Value:       expValue,
 		}
 
 		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)

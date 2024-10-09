@@ -176,6 +176,16 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
+// TestGenericKeyMembership tests the membership program when the key can be a generic byte array
+func (s *SP1ICS07TendermintTestSuite) TestGenericKeyMembership() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	eth, simd := s.ChainA, s.ChainB
+
+}
+
 // TestUpdateClientAndMembership tests the update client and membership functionality
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 	ctx := context.Background()
@@ -299,7 +309,11 @@ func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour() {
 			Header2: &trustedHeader,
 		}
 
-		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, "double_sign",
+		var fixtureName string
+		if s.generateFixtures {
+			fixtureName = "double_sign"
+		}
+		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, fixtureName,
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod))
 		s.Require().NoError(err)
@@ -373,7 +387,11 @@ func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour()
 			Header2: &header2,
 		}
 
-		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, "breaking_time_monotonicity",
+		var fixtureName string
+		if s.generateFixtures {
+			fixtureName = "breaking_time_monotonicity"
+		}
+		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, fixtureName,
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod))
 		s.Require().NoError(err)

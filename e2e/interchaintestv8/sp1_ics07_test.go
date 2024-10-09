@@ -69,9 +69,8 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 		os.Setenv(testvalues.EnvKeyTendermintRPC, simd.GetHostRPCAddress())
 		os.Setenv(testvalues.EnvKeySp1Prover, "network")
 		os.Setenv(testvalues.EnvKeyPrivateKey, hexPrivateKey)
-		if os.Getenv(testvalues.EnvKeyGenerateFixtures) == testvalues.EnvValueGenerateFixtures_True {
-			s.generateFixtures = true
-		}
+		s.generateFixtures = os.Getenv(testvalues.EnvKeyGenerateFixtures) == testvalues.EnvValueGenerateFixtures_True
+
 		// make sure that the SP1_PRIVATE_KEY is set.
 		s.Require().NotEmpty(os.Getenv(testvalues.EnvKeySp1PrivateKey))
 

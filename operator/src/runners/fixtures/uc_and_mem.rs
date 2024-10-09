@@ -119,14 +119,10 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     match args.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
-            std::fs::write(
-                PathBuf::from(path),
-                serde_json::to_string_pretty(&fixture).unwrap(),
-            )
-            .unwrap();
+            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?)?;
         }
         OutputPath::Stdout => {
-            println!("{}", serde_json::to_string_pretty(&fixture).unwrap());
+            println!("{}", serde_json::to_string_pretty(&fixture)?);
         }
     }
 

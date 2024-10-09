@@ -200,7 +200,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		)
 		s.Require().True(s.Run("Generate keys", func() {
 			// Prove the bank balance of UserA
-			key, err := types.BankBalanceKey(s.UserA.Address(), simd.Config().Denom)
+			key, err := types.BankBalanceKey(s.UserB.Address(), simd.Config().Denom)
 			s.Require().NoError(err)
 
 			membershipKey = [][]byte{[]byte(banktypes.StoreKey), key}

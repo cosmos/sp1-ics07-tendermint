@@ -68,10 +68,16 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
 
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
         futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
+            let path = if args.base64 {
+                subtle_encoding::base64::decode(path)?
+            } else {
+                path.into_bytes()
+            };
+
             let res = tm_rpc_client
                 .abci_query(
                     Some(IBC_QUERY_PATH.to_string()),
-                    path.as_bytes(),
+                    path.as_slice(),
                     // Proof height should be the block before the target block.
                     Some((args.trusted_block - 1).into()),
                     true,
@@ -79,7 +85,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
                 .await?;
 
             assert_eq!(u32::try_from(res.height.value())? + 1, args.trusted_block);
-            assert_eq!(res.key.as_slice(), path.as_bytes());
+            assert_eq!(res.key.as_slice(), path);
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             let value = res.value;
             if value.is_empty() {
@@ -87,7 +93,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
             }
             assert!(!vm_proof.proofs.is_empty());
 
-            let key_path = vec![b"ibc".to_vec(), path.into()];
+            let key_path = vec![b"ibc".into(), path];
             anyhow::Ok((key_path, value, vm_proof))
         }))
         .await?;
@@ -96,7 +102,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let proof_data = verify_mem_prover.generate_proof(&commitment_root_bytes, kv_proofs);
 
     let bytes = proof_data.public_values.as_slice();
-    let output = MembershipOutput::abi_decode(bytes, true).unwrap();
+    let output = MembershipOutput::abi_decode(bytes, true)?;
     assert_eq!(output.commitmentRoot.as_slice(), &commitment_root_bytes);
 
     let sp1_membership_proof = SP1MembershipProof {
@@ -117,14 +123,10 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     match args.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
-            std::fs::write(
-                PathBuf::from(path),
-                serde_json::to_string_pretty(&fixture).unwrap(),
-            )
-            .unwrap();
+            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?).unwrap();
         }
         OutputPath::Stdout => {
-            println!("{}", serde_json::to_string_pretty(&fixture).unwrap());
+            println!("{}", serde_json::to_string_pretty(&fixture)?);
         }
     }
 

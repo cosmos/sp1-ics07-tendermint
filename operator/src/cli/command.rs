@@ -151,6 +151,11 @@ pub mod fixtures {
         /// Trust options
         #[clap(flatten)]
         pub trust_options: super::TrustOptions,
+
+        /// Indicates that the key paths are base64 encoded (and separated by commas).
+        /// Otherwise, they are assumed to be UTF-8 strings (and separated by commas).
+        #[clap(long)]
+        pub base64: bool,
     }
 
     /// The arguments for the `UpdateClientAndMembership` fixture executable.

@@ -15,21 +15,25 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	// banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	ibcclientutils "github.com/cosmos/ibc-go/v8/modules/core/02-client/client/utils"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	// commitmenttypes "github.com/cosmos/ibc-go/v8/modules/core/23-commitment/types"
 	ibchost "github.com/cosmos/ibc-go/v8/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ibctesting "github.com/cosmos/ibc-go/v8/testing"
 
-	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/testvalues"
+	// "github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/types/sp1ics07tendermint"
 )
 
@@ -87,7 +91,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 			"-o", "contracts/script/genesis.json",
 		))
 
-		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), foundry.ForgeScriptOpts{
+		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
 			ContractRootDir:  ".",
 			SolidityContract: "contracts/script/SP1ICS07Tendermint.s.sol",
 			RawOptions:       []string{"--json"},
@@ -176,15 +180,22 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
-// TestGenericKeyMembership tests the membership program when the key can be a generic byte array
-func (s *SP1ICS07TendermintTestSuite) TestGenericKeyMembership() {
-	ctx := context.Background()
-
-	s.SetupSuite(ctx)
-
-	eth, simd := s.ChainA, s.ChainB
-
-}
+// // TestGenericKeyMembership tests the membership program when the key can be a generic byte array
+// func (s *SP1ICS07TendermintTestSuite) TestGenericKeyMembership() {
+// 	ctx := context.Background()
+//
+// 	s.SetupSuite(ctx)
+//
+// 	eth, simd := s.ChainA, s.ChainB
+//
+// 	s.Require().True(s.Run("Verify generic membership", func() {
+// 		key, err := types.BankBalanceKey(s.UserA.Address(), simd.Config().Denom)
+// 		s.Require().NoError(err)
+// 		merklePath = commitmenttypes.NewMerklePath(key)
+// 		merklePath, err = commitmenttypes.ApplyPrefix(commitmenttypes.NewMerklePrefix([]byte(banktypes.StoreKey)), merklePath)
+// 		s.Require().NoError(err)
+// 	}))
+// }
 
 // TestUpdateClientAndMembership tests the update client and membership functionality
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
@@ -231,7 +242,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth, tx.Hash())
 
 		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -322,7 +333,7 @@ func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth, tx.Hash())
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -400,7 +411,7 @@ func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour()
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth, tx.Hash())
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)

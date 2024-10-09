@@ -12,7 +12,7 @@ import (
 
 	interchaintest "github.com/strangelove-ventures/interchaintest/v8"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
-	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testreporter"
 
@@ -24,7 +24,7 @@ import (
 type TestSuite struct {
 	suite.Suite
 
-	ChainA       *foundry.AnvilChain
+	ChainA       *ethereum.EthereumChain
 	ChainB       *cosmos.CosmosChain
 	UserA        ibc.Wallet
 	UserB        ibc.Wallet
@@ -52,7 +52,7 @@ func (s *TestSuite) SetupSuite(ctx context.Context) {
 
 	chains, err := cf.Chains(t.Name())
 	s.Require().NoError(err)
-	s.ChainA = chains[0].(*foundry.AnvilChain)
+	s.ChainA = chains[0].(*ethereum.EthereumChain)
 	s.ChainB = chains[1].(*cosmos.CosmosChain)
 
 	s.ExecRep = testreporter.NewNopReporter().RelayerExecReporter(t)

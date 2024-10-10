@@ -498,10 +498,14 @@ func (s *SP1ICS07TendermintTestSuite) largeMembershipTest(n uint64) {
 				expValue = resp.Value
 			}))
 
+			var fixtureName string
+			if s.generateFixtures {
+				fixtureName = fmt.Sprintf("membership_%d", n)
+			}
 			proofHeight, memProof, err := operator.MembershipProof(
 				clientHeight.RevisionHeight, operator.ToBase64KeyPaths(membershipKeys...),
-				"--trust-level", testvalues.DefaultTrustLevel.String(), "--base64",
-				"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+				fixtureName, "--trust-level", testvalues.DefaultTrustLevel.String(),
+				"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64",
 			)
 			s.Require().NoError(err)
 

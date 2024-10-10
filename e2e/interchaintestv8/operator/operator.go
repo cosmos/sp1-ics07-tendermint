@@ -62,7 +62,7 @@ func StartOperator(args ...string) error {
 }
 
 // MembershipProof is a function that generates a membership proof
-func MembershipProof(trusted_height uint64, paths string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
+func MembershipProof(trusted_height uint64, paths string, writeFixtureName string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
 	args = append([]string{"fixtures", "membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--key-paths", paths}, args...)
 
 	cmd := exec.Command("target/release/operator", args...)
@@ -77,6 +77,13 @@ func MembershipProof(trusted_height uint64, paths string, args ...string) (*sp1i
 		panic("no json found in output")
 	}
 	output = output[jsonStartIdx:]
+
+	if writeFixtureName != "" {
+		fixtureFileName := fmt.Sprintf("contracts/fixtures/%s.json", writeFixtureName)
+		if err := os.WriteFile(fixtureFileName, output, 0o600); err != nil {
+			return nil, nil, err
+		}
+	}
 
 	var membership membershipFixture
 	err = json.Unmarshal(output, &membership)

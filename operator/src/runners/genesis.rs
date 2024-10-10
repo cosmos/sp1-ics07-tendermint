@@ -112,14 +112,10 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
     match args.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
-            std::fs::write(
-                PathBuf::from(path),
-                serde_json::to_string_pretty(&genesis).unwrap(),
-            )
-            .unwrap();
+            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&genesis)?)?;
         }
         OutputPath::Stdout => {
-            println!("{}", serde_json::to_string_pretty(&genesis).unwrap());
+            println!("{}", serde_json::to_string_pretty(&genesis)?);
         }
     }
 

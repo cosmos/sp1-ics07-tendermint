@@ -20,9 +20,9 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/cometbft/cometbft/crypto/ed25519"
 	"github.com/cometbft/cometbft/crypto/tmhash"
 	cometproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	comettypes "github.com/cometbft/cometbft/types"
@@ -30,7 +30,6 @@ import (
 
 	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ibctesting "github.com/cosmos/ibc-go/v8/testing"
-	ibcmocks "github.com/cosmos/ibc-go/v8/testing/mock"
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
@@ -174,11 +173,8 @@ func (s *TestSuite) CreateTMClientHeader(
 		decodedKeyBz, err := base64.StdEncoding.DecodeString(privValidatorKeyFile.PrivKey.Value)
 		s.Require().NoError(err)
 
-		privKey := &ed25519.PrivKey{
-			Key: decodedKeyBz,
-		}
-
-		privVal := ibcmocks.PV{PrivKey: privKey}
+		privKey := ed25519.PrivKey(decodedKeyBz)
+		privVal := comettypes.NewMockPVWithParams(privKey, false, false)
 		privVals = append(privVals, privVal)
 
 		pubKey, err := privVal.GetPubKey()

@@ -81,8 +81,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let proof_data =
         uc_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
 
-    let output =
-        UpdateClientOutput::abi_decode(proof_data.public_values.as_slice(), false).unwrap();
+    let output = UpdateClientOutput::abi_decode(proof_data.public_values.as_slice(), false)?;
 
     let update_msg = MsgUpdateClient {
         sp1Proof: SP1Proof::new(
@@ -102,14 +101,10 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     match args.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
-            std::fs::write(
-                PathBuf::from(path),
-                serde_json::to_string_pretty(&fixture).unwrap(),
-            )
-            .unwrap();
+            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?)?;
         }
         OutputPath::Stdout => {
-            println!("{}", serde_json::to_string_pretty(&fixture).unwrap());
+            println!("{}", serde_json::to_string_pretty(&fixture)?);
         }
     }
 

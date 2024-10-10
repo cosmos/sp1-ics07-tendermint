@@ -166,6 +166,19 @@ func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writ
 	return submitMsgBz, nil
 }
 
+// ToBase64KeyPaths is a function that takes a list of key paths and returns a base64 encoded string
+// that the operator can use to generate a membership proof
+func ToBase64KeyPaths(paths ...[][]byte) string {
+	var keyPaths []string
+	for _, path := range paths {
+		if len(path) != 2 {
+			panic("path must have 2 elements")
+		}
+		keyPaths = append(keyPaths, base64.StdEncoding.EncodeToString(path[0])+"/"+base64.StdEncoding.EncodeToString(path[1]))
+	}
+	return strings.Join(keyPaths, ",")
+}
+
 // TODO: This is a mighty ugly piece of code. Hopefully there is a better way to do this.
 // marshalMisbehaviour takes a MisbehaviourProof struct and marshals it into a JSON byte slice that can be unmarshalled by the operator.
 // It first marshals to JSON directly, and then modifies all the incompatible types (mostly base64 encoded bytes) to be hex encoded.

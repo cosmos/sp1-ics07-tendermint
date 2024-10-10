@@ -1,11 +1,13 @@
 package operator
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strconv"
@@ -64,8 +66,7 @@ func MembershipProof(trusted_height uint64, paths string, args ...string) (*sp1i
 	args = append([]string{"fixtures", "membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--key-paths", paths}, args...)
 
 	cmd := exec.Command("target/release/operator", args...)
-	cmd.Stdout = os.Stdout
-	output, err := cmd.CombinedOutput()
+	output, err := execOperatorCommand(cmd)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -125,8 +126,7 @@ func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths 
 	args = append([]string{"fixtures", "update-client-and-membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--target-block", strconv.FormatUint(target_height, 10), "--key-paths", paths}, args...)
 
 	cmd := exec.Command("target/release/operator", args...)
-	cmd.Stdout = os.Stdout
-	output, err := cmd.CombinedOutput()
+	output, err := execOperatorCommand(cmd)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -197,10 +197,9 @@ func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writ
 
 	args = append([]string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName}, args...)
 	cmd := exec.Command("target/release/operator", args...)
-	cmd.Stdout = os.Stdout
-	output, err := cmd.CombinedOutput()
+	output, err := execOperatorCommand(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("operator misbehaviour failed: %w, output: %s", err, output)
+		return nil, err
 	}
 
 	// eliminate non-json characters
@@ -370,4 +369,22 @@ func marshalMisbehaviour(cdc codec.Codec, misbehaviour tmclient.Misbehaviour) ([
 	}
 
 	return json.Marshal(jsonIntermediary)
+}
+
+func execOperatorCommand(c *exec.Cmd) ([]byte, error) {
+	var outBuf bytes.Buffer
+
+	// Create a MultiWriter to write to both os.Stdout and the buffer
+	multiWriter := io.MultiWriter(os.Stdout, &outBuf)
+
+	// Set the command's stdout to the MultiWriter
+	c.Stdout = multiWriter
+	c.Stderr = os.Stderr
+
+	// Run the command
+	if err := c.Run(); err != nil {
+		return nil, fmt.Errorf("operator command '%s' failed: %w", strings.Join(c.Args, " "), err)
+	}
+
+	return outBuf.Bytes(), nil
 }

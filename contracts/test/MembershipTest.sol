@@ -7,10 +7,6 @@ import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
 
 abstract contract MembershipTest is SP1ICS07TendermintTest {
-    bytes[] public verifyMembershipPath = [bytes("ibc"), bytes("clients/07-tendermint-0/clientState")];
-
-    bytes[] public verifyNonMembershipPath = [bytes("ibc"), bytes("clients/07-tendermint-001/clientState")];
-
     struct SP1ICS07MembershipFixtureJson {
         Height proofHeight;
         MembershipProof membershipProof;

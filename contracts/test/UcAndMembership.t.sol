@@ -9,6 +9,9 @@ import { MembershipTest } from "./MembershipTest.sol";
 contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     using stdJson for string;
 
+    bytes[] public verifyMembershipPath = [bytes("ibc"), bytes("clients/07-tendermint-0/clientState")];
+    bytes[] public verifyNonMembershipPath = [bytes("ibc"), bytes("clients/07-tendermint-001/clientState")];
+
     SP1MembershipAndUpdateClientProof public proof;
 
     function setUp() public {

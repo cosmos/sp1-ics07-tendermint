@@ -27,7 +27,7 @@ import (
 	tmclient "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ibctesting "github.com/cosmos/ibc-go/v8/testing"
 
-	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum"
+	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
 	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
@@ -92,7 +92,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 			"-o", "contracts/script/genesis.json",
 		))
 
-		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), ethereum.ForgeScriptOpts{
+		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), foundry.ForgeScriptOpts{
 			ContractRootDir:  ".",
 			SolidityContract: "contracts/script/SP1ICS07Tendermint.s.sol",
 			RawOptions:       []string{"--json"},
@@ -256,7 +256,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
 
 		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -347,7 +347,7 @@ func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -425,7 +425,7 @@ func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour()
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth, tx.Hash())
+		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)

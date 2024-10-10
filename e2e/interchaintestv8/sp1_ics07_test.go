@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+	mathrand "math/rand"
 	"os"
 	"strconv"
 	"testing"
@@ -15,6 +18,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	"cosmossdk.io/math"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -226,7 +233,7 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		var expValue []byte
 		s.Require().True(s.Run("Get expected value for the verify membership", func() {
 			resp, err := e2esuite.ABCIQuery(ctx, simd, &abci.RequestQuery{
-				Path:   "store/" + string(membershipKey[0]) + "/key",
+				Path:   fmt.Sprintf("store/%s/key", membershipKey[0]),
 				Data:   membershipKey[1],
 				Height: latestHeight - 1,
 			})
@@ -431,4 +438,101 @@ func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour()
 		s.Require().NoError(err)
 		s.Require().True(clientState.IsFrozen)
 	}))
+}
+
+func (s *SP1ICS07TendermintTestSuite) Test100Membership() {
+	s.largeMembershipTest(100)
+}
+
+// largeMembershipTest tests membership proofs with a large number of key-value pairs
+func (s *SP1ICS07TendermintTestSuite) largeMembershipTest(n uint64) {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	eth, simd := s.ChainA, s.ChainB
+
+	s.Require().True(s.Run(fmt.Sprintf("Large membership test with %d key-value pairs", n), func() {
+		membershipKeys := make([][][]byte, n)
+		s.Require().True(s.Run("Generate state and keys", func() {
+			// Messages to generate state to be used in the membership proof
+			msgs := []sdk.Msg{}
+			// Generate a random addresses
+			pubBz := make([]byte, ed25519.PubKeySize)
+			pub := &ed25519.PubKey{Key: pubBz}
+			for i := uint64(0); i < n; i++ {
+				_, err := rand.Read(pubBz)
+				s.Require().NoError(err)
+				acc := sdk.AccAddress(pub.Address())
+
+				// Send some funds to the address
+				msgs = append(msgs, banktypes.NewMsgSend(s.UserB.Address(), acc, sdk.NewCoins(sdk.NewCoin(simd.Config().Denom, math.NewInt(1)))))
+
+				key, err := types.BankBalanceKey(s.UserB.Address(), simd.Config().Denom)
+				s.Require().NoError(err)
+
+				membershipKeys[i] = [][]byte{[]byte(banktypes.StoreKey), key}
+			}
+
+			// Send the messages
+			_, err := s.BroadcastMessages(ctx, simd, s.UserB, 2_000_000, msgs...)
+			s.Require().NoError(err)
+		}))
+
+		// update the client
+		clientHeight := s.UpdateClient(ctx)
+
+		s.Require().True(s.Run("Verify membership", func() {
+			rndIdx := mathrand.Intn(int(n))
+
+			var expValue []byte
+			s.Require().True(s.Run("Get expected value for the verify membership", func() {
+				resp, err := e2esuite.ABCIQuery(ctx, simd, &abci.RequestQuery{
+					Path:   fmt.Sprintf("store/%s/key", membershipKeys[rndIdx][0]),
+					Data:   membershipKeys[rndIdx][1],
+					Height: int64(clientHeight.RevisionHeight) - 1,
+				})
+				s.Require().NoError(err)
+				s.Require().NotEmpty(resp.Value)
+
+				expValue = resp.Value
+			}))
+
+			proofHeight, memProof, err := operator.MembershipProof(
+				clientHeight.RevisionHeight, operator.ToBase64KeyPaths(membershipKeys...),
+				"--trust-level", testvalues.DefaultTrustLevel.String(), "--base64",
+				"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+			)
+			s.Require().NoError(err)
+
+			msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+				ProofHeight: *proofHeight,
+				Proof:       memProof,
+				Path:        membershipKeys[rndIdx],
+				Value:       expValue,
+			}
+
+			tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
+			s.Require().NoError(err)
+
+			// wait until transaction is included in a block
+			_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		}))
+	}))
+}
+
+// UpdateClient updates the SP1ICS07Tendermint client and returns the new height
+func (s *SP1ICS07TendermintTestSuite) UpdateClient(ctx context.Context) clienttypes.Height {
+	var updatedClientState sp1ics07tendermint.IICS07TendermintMsgsClientState
+	s.Require().True(s.Run("Update client", func() {
+		s.Require().NoError(operator.StartOperator("--only-once"))
+		var err error
+		updatedClientState, err = s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+	}))
+
+	return clienttypes.Height{
+		RevisionNumber: uint64(updatedClientState.LatestHeight.RevisionNumber),
+		RevisionHeight: uint64(updatedClientState.LatestHeight.RevisionHeight),
+	}
 }

@@ -79,7 +79,7 @@ func MembershipProof(trusted_height uint64, paths string, writeFixtureName strin
 	output = output[jsonStartIdx:]
 
 	if writeFixtureName != "" {
-		fixtureFileName := fmt.Sprintf("contracts/fixtures/%s.json", writeFixtureName)
+		fixtureFileName := fmt.Sprintf("contracts/fixtures/%s_fixture.json", writeFixtureName)
 		if err := os.WriteFile(fixtureFileName, output, 0o600); err != nil {
 			return nil, nil, err
 		}

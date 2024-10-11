@@ -34,19 +34,26 @@ library UnionMembership {
         bytes calldata prefix,
         bytes calldata key,
         bytes calldata value
-    ) public pure returns (bool) {
+    )
+        public
+        pure
+        returns (bool)
+    {
         if (value.length == 0) {
             UnionNonMembershipProof calldata nmProof;
             assembly {
                 nmProof := proof.offset
             } // TODO: make sure this works
-            return Ics23.verifyChainedNonMembership(nmProof.nonExistenceProof, nmProof.existenceProof, root, prefix, key) == Ics23.VerifyChainedNonMembershipError.None;
+            return Ics23.verifyChainedNonMembership(
+                nmProof.nonExistenceProof, nmProof.existenceProof, root, prefix, key
+            ) == Ics23.VerifyChainedNonMembershipError.None;
         } else {
             UnionMembershipProof calldata mProof;
             assembly {
                 mProof := proof.offset
             }
-            return Ics23.verifyChainedMembership(mProof.membershipProofs, root, prefix, key, value) == Ics23.VerifyChainedMembershipError.None;
+            return Ics23.verifyChainedMembership(mProof.membershipProofs, root, prefix, key, value)
+                == Ics23.VerifyChainedMembershipError.None;
         }
     }
 }

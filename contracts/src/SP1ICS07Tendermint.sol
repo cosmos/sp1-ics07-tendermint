@@ -196,12 +196,12 @@ contract SP1ICS07Tendermint is
         }
 
         validateMembershipOutput(
-            uProof.trustedConsensusState.root,
-            proofHeight.revisionHeight,
-            uProof.trustedConsensusState
+            uProof.trustedConsensusState.root, proofHeight.revisionHeight, uProof.trustedConsensusState
         );
 
-        if (!UnionMembership.verify(uProof.trustedConsensusState.root, uProof.ics23Proof, kvPath[0], kvPath[1], kvValue)) {
+        if (
+            !UnionMembership.verify(uProof.trustedConsensusState.root, uProof.ics23Proof, kvPath[0], kvPath[1], kvValue)
+        ) {
             revert InvalidMembershipProof();
         }
 

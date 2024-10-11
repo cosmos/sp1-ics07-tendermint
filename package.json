@@ -10,7 +10,8 @@
     "@openzeppelin/contracts": "^5.0.2",
     "forge-std": "github:foundry-rs/forge-std#v1.9.2",
     "sp1-contracts": "github:succinctlabs/sp1-contracts#v2.0.0",
-    "solidity-ibc": "github:cosmos/solidity-ibc-eureka#370ce703e20148086f84e51f59895dfd237ceec8"
+    "solidity-ibc": "github:cosmos/solidity-ibc-eureka#370ce703e20148086f84e51f59895dfd237ceec8",
+    "union": "github:unionlabs/union#26ece3489a1571d74104ea89a3589374730cfa64"
   },
   "devDependencies": {
     "solhint": "^5.0.3",

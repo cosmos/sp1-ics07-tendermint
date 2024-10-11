@@ -46,11 +46,20 @@ interface IMembershipMsgs is ISP1Msgs {
         SP1Proof sp1Proof;
     }
 
+    /// @notice The membership proof for the union verify (non)membership program.
+    /// @param ics23Proof The ics23 proof for the membership program.
+    struct UnionMembershipProof {
+        bytes ics23Proof;
+        IICS07TendermintMsgs.ConsensusState trustedConsensusState;
+    }
+
     /// @notice The type of the membership proof.
     enum MembershipProofType {
         /// The proof is for the verify membership program.
         SP1MembershipProof,
         /// The proof is for the verify membership and update client program.
-        SP1MembershipAndUpdateClientProof
+        SP1MembershipAndUpdateClientProof,
+        /// Prove (non)membership using union's ics23.
+        UnionMembershipProof
     }
 }

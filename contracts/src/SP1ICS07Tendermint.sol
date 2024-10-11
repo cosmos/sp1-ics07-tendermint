@@ -12,6 +12,7 @@ import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
 import { Paths } from "./utils/Paths.sol";
+import { UnionMembership } from "./utils/UnionMembership.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -128,13 +129,21 @@ contract SP1ICS07Tendermint is
     /// @return timestamp The timestamp of the trusted consensus state.
     /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
-        MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
+        bytes calldata proof = msgMembership.proof;
+        MembershipProof calldata membershipProof;
+        assembly {
+            membershipProof := proof.offset
+        }
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
             return handleSP1MembershipProof(
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else if (membershipProof.proofType == MembershipProofType.SP1MembershipAndUpdateClientProof) {
             return handleSP1UpdateClientAndMembership(
+                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+            );
+        } else if (membershipProof.proofType == MembershipProofType.UnionMembershipProof) {
+            return handleUnionMembershipProof(
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else {
@@ -167,6 +176,38 @@ contract SP1ICS07Tendermint is
         revert FeatureNotSupported();
     }
 
+    function handleUnionMembershipProof(
+        Height calldata proofHeight,
+        bytes calldata proofBytes,
+        bytes[] calldata kvPath,
+        bytes calldata kvValue
+    )
+        private
+        view
+        returns (uint256)
+    {
+        if (kvPath.length != 2) {
+            revert LengthIsOutOfRange(kvPath.length, 2, 2);
+        }
+
+        UnionMembershipProof calldata uProof;
+        assembly {
+            uProof := proofBytes.offset
+        }
+
+        validateMembershipOutput(
+            uProof.trustedConsensusState.root,
+            proofHeight.revisionHeight,
+            uProof.trustedConsensusState
+        );
+
+        if (!UnionMembership.verify(uProof.trustedConsensusState.root, uProof.ics23Proof, kvPath[0], kvPath[1], kvValue)) {
+            revert InvalidMembershipProof();
+        }
+
+        return uProof.trustedConsensusState.timestamp;
+    }
+
     /// @notice Handles the `SP1MembershipProof` proof type.
     /// @param proofHeight The height of the proof.
     /// @param proofBytes The encoded proof.
@@ -175,7 +216,7 @@ contract SP1ICS07Tendermint is
     /// @return The timestamp of the trusted consensus state.
     function handleSP1MembershipProof(
         Height calldata proofHeight,
-        bytes memory proofBytes,
+        bytes calldata proofBytes,
         bytes[] calldata kvPath,
         bytes calldata kvValue
     )
@@ -243,7 +284,7 @@ contract SP1ICS07Tendermint is
     // solhint-disable-next-line code-complexity
     function handleSP1UpdateClientAndMembership(
         Height calldata proofHeight,
-        bytes memory proofBytes,
+        bytes calldata proofBytes,
         bytes[] calldata kvPath,
         bytes calldata kvValue
     )

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.27;
+pragma solidity >=0.8.25;
 
 import { Ics23, UnionIcs23 } from "union-lib/ICS23.sol";
 

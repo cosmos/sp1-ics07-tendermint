@@ -6928,6 +6928,7 @@ dependencies = [
  "ibc-core-host-types",
  "ibc-proto",
  "log",
+ "protos",
  "reqwest 0.12.8",
  "serde",
  "serde_cbor",

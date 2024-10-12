@@ -42,19 +42,19 @@ pub struct SP1ICS07MembershipFixture {
 /// Writes the proof data for the given trusted and target blocks to the given fixture path.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
-    assert!(!args.key_paths.is_empty());
+    assert!(!args.membership.key_paths.is_empty());
 
     let tm_rpc_client = HttpClient::from_env();
     let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 
     let trusted_light_block = tm_rpc_client
-        .get_light_block(Some(args.trusted_block))
+        .get_light_block(Some(args.membership.trusted_block))
         .await?;
 
     let genesis = SP1ICS07TendermintGenesis::from_env(
         &trusted_light_block,
-        args.trust_options.trusting_period,
-        args.trust_options.trust_level,
+        args.membership.trust_options.trusting_period,
+        args.membership.trust_options.trust_level,
     )
     .await?;
 
@@ -67,8 +67,8 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         .to_vec();
 
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
-        futures::future::try_join_all(args.key_paths.into_iter().map(|path| async {
-            let path: Vec<Vec<u8>> = if args.base64 {
+        futures::future::try_join_all(args.membership.key_paths.into_iter().map(|path| async {
+            let path: Vec<Vec<u8>> = if args.membership.base64 {
                 path.split('/')
                     .map(subtle_encoding::base64::decode)
                     .collect::<Result<_, _>>()?
@@ -82,12 +82,15 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
                     Some(format!("store/{}/key", str::from_utf8(&path[0])?)),
                     path[1].as_slice(),
                     // Proof height should be the block before the target block.
-                    Some((args.trusted_block - 1).into()),
+                    Some((args.membership.trusted_block - 1).into()),
                     true,
                 )
                 .await?;
 
-            assert_eq!(u32::try_from(res.height.value())? + 1, args.trusted_block);
+            assert_eq!(
+                u32::try_from(res.height.value())? + 1,
+                args.membership.trusted_block
+            );
             assert_eq!(res.key.as_slice(), path[1].as_slice());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             assert!(!vm_proof.proofs.is_empty());
@@ -118,7 +121,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         membership_proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
     };
 
-    match args.output_path {
+    match args.membership.output_path {
         OutputPath::File(path) => {
             // Save the proof data to the file path.
             std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?).unwrap();

@@ -54,7 +54,8 @@ fixtures prover: build-operator
   TRUSTED_HEIGHT=$(($CURRENT_HEIGHT-100)) && \
   TARGET_HEIGHT=$(($CURRENT_HEIGHT-10)) && \
   echo "For celestia fixtures, trusted block: $TRUSTED_HEIGHT, target block: $TARGET_HEIGHT, from $TENDERMINT_RPC_URL" && \
-  parallel --progress --shebang --ungroup -j 4 ::: \
+  parallel --progress --shebang --ungroup -j 5 ::: \
+    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState --trusted-block $TRUSTED_HEIGHT --union -o 'contracts/fixtures/union_membership_fixture.json'" \
     "RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/update_client_fixture.json'" \
     "sleep 15 && RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/uc_and_memberships_fixture.json'" \
     "sleep 30 && RUST_LOG=info SP1_PROVER={{prover}} ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -o 'contracts/fixtures/memberships_fixture.json'"

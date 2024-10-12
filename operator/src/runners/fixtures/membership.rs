@@ -45,7 +45,6 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     assert!(!args.membership.key_paths.is_empty());
 
     let tm_rpc_client = HttpClient::from_env();
-    let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
 
     let trusted_light_block = tm_rpc_client
         .get_light_block(Some(args.membership.trusted_block))
@@ -61,14 +60,57 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;
     let trusted_consensus_state =
         SolConsensusState::abi_decode(&genesis.trusted_consensus_state, false)?;
+
+    let sp1_membership_proof = run_sp1_membership(
+        &tm_rpc_client,
+        args.membership.base64,
+        args.membership.key_paths,
+        args.membership.trusted_block,
+        trusted_consensus_state,
+    )
+    .await?;
+
+    let fixture = SP1ICS07MembershipFixture {
+        genesis,
+        proof_height: trusted_client_state.latestHeight.abi_encode(),
+        membership_proof: sp1_membership_proof.abi_encode(),
+    };
+
+    match args.membership.output_path {
+        OutputPath::File(path) => {
+            // Save the proof data to the file path.
+            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?).unwrap();
+        }
+        OutputPath::Stdout => {
+            println!("{}", serde_json::to_string_pretty(&fixture)?);
+        }
+    }
+
+    Ok(())
+}
+
+/// Generates an sp1 membership proof for the given args
+#[allow(
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
+    clippy::module_name_repetitions
+)]
+pub async fn run_sp1_membership(
+    tm_rpc_client: &HttpClient,
+    is_base64: bool,
+    key_paths: Vec<String>,
+    trusted_block: u32,
+    trusted_consensus_state: SolConsensusState,
+) -> anyhow::Result<MembershipProof> {
+    let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
     let commitment_root_bytes = ConsensusState::from(trusted_consensus_state.clone())
         .root
         .as_bytes()
         .to_vec();
 
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
-        futures::future::try_join_all(args.membership.key_paths.into_iter().map(|path| async {
-            let path: Vec<Vec<u8>> = if args.membership.base64 {
+        futures::future::try_join_all(key_paths.into_iter().map(|path| async {
+            let path: Vec<Vec<u8>> = if is_base64 {
                 path.split('/')
                     .map(subtle_encoding::base64::decode)
                     .collect::<Result<_, _>>()?
@@ -82,15 +124,12 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
                     Some(format!("store/{}/key", str::from_utf8(&path[0])?)),
                     path[1].as_slice(),
                     // Proof height should be the block before the target block.
-                    Some((args.membership.trusted_block - 1).into()),
+                    Some((trusted_block - 1).into()),
                     true,
                 )
                 .await?;
 
-            assert_eq!(
-                u32::try_from(res.height.value())? + 1,
-                args.membership.trusted_block
-            );
+            assert_eq!(u32::try_from(res.height.value())? + 1, trusted_block);
             assert_eq!(res.key.as_slice(), path[1].as_slice());
             let vm_proof = convert_tm_to_ics_merkle_proof(&res.proof.unwrap())?;
             assert!(!vm_proof.proofs.is_empty());
@@ -115,21 +154,5 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         trustedConsensusState: trusted_consensus_state,
     };
 
-    let fixture = SP1ICS07MembershipFixture {
-        genesis,
-        proof_height: trusted_client_state.latestHeight.abi_encode(),
-        membership_proof: MembershipProof::from(sp1_membership_proof).abi_encode(),
-    };
-
-    match args.membership.output_path {
-        OutputPath::File(path) => {
-            // Save the proof data to the file path.
-            std::fs::write(PathBuf::from(path), serde_json::to_string_pretty(&fixture)?).unwrap();
-        }
-        OutputPath::Stdout => {
-            println!("{}", serde_json::to_string_pretty(&fixture)?);
-        }
-    }
-
-    Ok(())
+    Ok(MembershipProof::from(sp1_membership_proof))
 }

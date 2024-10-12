@@ -519,6 +519,7 @@ contract SP1ICS07Tendermint is
     /// @param o6 The SP1MembershipAndUpdateClientProof.
     /// @param o7 The MisbehaviourOutput.
     /// @param o8 The MsgSubmitMisbehaviour.
+    /// @param o9 The UnionMembershipProof.
     function abiPublicTypes(
         MembershipOutput memory o1,
         UcAndMembershipOutput memory o2,
@@ -527,7 +528,8 @@ contract SP1ICS07Tendermint is
         SP1MembershipProof memory o5,
         SP1MembershipAndUpdateClientProof memory o6,
         MisbehaviourOutput memory o7,
-        MsgSubmitMisbehaviour memory o8
+        MsgSubmitMisbehaviour memory o8,
+        UnionMembershipProof memory o9
     )
         public
         pure

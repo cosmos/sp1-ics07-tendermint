@@ -577,6 +577,40 @@
             ]
           }
         ]
+      },
+      {
+        "name": "o9",
+        "type": "tuple",
+        "internalType": "struct IMembershipMsgs.UnionMembershipProof",
+        "components": [
+          {
+            "name": "ics23Proof",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "trustedConsensusState",
+            "type": "tuple",
+            "internalType": "struct IICS07TendermintMsgs.ConsensusState",
+            "components": [
+              {
+                "name": "timestamp",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "root",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "nextValidatorsHash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          }
+        ]
       }
     ],
     "outputs": [],
@@ -834,6 +868,11 @@
   {
     "type": "error",
     "name": "FrozenClientState",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidMembershipProof",
     "inputs": []
   },
   {

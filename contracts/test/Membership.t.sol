@@ -20,6 +20,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
         assertEq(output.kvPairs.length, 2);
         assertEq(output.kvPairs[0].path, verifyMembershipPath);
         assert(output.kvPairs[0].value.length != 0);
+        assertEq(output.kvPairs[0].value, firstVerifyMembershipValue);
         assertEq(output.kvPairs[1].path, verifyNonMembershipPath);
         assertEq(output.kvPairs[1].value.length, 0);
     }

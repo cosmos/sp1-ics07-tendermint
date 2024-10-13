@@ -32,7 +32,7 @@ install-operator:
 
 # Run the Solidity tests using `forge test` command
 test-foundry testname=".\\*":
-  forge test -vvv --match-test ^{{testname}}\(.\*\)\$
+  forge test -vvvv --match-test ^{{testname}}\(.\*\)\$
 
 # Run the Rust tests using `cargo test` command (excluding the sp1-ics07-tendermint-update-client crate)
 test-cargo:

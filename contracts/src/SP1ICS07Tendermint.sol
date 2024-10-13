@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.25;
 
+import "forge-std/console.sol";
 import { IICS07TendermintMsgs } from "./msgs/IICS07TendermintMsgs.sol";
 import { IUpdateClientMsgs } from "./msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "./msgs/IMembershipMsgs.sol";
@@ -129,11 +130,7 @@ contract SP1ICS07Tendermint is
     /// @return timestamp The timestamp of the trusted consensus state.
     /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
-        bytes calldata proof = msgMembership.proof;
-        MembershipProof calldata membershipProof;
-        assembly {
-            membershipProof := proof.offset
-        }
+        MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
             return handleSP1MembershipProof(
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
@@ -143,11 +140,11 @@ contract SP1ICS07Tendermint is
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else if (membershipProof.proofType == MembershipProofType.UnionMembershipProof) {
-            return handleUnionMembershipProof(
+            return this.handleUnionMembershipProof(
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else {
-            revert UnknownMembershipProofType(uint8(membershipProof.proofType));
+            // revert UnknownMembershipProofType(uint8(membershipProof.proofType));
         }
     }
 
@@ -182,7 +179,7 @@ contract SP1ICS07Tendermint is
         bytes[] calldata kvPath,
         bytes calldata kvValue
     )
-        private
+        public
         view
         returns (uint256)
     {
@@ -216,7 +213,7 @@ contract SP1ICS07Tendermint is
     /// @return The timestamp of the trusted consensus state.
     function handleSP1MembershipProof(
         Height calldata proofHeight,
-        bytes calldata proofBytes,
+        bytes memory proofBytes,
         bytes[] calldata kvPath,
         bytes calldata kvValue
     )
@@ -284,7 +281,7 @@ contract SP1ICS07Tendermint is
     // solhint-disable-next-line code-complexity
     function handleSP1UpdateClientAndMembership(
         Height calldata proofHeight,
-        bytes calldata proofBytes,
+        bytes memory proofBytes,
         bytes[] calldata kvPath,
         bytes calldata kvValue
     )

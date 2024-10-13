@@ -187,10 +187,7 @@ contract SP1ICS07Tendermint is
             revert LengthIsOutOfRange(kvPath.length, 2, 2);
         }
 
-        UnionMembershipProof calldata uProof;
-        assembly {
-            uProof := proofBytes.offset
-        }
+        UnionMembershipProof memory uProof = abi.decode(proofBytes, (UnionMembershipProof));
 
         validateMembershipOutput(
             uProof.trustedConsensusState.root, proofHeight.revisionHeight, uProof.trustedConsensusState

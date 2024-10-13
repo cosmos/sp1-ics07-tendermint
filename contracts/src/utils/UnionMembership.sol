@@ -15,13 +15,6 @@ library UnionMembership {
         UnionIcs23.ExistenceProof existenceProof;
     }
 
-    /// @notice A membership proof for a key-value pair.
-    /// @dev The proof consists of two ICS23 ExistenceProofs.
-    /// @param membershipProofs The membership proofs.
-    struct UnionMembershipProof {
-        UnionIcs23.ExistenceProof[2] membershipProofs;
-    }
-
     /// @notice Verifies the membership or non-membership of a key-value pair.
     /// @dev If the value is empty, the function verifies non-membership.
     /// @param proof The membership proof.
@@ -48,11 +41,11 @@ library UnionMembership {
                 nmProof.nonExistenceProof, nmProof.existenceProof, root, prefix, key
             ) == Ics23.VerifyChainedNonMembershipError.None;
         } else {
-            UnionMembershipProof calldata mProof;
+            UnionIcs23.ExistenceProof[2] calldata mProof;
             assembly {
                 mProof := proof.offset
             }
-            return Ics23.verifyChainedMembership(mProof.membershipProofs, root, prefix, key, value)
+            return Ics23.verifyChainedMembership(mProof, root, prefix, key, value)
                 == Ics23.VerifyChainedMembershipError.None;
         }
     }

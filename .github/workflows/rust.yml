@@ -18,7 +18,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          override: true
+          override: false
           components: rustfmt, clippy
       - name: Install SP1 toolchain
         run: |

@@ -143,7 +143,7 @@ contract SP1ICS07Tendermint is
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
         } else {
-            // revert UnknownMembershipProofType(uint8(membershipProof.proofType));
+            revert UnknownMembershipProofType(uint8(membershipProof.proofType));
         }
     }
 

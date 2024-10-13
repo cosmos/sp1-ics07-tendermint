@@ -36,7 +36,7 @@ library UnionMembership {
             UnionNonMembershipProof calldata nmProof;
             assembly {
                 nmProof := proof.offset
-            } // TODO: make sure this works
+            }
             return Ics23.verifyChainedNonMembership(
                 nmProof.nonExistenceProof, nmProof.existenceProof, root, prefix, key
             ) == Ics23.VerifyChainedNonMembershipError.None;

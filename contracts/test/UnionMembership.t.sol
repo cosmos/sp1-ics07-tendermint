@@ -20,7 +20,7 @@ contract UnionMembershipTest is MembershipTest {
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: verifyMembershipPath,
-            value: firstVerifyMembershipValue
+            value: VERIFY_MEMBERSHIP_VALUE
         });
 
         ics07Tendermint.membership(membershipMsg);

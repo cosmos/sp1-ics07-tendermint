@@ -174,7 +174,7 @@ pub async fn run_sp1_membership(
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
         futures::future::try_join_all(key_paths.into_iter().map(|path| async {
             let path: Vec<Vec<u8>> = if is_base64 {
-                path.split('/')
+                path.split('\\')
                     .map(subtle_encoding::base64::decode)
                     .collect::<Result<_, _>>()?
             } else {

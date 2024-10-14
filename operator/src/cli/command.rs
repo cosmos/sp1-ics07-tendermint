@@ -136,6 +136,18 @@ pub mod fixtures {
     #[derive(Parser, Debug, Clone)]
     #[command(about = "Generate the verify (non)membership fixture")]
     pub struct MembershipCmd {
+        /// Generic membership arguments.
+        #[clap(flatten)]
+        pub membership: MembershipArgs,
+
+        /// Whether to generate a union ics23 proof.
+        #[clap(long)]
+        pub union: bool,
+    }
+
+    /// The arguments for generic membership proof generation.
+    #[derive(Parser, Debug, Clone)]
+    pub struct MembershipArgs {
         /// Trusted block.
         #[clap(long)]
         pub trusted_block: u32,
@@ -168,7 +180,7 @@ pub mod fixtures {
 
         /// Membership arguments.
         #[clap(flatten)]
-        pub membership: MembershipCmd,
+        pub membership: MembershipArgs,
     }
 
     /// The arguments for the `Misbehaviour` fixture executable.

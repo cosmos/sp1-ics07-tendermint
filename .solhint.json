@@ -12,6 +12,7 @@
     "one-contract-per-file": "off",
     "gas-custom-errors": "off",
     "reason-string": "off",
-    "max-line-length": "off"
+    "max-line-length": "off",
+    "no-inline-assembly": "off"
   }
 }

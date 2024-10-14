@@ -63,6 +63,10 @@ tendermint-rpc = { version = "0.38", features = ["http-client"] }
 ibc-core-client-types = { version = "0.54", default-features = false }
 ibc-core-host-cosmos = { version = "0.54", default-features = false }
 
+# Union
+unionlabs = { git = "https://github.com/unionlabs/union", rev = "4a6e7229b78de70742cf719fb26409cab3cca631" }
+union-protos = { package = "protos", git = "https://github.com/unionlabs/union", rev = "4a6e7229b78de70742cf719fb26409cab3cca631" }
+
 # Other dependencies
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }

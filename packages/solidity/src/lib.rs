@@ -129,6 +129,15 @@ impl From<IMembershipMsgs::SP1MembershipAndUpdateClientProof> for IMembershipMsg
     }
 }
 
+impl From<IMembershipMsgs::UnionMembershipProof> for IMembershipMsgs::MembershipProof {
+    fn from(proof: IMembershipMsgs::UnionMembershipProof) -> Self {
+        Self {
+            proofType: 2,
+            proof: proof.abi_encode().into(),
+        }
+    }
+}
+
 impl TryFrom<ibc_core_client_types::Height> for IICS02ClientMsgs::Height {
     type Error = <u64 as TryInto<u32>>::Error;
 

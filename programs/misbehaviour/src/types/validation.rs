@@ -30,7 +30,7 @@ impl<'a, 'b> MisbehaviourValidationContext<'a, 'b> {
     }
 }
 
-impl<'a, 'b> ClientValidationContext for MisbehaviourValidationContext<'a, 'b> {
+impl ClientValidationContext for MisbehaviourValidationContext<'_, '_> {
     type ClientStateRef = ClientStateWrapper;
     type ConsensusStateRef = ConsensusStateWrapper;
 
@@ -62,7 +62,7 @@ impl<'a, 'b> ClientValidationContext for MisbehaviourValidationContext<'a, 'b> {
     }
 }
 
-impl<'a, 'b> ExtClientValidationContext for MisbehaviourValidationContext<'a, 'b> {
+impl ExtClientValidationContext for MisbehaviourValidationContext<'_, '_> {
     fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
         Ok(Timestamp::from_nanoseconds(self.env.now * 1_000_000_000))
     }

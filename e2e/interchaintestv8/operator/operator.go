@@ -315,13 +315,13 @@ func execOperatorCommand(c *exec.Cmd) ([]byte, error) {
 	// Create a MultiWriter to write to both os.Stdout and the buffer
 	multiWriter := io.MultiWriter(os.Stdout, &outBuf)
 
-	// Set the command's stdout to the MultiWriter
+	// Set the command's stdout and stderror to the MultiWriter
 	c.Stdout = multiWriter
-	c.Stderr = os.Stderr
+	c.Stderr = multiWriter
 
 	// Run the command
 	if err := c.Run(); err != nil {
-		return nil, fmt.Errorf("operator command '%s' failed: %w", strings.Join(c.Args, " "), err)
+		return nil, fmt.Errorf("operator command '%s' failed: %s", strings.Join(c.Args, " "), outBuf.String())
 	}
 
 	return outBuf.Bytes(), nil

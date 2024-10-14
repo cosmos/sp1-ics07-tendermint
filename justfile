@@ -67,7 +67,7 @@ fixtures: build-operator
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract
 # Requires `jq` to be installed on the system
 # Requires `abigen` to be installed on the system to generate the go bindings for e2e tests
-generate-abi:
+generate-abi: clean
   cd contracts && forge install && forge build
   jq '.abi' contracts/out/SP1ICS07Tendermint.sol/SP1ICS07Tendermint.json > contracts/abi/SP1ICS07Tendermint.json
   @echo "ABI file created at 'contracts/abi/SP1ICS07Tendermint.json'"

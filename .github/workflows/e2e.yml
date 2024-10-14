@@ -72,7 +72,6 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          override: false
 
       - name: Get SP1 version
         id: sp1-version

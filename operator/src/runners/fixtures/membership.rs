@@ -130,6 +130,9 @@ pub async fn run_union_membership(
     } else {
         vec![b"ibc".into(), key_paths[0].as_bytes().to_vec()]
     };
+
+    // the program could support longer key paths, but the operator only supports 2
+    // because the current assumption is that the Cosmos SDK will always have 2
     assert_eq!(path.len(), 2);
 
     let res = tm_rpc_client

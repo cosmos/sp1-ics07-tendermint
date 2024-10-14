@@ -182,15 +182,6 @@ contract SP1ICS07Tendermint is
         private
         returns (uint256)
     {
-        if (proofHeight.revisionNumber != clientState.latestHeight.revisionNumber) {
-            revert ProofHeightMismatch(
-                proofHeight.revisionNumber,
-                proofHeight.revisionHeight,
-                clientState.latestHeight.revisionNumber,
-                clientState.latestHeight.revisionHeight
-            );
-        }
-
         SP1MembershipProof memory proof = abi.decode(proofBytes, (SP1MembershipProof));
         if (proof.sp1Proof.vKey != MEMBERSHIP_PROGRAM_VKEY) {
             revert VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);

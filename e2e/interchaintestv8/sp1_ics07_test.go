@@ -181,6 +181,52 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
+func (s *SP1ICS07TendermintTestSuite) TestVerifyMembership() {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	eth, simd := s.ChainA, s.ChainB
+
+	if s.generateFixtures {
+		s.T().Log("Generate fixtures is set to true, but TestVerifyMembership does not support it (yet)")
+	}
+
+	s.Require().True(s.Run("Verify membership", func() {
+		var membershipKey [][]byte
+		s.Require().True(s.Run("Generate keys", func() {
+			// Prove the bank balance of UserA
+			key, err := types.BankBalanceKey(s.UserA.Address(), simd.Config().Denom)
+			s.Require().NoError(err)
+
+			membershipKey = [][]byte{[]byte(banktypes.StoreKey), key}
+		}))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		trustedHeight := clientState.LatestHeight.RevisionHeight
+
+		latestHeight, err := simd.Height(ctx)
+		s.Require().NoError(err)
+
+		s.Require().Greater(uint32(latestHeight), trustedHeight)
+
+		var expValue []byte
+		s.Require().True(s.Run("Get expected value for the verify membership", func() {
+			resp, err := e2esuite.ABCIQuery(ctx, simd, &abci.RequestQuery{
+				Path:   "store/" + string(membershipKey[0]) + "/key",
+				Data:   membershipKey[1],
+				Height: latestHeight - 1,
+			})
+			s.Require().NoError(err)
+			s.Require().NotEmpty(resp.Value)
+
+			expValue = resp.Value
+		}))
+	}))
+}
+
 // TestUpdateClientAndMembership tests the update client and membership functionality
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 	ctx := context.Background()
@@ -210,8 +256,6 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 
 			nonMembershipKey = [][]byte{[]byte(ibcexported.StoreKey), packetReceiptPath}
 		}))
-
-		s.Require().NoError(testutil.WaitForBlocks(ctx, 5, simd))
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)

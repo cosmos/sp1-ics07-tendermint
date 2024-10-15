@@ -91,6 +91,11 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 			"-o", "contracts/script/genesis.json",
 		))
 
+		s.T().Cleanup(func() {
+			err := os.Remove("contracts/script/genesis.json")
+			s.Require().NoError(err)
+		})
+
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), foundry.ForgeScriptOpts{
 			ContractRootDir:  ".",
 			SolidityContract: "contracts/script/SP1ICS07Tendermint.s.sol",

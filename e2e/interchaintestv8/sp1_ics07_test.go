@@ -180,7 +180,16 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
-func (s *SP1ICS07TendermintTestSuite) TestVerifyMembership() {
+func (s *SP1ICS07TendermintTestSuite) TestVerifyUnionMembership() {
+	s.VerifyMembershipTest("--union")
+}
+
+func (s *SP1ICS07TendermintTestSuite) TestVerifySP1Membership() {
+	s.VerifyMembershipTest()
+}
+
+// VerifyMembershipTest tests the verify membership functionality with the given arguments
+func (s *SP1ICS07TendermintTestSuite) VerifyMembershipTest(args ...string) {
 	ctx := context.Background()
 
 	s.SetupSuite(ctx)
@@ -195,7 +204,7 @@ func (s *SP1ICS07TendermintTestSuite) TestVerifyMembership() {
 		var membershipKey [][]byte
 		s.Require().True(s.Run("Generate keys", func() {
 			// Prove the bank balance of UserA
-			key, err := types.BankBalanceKey(s.UserA.Address(), simd.Config().Denom)
+			key, err := types.BankBalanceKey(s.UserB.Address(), simd.Config().Denom)
 			s.Require().NoError(err)
 
 			membershipKey = [][]byte{[]byte(banktypes.StoreKey), key}
@@ -219,11 +228,10 @@ func (s *SP1ICS07TendermintTestSuite) TestVerifyMembership() {
 			expValue = resp.Value
 		}))
 
+		args = append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
 		proofHeight, ucAndMemProof, err := operator.MembershipProof(
-			uint64(trustedHeight), operator.ToBase64KeyPaths(membershipKey),
-			"--trust-level", testvalues.DefaultTrustLevel.String(),
-			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
-			"--base64",
+			uint64(trustedHeight), operator.ToBase64KeyPaths(membershipKey), "",
+			args...,
 		)
 		s.Require().NoError(err)
 
@@ -238,7 +246,8 @@ func (s *SP1ICS07TendermintTestSuite) TestVerifyMembership() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 	}))
 }
 
@@ -315,7 +324,8 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 
 		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -406,7 +416,8 @@ func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -484,7 +495,8 @@ func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour()
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)

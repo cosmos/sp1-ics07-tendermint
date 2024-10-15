@@ -180,16 +180,18 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
-func (s *SP1ICS07TendermintTestSuite) TestVerifyUnionMembership() {
-	s.VerifyMembershipTest("--union")
+// TestUnionMembership tests the verify (non)membership functionality with the --union flag
+func (s *SP1ICS07TendermintTestSuite) TestUnionMembership() {
+	s.MembershipTest("--union")
 }
 
-func (s *SP1ICS07TendermintTestSuite) TestVerifySP1Membership() {
-	s.VerifyMembershipTest()
+// TestSP1Membership tests the verify (non)membership functionality
+func (s *SP1ICS07TendermintTestSuite) TestSP1Membership() {
+	s.MembershipTest()
 }
 
-// VerifyMembershipTest tests the verify membership functionality with the given arguments
-func (s *SP1ICS07TendermintTestSuite) VerifyMembershipTest(args ...string) {
+// MembershipTest tests the verify (non)membership functionality with the given arguments
+func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 	ctx := context.Background()
 
 	s.SetupSuite(ctx)
@@ -240,6 +242,42 @@ func (s *SP1ICS07TendermintTestSuite) VerifyMembershipTest(args ...string) {
 			Proof:       ucAndMemProof,
 			Path:        membershipKey,
 			Value:       expValue,
+		}
+
+		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
+	}))
+
+	s.Require().True(s.Run("Verify non-membership", func() {
+		var nonMembershipKey [][]byte
+		s.Require().True(s.Run("Generate keys", func() {
+			// A non-membership key:
+			packetReceiptPath := ibchost.PacketReceiptKey(transfertypes.PortID, ibctesting.FirstChannelID, 1)
+
+			nonMembershipKey = [][]byte{[]byte(ibcexported.StoreKey), packetReceiptPath}
+		}))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		trustedHeight := clientState.LatestHeight.RevisionHeight
+
+		args = append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		proofHeight, ucAndMemProof, err := operator.MembershipProof(
+			uint64(trustedHeight), operator.ToBase64KeyPaths(nonMembershipKey), "",
+			args...,
+		)
+		s.Require().NoError(err)
+
+		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+			ProofHeight: *proofHeight,
+			Proof:       ucAndMemProof,
+			Path:        nonMembershipKey,
+			Value:       []byte(""),
 		}
 
 		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)

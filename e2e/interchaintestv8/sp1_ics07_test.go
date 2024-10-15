@@ -230,10 +230,10 @@ func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 			expValue = resp.Value
 		}))
 
-		args = append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		memArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
 		proofHeight, ucAndMemProof, err := operator.MembershipProof(
 			uint64(trustedHeight), operator.ToBase64KeyPaths(membershipKey), "",
-			args...,
+			memArgs...,
 		)
 		s.Require().NoError(err)
 
@@ -266,10 +266,10 @@ func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 
 		trustedHeight := clientState.LatestHeight.RevisionHeight
 
-		args = append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		nonMemArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
 		proofHeight, ucAndMemProof, err := operator.MembershipProof(
 			uint64(trustedHeight), operator.ToBase64KeyPaths(nonMembershipKey), "",
-			args...,
+			nonMemArgs...,
 		)
 		s.Require().NoError(err)
 

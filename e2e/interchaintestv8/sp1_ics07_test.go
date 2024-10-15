@@ -29,7 +29,6 @@ import (
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
@@ -207,23 +206,39 @@ func (s *SP1ICS07TendermintTestSuite) TestVerifyMembership() {
 
 		trustedHeight := clientState.LatestHeight.RevisionHeight
 
-		latestHeight, err := simd.Height(ctx)
-		s.Require().NoError(err)
-
-		s.Require().Greater(uint32(latestHeight), trustedHeight)
-
 		var expValue []byte
 		s.Require().True(s.Run("Get expected value for the verify membership", func() {
 			resp, err := e2esuite.ABCIQuery(ctx, simd, &abci.RequestQuery{
 				Path:   "store/" + string(membershipKey[0]) + "/key",
 				Data:   membershipKey[1],
-				Height: latestHeight - 1,
+				Height: int64(trustedHeight) - 1,
 			})
 			s.Require().NoError(err)
 			s.Require().NotEmpty(resp.Value)
 
 			expValue = resp.Value
 		}))
+
+		proofHeight, ucAndMemProof, err := operator.MembershipProof(
+			uint64(trustedHeight), operator.ToBase64KeyPaths(membershipKey),
+			"--trust-level", testvalues.DefaultTrustLevel.String(),
+			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
+			"--base64",
+		)
+		s.Require().NoError(err)
+
+		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+			ProofHeight: *proofHeight,
+			Proof:       ucAndMemProof,
+			Path:        membershipKey,
+			Value:       expValue,
+		}
+
+		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
 	}))
 }
 

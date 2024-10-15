@@ -29,7 +29,6 @@ import (
 
 	"github.com/strangelove-ventures/interchaintest/v8/chain/ethereum/foundry"
 	"github.com/strangelove-ventures/interchaintest/v8/ibc"
-	"github.com/strangelove-ventures/interchaintest/v8/testutil"
 
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/e2esuite"
 	"github.com/srdtrk/sp1-ics07-tendermint/e2e/v8/operator"
@@ -91,6 +90,11 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context) {
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
 			"-o", "contracts/script/genesis.json",
 		))
+
+		s.T().Cleanup(func() {
+			err := os.Remove("contracts/script/genesis.json")
+			s.Require().NoError(err)
+		})
 
 		stdout, _, err := eth.ForgeScript(ctx, s.UserA.KeyName(), foundry.ForgeScriptOpts{
 			ContractRootDir:  ".",
@@ -181,6 +185,115 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClient() {
 	}))
 }
 
+// TestUnionMembership tests the verify (non)membership functionality with the --union flag
+func (s *SP1ICS07TendermintTestSuite) TestUnionMembership() {
+	s.MembershipTest("--union")
+}
+
+// TestSP1Membership tests the verify (non)membership functionality
+func (s *SP1ICS07TendermintTestSuite) TestSP1Membership() {
+	s.MembershipTest()
+}
+
+// MembershipTest tests the verify (non)membership functionality with the given arguments
+func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
+	ctx := context.Background()
+
+	s.SetupSuite(ctx)
+
+	eth, simd := s.ChainA, s.ChainB
+
+	if s.generateFixtures {
+		s.T().Log("Generate fixtures is set to true, but TestVerifyMembership does not support it (yet)")
+	}
+
+	s.Require().True(s.Run("Verify membership", func() {
+		var membershipKey [][]byte
+		s.Require().True(s.Run("Generate keys", func() {
+			// Prove the bank balance of UserA
+			key, err := types.BankBalanceKey(s.UserB.Address(), simd.Config().Denom)
+			s.Require().NoError(err)
+
+			membershipKey = [][]byte{[]byte(banktypes.StoreKey), key}
+		}))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		trustedHeight := clientState.LatestHeight.RevisionHeight
+
+		var expValue []byte
+		s.Require().True(s.Run("Get expected value for the verify membership", func() {
+			resp, err := e2esuite.ABCIQuery(ctx, simd, &abci.RequestQuery{
+				Path:   "store/" + string(membershipKey[0]) + "/key",
+				Data:   membershipKey[1],
+				Height: int64(trustedHeight) - 1,
+			})
+			s.Require().NoError(err)
+			s.Require().NotEmpty(resp.Value)
+
+			expValue = resp.Value
+		}))
+
+		memArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		proofHeight, ucAndMemProof, err := operator.MembershipProof(
+			uint64(trustedHeight), operator.ToBase64KeyPaths(membershipKey), "",
+			memArgs...,
+		)
+		s.Require().NoError(err)
+
+		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+			ProofHeight: *proofHeight,
+			Proof:       ucAndMemProof,
+			Path:        membershipKey,
+			Value:       expValue,
+		}
+
+		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
+	}))
+
+	s.Require().True(s.Run("Verify non-membership", func() {
+		var nonMembershipKey [][]byte
+		s.Require().True(s.Run("Generate keys", func() {
+			// A non-membership key:
+			packetReceiptPath := ibchost.PacketReceiptKey(transfertypes.PortID, ibctesting.FirstChannelID, 1)
+
+			nonMembershipKey = [][]byte{[]byte(ibcexported.StoreKey), packetReceiptPath}
+		}))
+
+		clientState, err := s.contract.GetClientState(nil)
+		s.Require().NoError(err)
+
+		trustedHeight := clientState.LatestHeight.RevisionHeight
+
+		nonMemArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		proofHeight, ucAndMemProof, err := operator.MembershipProof(
+			uint64(trustedHeight), operator.ToBase64KeyPaths(nonMembershipKey), "",
+			nonMemArgs...,
+		)
+		s.Require().NoError(err)
+
+		msg := sp1ics07tendermint.ILightClientMsgsMsgMembership{
+			ProofHeight: *proofHeight,
+			Proof:       ucAndMemProof,
+			Path:        nonMembershipKey,
+			Value:       []byte(""),
+		}
+
+		tx, err := s.contract.Membership(s.GetTransactOpts(s.key), msg)
+		s.Require().NoError(err)
+
+		// wait until transaction is included in a block
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
+	}))
+}
+
 // TestUpdateClientAndMembership tests the update client and membership functionality
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 	ctx := context.Background()
@@ -210,8 +323,6 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 
 			nonMembershipKey = [][]byte{[]byte(ibcexported.StoreKey), packetReceiptPath}
 		}))
-
-		s.Require().NoError(testutil.WaitForBlocks(ctx, 5, simd))
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -256,7 +367,8 @@ func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 
 		clientState, err = s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -347,7 +459,8 @@ func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour() {
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)
@@ -425,7 +538,8 @@ func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour()
 		s.Require().NoError(err)
 
 		// wait until transaction is included in a block
-		_ = s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		receipt := s.GetTxReciept(ctx, eth.EthereumChain, tx.Hash())
+		s.T().Logf("Gas used in %s: %d", s.T().Name(), receipt.GasUsed)
 
 		clientState, err := s.contract.GetClientState(nil)
 		s.Require().NoError(err)

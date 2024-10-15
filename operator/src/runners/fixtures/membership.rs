@@ -124,7 +124,7 @@ pub async fn run_union_membership(
 
     let path: Vec<Vec<u8>> = if is_base64 {
         key_paths[0]
-            .split('/')
+            .split('\\')
             .map(subtle_encoding::base64::decode)
             .collect::<Result<_, _>>()?
     } else {

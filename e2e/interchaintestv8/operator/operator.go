@@ -61,6 +61,73 @@ func StartOperator(args ...string) error {
 	return cmd.Run()
 }
 
+// MembershipProof is a function that generates a membership proof and returns the proof height and proof
+func MembershipProof(trusted_height uint64, paths string, writeFixtureName string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
+	args = append([]string{"fixtures", "membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--key-paths", paths}, args...)
+
+	cmd := exec.Command("target/release/operator", args...)
+	output, err := execOperatorCommand(cmd)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// eliminate non-json characters
+	jsonStartIdx := strings.Index(string(output), "{")
+	if jsonStartIdx == -1 {
+		panic("no json found in output")
+	}
+	output = output[jsonStartIdx:]
+
+	if writeFixtureName != "" {
+		fixtureFileName := fmt.Sprintf("contracts/fixtures/%s_fixture.json", writeFixtureName)
+		if err := os.WriteFile(fixtureFileName, output, 0o600); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	var membership membershipFixture
+	err = json.Unmarshal(output, &membership)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	heightBz, err := hex.DecodeString(membership.ProofHeight)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	heightType, err := abi.NewType("tuple", "IICS02ClientMsgsHeight", []abi.ArgumentMarshaling{
+		{Name: "revisionNumber", Type: "uint32"},
+		{Name: "revisionHeight", Type: "uint32"},
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	heightArgs := abi.Arguments{
+		{Type: heightType, Name: "param_one"},
+	}
+
+	// abi encoding
+	heightI, err := heightArgs.Unpack(heightBz)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	height := abi.ConvertType(heightI[0], new(sp1ics07tendermint.IICS02ClientMsgsHeight)).(*sp1ics07tendermint.IICS02ClientMsgsHeight)
+
+	if height.RevisionHeight != uint32(trusted_height) {
+		return nil, nil, errors.New("heights do not match")
+	}
+
+	proofBz, err := hex.DecodeString(membership.MembershipProof)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return height, proofBz, nil
+}
+
 // UpdateClientAndMembershipProof is a function that generates an update client and membership proof
 func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
 	args = append([]string{"fixtures", "update-client-and-membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--target-block", strconv.FormatUint(target_height, 10), "--key-paths", paths}, args...)

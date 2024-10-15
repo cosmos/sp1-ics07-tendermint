@@ -40,6 +40,8 @@ jobs:
           # List your tests here
           - TestWithSP1ICS07TendermintTestSuite/TestDeploy
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
+          - TestWithSP1ICS07TendermintTestSuite/TestUnionMembership
+          - TestWithSP1ICS07TendermintTestSuite/TestSP1Membership
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership
           - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour
           - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour

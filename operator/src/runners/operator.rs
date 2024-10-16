@@ -20,10 +20,8 @@ use sp1_ics07_tendermint_solidity::{
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use tendermint_rpc::HttpClient;
 
-/// An implementation of a Tendermint Light Client operator that will poll an onchain Tendermint
-/// light client and generate a proof of the transition from the latest block in the contract to the
-/// latest block on the chain. Then, submits the proof to the contract and updates the contract with
-/// the latest block hash and height.
+/// Runs the update client program in a loop.
+/// If the `only_once` flag is set, the program will only run once.
 #[allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 pub async fn run(args: Args) -> anyhow::Result<()> {
     setup_logger();

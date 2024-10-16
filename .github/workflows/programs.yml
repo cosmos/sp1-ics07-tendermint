@@ -27,7 +27,6 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-          override: true
 
       - name: Install SP1 toolchain
         run: |

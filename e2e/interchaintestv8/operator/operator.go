@@ -132,8 +132,7 @@ func MembershipProof(trusted_height uint64, paths string, writeFixtureName strin
 func UpdateClientAndMembershipProof(trusted_height, target_height uint64, paths string, args ...string) (*sp1ics07tendermint.IICS02ClientMsgsHeight, []byte, error) {
 	args = append([]string{"fixtures", "update-client-and-membership", "--trusted-block", strconv.FormatUint(trusted_height, 10), "--target-block", strconv.FormatUint(target_height, 10), "--key-paths", paths}, args...)
 
-	cmd := exec.Command("target/release/operator", args...)
-	output, err := execOperatorCommand(cmd)
+	output, err := execOperatorCommand(exec.Command("target/release/operator", args...))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -203,8 +202,7 @@ func MisbehaviourProof(cdc codec.Codec, misbehaviour tmclient.Misbehaviour, writ
 	defer os.Remove(misbehaviourFileName)
 
 	args = append([]string{"fixtures", "misbehaviour", "--misbehaviour-path", misbehaviourFileName}, args...)
-	cmd := exec.Command("target/release/operator", args...)
-	output, err := execOperatorCommand(cmd)
+	output, err := execOperatorCommand(exec.Command("target/release/operator", args...))
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +243,7 @@ func ToBase64KeyPaths(paths ...[][]byte) string {
 		if len(path) != 2 {
 			panic("path must have 2 elements")
 		}
-		keyPaths = append(keyPaths, base64.StdEncoding.EncodeToString(path[0])+"/"+base64.StdEncoding.EncodeToString(path[1]))
+		keyPaths = append(keyPaths, base64.StdEncoding.EncodeToString(path[0])+"\\"+base64.StdEncoding.EncodeToString(path[1]))
 	}
 	return strings.Join(keyPaths, ",")
 }
@@ -384,13 +382,13 @@ func execOperatorCommand(c *exec.Cmd) ([]byte, error) {
 	// Create a MultiWriter to write to both os.Stdout and the buffer
 	multiWriter := io.MultiWriter(os.Stdout, &outBuf)
 
-	// Set the command's stdout to the MultiWriter
+	// Set the command's stdout and stderror to the MultiWriter
 	c.Stdout = multiWriter
-	c.Stderr = os.Stderr
+	c.Stderr = multiWriter
 
 	// Run the command
 	if err := c.Run(); err != nil {
-		return nil, fmt.Errorf("operator command '%s' failed: %w", strings.Join(c.Args, " "), err)
+		return nil, fmt.Errorf("operator command '%s' failed: %s", strings.Join(c.Args, " "), outBuf.String())
 	}
 
 	return outBuf.Bytes(), nil

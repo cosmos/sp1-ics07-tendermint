@@ -94,4 +94,7 @@ interface ISP1ICS07TendermintErrors {
 
     /// @notice Returned when the feature is not supported.
     error FeatureNotSupported();
+
+    /// @notice Returned when the membership proof is invalid.
+    error InvalidMembershipProof();
 }

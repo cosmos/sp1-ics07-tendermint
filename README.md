@@ -56,7 +56,7 @@ This project is structured as a cargo workspace with the following directories:
 
 ### Programs
 
-This project contains the following SP1 programs
+This project contains the following SP1 programs:
 
 |     **Programs**    |                                                                                                                                     **Description**                                                                                                                                     | **Status** |
 |:-------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------:|
@@ -64,6 +64,15 @@ This project contains the following SP1 programs
 |     `membership`    | As consensus states are added to the client, they can be used for proof verification by relayers wishing to prove packet flow messages against a particular height on the counterparty. This uses the `verify_membership` and `verify_non_membership` methods on the tendermint client. |      ✅     |
 | `uc-and-membership` | This is a program that combines `update-client` and `membership` to update the client, and prove membership of packet flow messages against the new consensus state.                                                                                                                    |      ✅     |
 |    `misbehaviour`   | In case, the malicious subset of the validators exceeds the trust level of the client; then the client can be deceived into accepting invalid blocks and the connection is no longer secure. The tendermint client has some mitigations in place to prevent this.                       |      ✅     |
+
+### Contracts
+
+This project contains the following Solidity contracts and libraries (interfaces are not included):
+
+| **Contract** | **Description** |
+|:---:|:---:|
+| `SP1ICS07Tendermint.sol` | The light client contract, and the entry point for SP1 proofs. |
+| `UnionMembership.sol` | A library wrapping Union's ICS23 implementation for verifying (non)membership purely in solidity (without SP1). |
 
 ## Cloning the Repository
 

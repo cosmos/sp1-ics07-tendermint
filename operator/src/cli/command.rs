@@ -136,6 +136,18 @@ pub mod fixtures {
     #[derive(Parser, Debug, Clone)]
     #[command(about = "Generate the verify (non)membership fixture")]
     pub struct MembershipCmd {
+        /// Generic membership arguments.
+        #[clap(flatten)]
+        pub membership: MembershipArgs,
+
+        /// Whether to generate a union ics23 proof.
+        #[clap(long)]
+        pub union: bool,
+    }
+
+    /// The arguments for generic membership proof generation.
+    #[derive(Parser, Debug, Clone)]
+    pub struct MembershipArgs {
         /// Trusted block.
         #[clap(long)]
         pub trusted_block: u32,
@@ -153,7 +165,7 @@ pub mod fixtures {
         pub trust_options: super::TrustOptions,
 
         /// Indicates that the key paths are base64 encoded.
-        /// Module store keys seperated by '/', eg. 'aWJj/a2V5' for 'ibc/key'.
+        /// Module store keys seperated by backslash, '\', eg. 'aWJj\a2V5' for 'ibc/key'.
         #[clap(long)]
         pub base64: bool,
     }
@@ -168,7 +180,7 @@ pub mod fixtures {
 
         /// Membership arguments.
         #[clap(flatten)]
-        pub membership: MembershipCmd,
+        pub membership: MembershipArgs,
     }
 
     /// The arguments for the `Misbehaviour` fixture executable.

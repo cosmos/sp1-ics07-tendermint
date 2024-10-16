@@ -26,7 +26,7 @@ impl<'a, 'b> ClientValidationCtx<'a, 'b> {
     }
 }
 
-impl<'a, 'b> ClientValidationContext for ClientValidationCtx<'a, 'b> {
+impl ClientValidationContext for ClientValidationCtx<'_, '_> {
     type ClientStateRef = ClientStateWrapper;
     type ConsensusStateRef = ConsensusStateWrapper;
 
@@ -57,7 +57,7 @@ impl<'a, 'b> ClientValidationContext for ClientValidationCtx<'a, 'b> {
     }
 }
 
-impl<'a, 'b> ExtClientValidationContext for ClientValidationCtx<'a, 'b> {
+impl ExtClientValidationContext for ClientValidationCtx<'_, '_> {
     fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
         Ok(Timestamp::from_nanoseconds(self.env.now * 1_000_000_000))
     }

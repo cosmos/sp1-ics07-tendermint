@@ -66,7 +66,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
         futures::future::try_join_all(args.membership.key_paths.into_iter().map(|path| async {
             let path: Vec<Vec<u8>> = if args.membership.base64 {
-                path.split('/')
+                path.split('\\')
                     .map(subtle_encoding::base64::decode)
                     .collect::<Result<_, _>>()?
             } else {

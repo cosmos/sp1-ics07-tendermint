@@ -12,6 +12,7 @@ import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
 import { Paths } from "./utils/Paths.sol";
+import { UnionMembership } from "./utils/UnionMembership.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -137,6 +138,10 @@ contract SP1ICS07Tendermint is
             return handleSP1UpdateClientAndMembership(
                 msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
             );
+        } else if (membershipProof.proofType == MembershipProofType.UnionMembershipProof) {
+            return this.handleUnionMembershipProof(
+                msgMembership.proofHeight, membershipProof.proof, msgMembership.path, msgMembership.value
+            );
         } else {
             revert UnknownMembershipProofType(uint8(membershipProof.proofType));
         }
@@ -167,6 +172,35 @@ contract SP1ICS07Tendermint is
         revert FeatureNotSupported();
     }
 
+    function handleUnionMembershipProof(
+        Height calldata proofHeight,
+        bytes calldata proofBytes,
+        bytes[] calldata kvPath,
+        bytes calldata kvValue
+    )
+        public
+        view
+        returns (uint256)
+    {
+        if (kvPath.length != 2) {
+            revert LengthIsOutOfRange(kvPath.length, 2, 2);
+        }
+
+        UnionMembershipProof memory uProof = abi.decode(proofBytes, (UnionMembershipProof));
+
+        validateMembershipOutput(
+            uProof.trustedConsensusState.root, proofHeight.revisionHeight, uProof.trustedConsensusState
+        );
+
+        if (
+            !UnionMembership.verify(uProof.trustedConsensusState.root, uProof.ics23Proof, kvPath[0], kvPath[1], kvValue)
+        ) {
+            revert InvalidMembershipProof();
+        }
+
+        return uProof.trustedConsensusState.timestamp;
+    }
+
     /// @notice Handles the `SP1MembershipProof` proof type.
     /// @param proofHeight The height of the proof.
     /// @param proofBytes The encoded proof.
@@ -182,15 +216,6 @@ contract SP1ICS07Tendermint is
         private
         returns (uint256)
     {
-        if (proofHeight.revisionNumber != clientState.latestHeight.revisionNumber) {
-            revert ProofHeightMismatch(
-                proofHeight.revisionNumber,
-                proofHeight.revisionHeight,
-                clientState.latestHeight.revisionNumber,
-                clientState.latestHeight.revisionHeight
-            );
-        }
-
         SP1MembershipProof memory proof = abi.decode(proofBytes, (SP1MembershipProof));
         if (proof.sp1Proof.vKey != MEMBERSHIP_PROGRAM_VKEY) {
             revert VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
@@ -478,6 +503,7 @@ contract SP1ICS07Tendermint is
     /// @param o6 The SP1MembershipAndUpdateClientProof.
     /// @param o7 The MisbehaviourOutput.
     /// @param o8 The MsgSubmitMisbehaviour.
+    /// @param o9 The UnionMembershipProof.
     function abiPublicTypes(
         MembershipOutput memory o1,
         UcAndMembershipOutput memory o2,
@@ -486,7 +512,8 @@ contract SP1ICS07Tendermint is
         SP1MembershipProof memory o5,
         SP1MembershipAndUpdateClientProof memory o6,
         MisbehaviourOutput memory o7,
-        MsgSubmitMisbehaviour memory o8
+        MsgSubmitMisbehaviour memory o8,
+        UnionMembershipProof memory o9
     )
         public
         pure

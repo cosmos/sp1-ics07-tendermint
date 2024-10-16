@@ -558,6 +558,10 @@ func (s *SP1ICS07TendermintTestSuite) Test100Membership() {
 	s.largeMembershipTest(100)
 }
 
+func (s *SP1ICS07TendermintTestSuite) Test25Membership() {
+	s.largeMembershipTest(25)
+}
+
 // largeMembershipTest tests membership proofs with a large number of key-value pairs
 func (s *SP1ICS07TendermintTestSuite) largeMembershipTest(n uint64) {
 	ctx := context.Background()

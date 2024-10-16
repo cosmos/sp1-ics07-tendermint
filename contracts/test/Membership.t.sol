@@ -6,9 +6,6 @@ import "forge-std/console.sol";
 import { MembershipTest } from "./MembershipTest.sol";
 
 contract SP1ICS07MembershipTest is MembershipTest {
-    bytes[] public verifyMembershipPath = [bytes("ibc"), bytes("clients/07-tendermint-0/clientState")];
-    bytes[] public verifyNonMembershipPath = [bytes("ibc"), bytes("clients/07-tendermint-001/clientState")];
-
     SP1MembershipProof public proof;
 
     function setUp() public {

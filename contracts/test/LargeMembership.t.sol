@@ -9,7 +9,7 @@ contract SP1ICS07LargeMembershipTest is MembershipTest {
     SP1MembershipProof public proof;
 
     function setUp() public {
-        setUpTestWithFixtures("membership_100_fixture.json");
+        setUpTestWithFixtures("membership_25_fixture.json");
 
         proof = abi.decode(fixture.membershipProof.proof, (SP1MembershipProof));
     }
@@ -35,11 +35,11 @@ contract SP1ICS07LargeMembershipTest is MembershipTest {
 
         ics07Tendermint.membership(membershipMsg);
 
-        console.log("VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+        console.log("LargeVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
         ics07Tendermint.membership(membershipMsg);
 
-        console.log("VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+        console.log("Cached LargeVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
     }
 
     // function test_ValidCachedMembership() public {

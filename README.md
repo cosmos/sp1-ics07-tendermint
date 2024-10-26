@@ -27,7 +27,6 @@ This is an [ICS-07](https://github.com/cosmos/ibc/tree/main/spec/client/ics-007-
     - [Overview](#overview)
         - [Project Structure](#project-structure)
         - [Programs](#programs)
-    - [Cloning the Repository](#cloning-the-repository)
     - [Requirements](#requirements)
     - [Build the programs](#build-the-programs)
     - [Run ICS-07 Tendermint Light Client End to End](#run-ics-07-tendermint-light-client-end-to-end)
@@ -73,14 +72,6 @@ This project contains the following Solidity contracts and libraries (interfaces
 |:---:|:---:|
 | `SP1ICS07Tendermint.sol` | The light client contract, and the entry point for SP1 proofs. |
 | `UnionMembership.sol` | A library wrapping Union's ICS23 implementation for verifying (non)membership purely in solidity (without SP1). |
-
-## Cloning the Repository
-
-This repository contains large files stored using Git LFS. These are only needed for the GitHub workflows and are not needed for local development/testing until [succinctlabs/sp1#1565](https://github.com/succinctlabs/sp1/issues/1565) is resolved. You can clone the repository without the large files by running the following command:
-
-```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/cosmos/sp1-ics07-tendermint
-```
 
 ## Requirements
 

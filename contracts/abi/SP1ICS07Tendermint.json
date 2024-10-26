@@ -706,6 +706,52 @@
   },
   {
     "type": "function",
+    "name": "handleUnionMembershipProof",
+    "inputs": [
+      {
+        "name": "proofHeight",
+        "type": "tuple",
+        "internalType": "struct IICS02ClientMsgs.Height",
+        "components": [
+          {
+            "name": "revisionNumber",
+            "type": "uint32",
+            "internalType": "uint32"
+          },
+          {
+            "name": "revisionHeight",
+            "type": "uint32",
+            "internalType": "uint32"
+          }
+        ]
+      },
+      {
+        "name": "proofBytes",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "kvPath",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      },
+      {
+        "name": "kvValue",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "membership",
     "inputs": [
       {

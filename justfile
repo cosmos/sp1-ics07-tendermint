@@ -116,4 +116,4 @@ lint-fix:
 clean:
   @echo "Cleaning up cache and build artifacts..."
   cargo clean
-  cd contracts && rm -rf cache out
+  - cd contracts && rm -rf cache out

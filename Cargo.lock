@@ -1677,7 +1677,7 @@ checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
 [[package]]
 name = "contracts"
 version = "0.0.0"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
  "ethers 2.0.10",
  "serde",
@@ -4396,7 +4396,7 @@ dependencies = [
 [[package]]
 name = "macros"
 version = "0.1.0"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5583,7 +5583,7 @@ dependencies = [
 [[package]]
 name = "protos"
 version = "0.0.0"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
  "chrono",
  "pbjson-types",
@@ -6422,7 +6422,7 @@ dependencies = [
 [[package]]
 name = "serde-utils"
 version = "0.1.0"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
  "base64 0.21.7",
  "bitvec",
@@ -7337,7 +7337,7 @@ dependencies = [
 [[package]]
 name = "ssz"
 version = "0.5.3"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
  "derivative",
  "itertools 0.10.5",
@@ -7354,7 +7354,7 @@ dependencies = [
 [[package]]
 name = "ssz-derive"
 version = "0.5.3"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
  "darling 0.13.4",
  "proc-macro2",
@@ -8184,8 +8184,9 @@ checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 [[package]]
 name = "unionlabs"
 version = "0.1.0"
-source = "git+https://github.com/unionlabs/union?rev=4a6e7229b78de70742cf719fb26409cab3cca631#4a6e7229b78de70742cf719fb26409cab3cca631"
+source = "git+https://github.com/unionlabs/union?rev=fe4b10691c3fb28436c44fa26042305b75d31e96#fe4b10691c3fb28436c44fa26042305b75d31e96"
 dependencies = [
+ "alloy",
  "base64 0.21.7",
  "bcs",
  "bip32",
@@ -8227,7 +8228,7 @@ dependencies = [
  "thiserror",
  "tracing",
  "typenum",
- "uint 0.10.0",
+ "uint 0.9.5",
  "wasmparser",
 ]
 

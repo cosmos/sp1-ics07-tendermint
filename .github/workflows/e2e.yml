@@ -51,18 +51,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Create LFS file list
-        run: git lfs ls-files --long | cut -d ' ' -f1 | sort > .lfs-assets-id
-      - name: LFS Cache
-        uses: actions/cache@v4
-        with:
-          path: .git/lfs/objects
-          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
-          restore-keys: |
-            ${{ runner.os }}-lfs-
-      - name: Git LFS Pull
-        run: git lfs pull
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -85,10 +73,6 @@ jobs:
           curl -L https://raw.githubusercontent.com/succinctlabs/sp1/${{ steps.sp1-version.outputs.sp1_version }}/sp1up/install | bash
           ~/.sp1/bin/sp1up --token ${{ secrets.GITHUB_TOKEN }}
           ~/.sp1/bin/cargo-prove prove --version
-      - name: Install SP1 circuit artifacts (plonky only)
-        run: |
-          mkdir ~/.sp1/circuits
-          mv e2e/artifacts/circuits/v2.0.0 ~/.sp1/circuits/v2.0.0
       - name: Install just
         uses: extractions/setup-just@v2
       - name: Build operator

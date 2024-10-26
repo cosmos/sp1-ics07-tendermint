@@ -64,8 +64,8 @@ ibc-core-client-types = { version = "0.54", default-features = false }
 ibc-core-host-cosmos = { version = "0.54", default-features = false }
 
 # Union
-unionlabs = { git = "https://github.com/unionlabs/union", rev = "fe4b10691c3fb28436c44fa26042305b75d31e96" }
-union-protos = { package = "protos", git = "https://github.com/unionlabs/union", rev = "fe4b10691c3fb28436c44fa26042305b75d31e96" }
+unionlabs = { git = "https://github.com/unionlabs/union", rev = "fe4b10691c3fb28436c44fa26042305b75d31e96", default-features = false, features = ["ethabi"] }
+union-protos = { package = "protos", git = "https://github.com/unionlabs/union", rev = "fe4b10691c3fb28436c44fa26042305b75d31e96", default-features = false, features = ["ibc+core+commitment+v1"] }
 
 # Other dependencies
 reqwest = { version = "0.12", features = ["json"] }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.25;
+pragma solidity ^0.8.28;
 
 import { IUpdateClientMsgs } from "./IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "./IMembershipMsgs.sol";

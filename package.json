@@ -8,12 +8,12 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0",
-    "forge-std": "github:foundry-rs/forge-std#v1.9.2",
     "sp1-contracts": "github:succinctlabs/sp1-contracts#v3.0.0",
-    "solidity-ibc": "github:cosmos/solidity-ibc-eureka#c3d851ff652a42e204846ce0ff60e373d477724d",
+    "solidity-ibc": "github:cosmos/solidity-ibc-eureka#e120d3168bbbde043e3c4a64c43ffebb36766c65",
     "union": "github:unionlabs/union#4a6e7229b78de70742cf719fb26409cab3cca631"
   },
   "devDependencies": {
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
     "solhint": "^5.0.3",
     "@defi-wonderland/natspec-smells": "^1.1.5"
   },

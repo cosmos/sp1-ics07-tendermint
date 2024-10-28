@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.25;
+pragma solidity ^0.8.28;
 
 import { IICS07TendermintMsgs } from "./IICS07TendermintMsgs.sol";
 import { ISP1Msgs } from "./ISP1Msgs.sol";

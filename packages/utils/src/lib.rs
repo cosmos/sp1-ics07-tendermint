@@ -12,7 +12,7 @@ use tendermint::merkle::proof::ProofOps;
 pub fn convert_tm_to_ics_merkle_proof(
     tm_proof: &ProofOps,
 ) -> Result<MerkleProof, prost::DecodeError> {
-    let mut proofs = Vec::new();
+    let mut proofs = Vec::with_capacity(tm_proof.ops.len());
 
     for op in &tm_proof.ops {
         let mut parsed = CommitmentProof { proof: None };

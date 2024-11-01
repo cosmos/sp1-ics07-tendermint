@@ -14,10 +14,12 @@ pub fn convert_tm_to_ics_merkle_proof(
 ) -> Result<MerkleProof, prost::DecodeError> {
     let mut proofs = Vec::with_capacity(tm_proof.ops.len());
 
-    for (i, op) in tm_proof.ops.iter().enumerate() {
-        let mut parsed = CommitmentProof::default();
+    for op in &tm_proof.ops {
+        let mut parsed = CommitmentProof { proof: None };
+
         prost::Message::merge(&mut parsed, op.data.as_slice())?;
-        proofs[i] = parsed;
+
+        proofs.push(parsed);
     }
 
     Ok(MerkleProof { proofs })

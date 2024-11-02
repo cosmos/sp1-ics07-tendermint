@@ -2,15 +2,13 @@
 
 use crate::{
     cli::command::{fixtures::UpdateClientAndMembershipCmd, OutputPath},
-    helpers::light_block::LightBlockExt,
-    rpc::TendermintRpcExt,
     runners::{
         fixtures::membership::SP1ICS07MembershipFixture, genesis::SP1ICS07TendermintGenesis,
     },
 };
 use alloy_sol_types::SolValue;
 use core::str;
-use ibc_client_tendermint::types::ConsensusState;
+use ibc_client_tendermint_types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use sp1_ics07_tendermint_prover::{
     programs::UpdateClientAndMembershipProgram, prover::SP1ICS07TendermintProver,
@@ -21,7 +19,8 @@ use sp1_ics07_tendermint_solidity::{
     ISP1Msgs::SP1Proof,
     IUpdateClientAndMembershipMsgs::UcAndMembershipOutput,
 };
-use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
+use sp1_ics07_tendermint_utils::merkle::convert_tm_to_ics_merkle_proof;
+use sp1_ics07_tendermint_utils::{light_block::LightBlockExt, rpc::TendermintRpcExt};
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::{Client, HttpClient};

@@ -2,12 +2,10 @@
 
 use crate::{
     cli::command::{fixtures::MisbehaviourCmd, OutputPath},
-    helpers::light_block::LightBlockExt,
-    rpc::TendermintRpcExt,
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
-use ibc_client_tendermint::types::Misbehaviour;
+use ibc_client_tendermint_types::Misbehaviour;
 use ibc_proto::ibc::lightclients::tendermint::v1::Misbehaviour as RawMisbehaviour;
 use serde::{Deserialize, Serialize};
 use sp1_ics07_tendermint_prover::{
@@ -18,6 +16,7 @@ use sp1_ics07_tendermint_solidity::{
     IMisbehaviourMsgs::MsgSubmitMisbehaviour,
     ISP1Msgs::SP1Proof,
 };
+use sp1_ics07_tendermint_utils::{light_block::LightBlockExt, rpc::TendermintRpcExt};
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::HttpClient;

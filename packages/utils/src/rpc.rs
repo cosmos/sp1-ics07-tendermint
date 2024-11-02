@@ -16,6 +16,7 @@ use tendermint_rpc::{Client, HttpClient, Paging, Url};
 
 /// An extension trait for [`HttpClient`] that provides additional methods for
 /// obtaining light blocks.
+#[async_trait::async_trait]
 pub trait TendermintRpcExt {
     /// Creates a new instance of the Tendermint RPC client from the environment variables.
     ///
@@ -34,6 +35,7 @@ pub trait TendermintRpcExt {
     async fn sdk_staking_params(&self) -> Result<Params>;
 }
 
+#[async_trait::async_trait]
 impl TendermintRpcExt for HttpClient {
     fn from_env() -> Self {
         Self::new(

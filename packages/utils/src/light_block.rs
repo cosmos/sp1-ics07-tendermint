@@ -1,6 +1,6 @@
 //! Provides helpers for deriving other types from `LightBlock`.
 
-use ibc_client_tendermint::types::{ConsensusState, Header};
+use ibc_client_tendermint_types::{ConsensusState, Header};
 use ibc_core_client_types::Height as IbcHeight;
 use ibc_core_commitment_types::commitment::CommitmentRoot;
 use ibc_core_host_types::{error::IdentifierError, identifiers::ChainId};

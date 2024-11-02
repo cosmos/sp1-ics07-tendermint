@@ -1,6 +1,5 @@
 #![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
-#![deny(clippy::nursery, clippy::pedantic, warnings)]
+#![deny(clippy::nursery, clippy::pedantic, warnings, missing_docs)]
 
 use ibc_core_commitment_types::{merkle::MerkleProof, proto::ics23::CommitmentProof};
 use tendermint::merkle::proof::ProofOps;

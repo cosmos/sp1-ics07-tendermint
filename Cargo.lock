@@ -7048,6 +7048,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp1-ics07-tendermint-prover"
+version = "0.1.0"
+dependencies = [
+ "ibc-client-tendermint-types",
+ "ibc-core-commitment-types",
+ "ibc-proto",
+ "log",
+ "sp1-ics07-tendermint-solidity",
+ "sp1-sdk",
+]
+
+[[package]]
 name = "sp1-ics07-tendermint-solidity"
 version = "0.1.0"
 dependencies = [

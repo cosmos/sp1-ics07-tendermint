@@ -19,7 +19,7 @@ use sp1_ics07_tendermint_solidity::{
     },
     ISP1Msgs::SP1Proof,
 };
-use sp1_ics07_tendermint_utils::convert_tm_to_ics_merkle_proof;
+use sp1_ics07_tendermint_utils::merkle::convert_tm_to_ics_merkle_proof;
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::{Client, HttpClient};

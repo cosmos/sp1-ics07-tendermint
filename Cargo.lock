@@ -7120,14 +7120,22 @@ dependencies = [
 name = "sp1-ics07-tendermint-utils"
 version = "0.1.0"
 dependencies = [
- "hex",
+ "alloy 0.5.4",
+ "anyhow",
+ "async-trait",
+ "cosmos-sdk-proto",
  "ibc-client-tendermint-types",
+ "ibc-core-client-types",
  "ibc-core-commitment-types",
+ "ibc-core-host-types",
  "prost 0.13.3",
+ "protos",
  "serde",
+ "sp1-ics07-tendermint-solidity",
  "tendermint",
  "tendermint-light-client-verifier",
- "time",
+ "tendermint-rpc",
+ "unionlabs",
 ]
 
 [[package]]

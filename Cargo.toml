@@ -71,6 +71,7 @@ union-protos = { package = "protos", git = "https://github.com/unionlabs/union",
 # Other dependencies
 reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
 time = { version = "0.3", default-features = false, features = ["macros", "parsing"] }
 alloy-primitives = "0.8"
 alloy-contract = "0.5"

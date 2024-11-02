@@ -7034,6 +7034,7 @@ dependencies = [
  "serde_json",
  "serde_with",
  "sha2 0.10.8",
+ "sp1-ics07-tendermint-prover",
  "sp1-ics07-tendermint-solidity",
  "sp1-ics07-tendermint-update-client",
  "sp1-ics07-tendermint-utils",

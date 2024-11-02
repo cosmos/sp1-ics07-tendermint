@@ -3,8 +3,6 @@
 use crate::{
     cli::command::{fixtures::UpdateClientAndMembershipCmd, OutputPath},
     helpers::light_block::LightBlockExt,
-    programs::UpdateClientAndMembershipProgram,
-    prover::SP1ICS07TendermintProver,
     rpc::TendermintRpcExt,
     runners::{
         fixtures::membership::SP1ICS07MembershipFixture, genesis::SP1ICS07TendermintGenesis,
@@ -14,6 +12,9 @@ use alloy_sol_types::SolValue;
 use core::str;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
+use sp1_ics07_tendermint_prover::{
+    programs::UpdateClientAndMembershipProgram, prover::SP1ICS07TendermintProver,
+};
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState, Env},
     IMembershipMsgs::{MembershipProof, SP1MembershipAndUpdateClientProof},

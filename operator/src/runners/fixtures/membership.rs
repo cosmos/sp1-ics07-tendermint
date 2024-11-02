@@ -3,8 +3,6 @@
 use crate::{
     cli::command::{fixtures::MembershipCmd, OutputPath},
     helpers::union::convert_to_union_proof,
-    programs::MembershipProgram,
-    prover::SP1ICS07TendermintProver,
     rpc::TendermintRpcExt,
     runners::genesis::SP1ICS07TendermintGenesis,
 };
@@ -14,6 +12,7 @@ use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
+use sp1_ics07_tendermint_prover::{programs::MembershipProgram, prover::SP1ICS07TendermintProver};
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState},
     IMembershipMsgs::{

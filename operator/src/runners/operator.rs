@@ -5,14 +5,15 @@ use std::env;
 use crate::{
     cli::command::operator::Args,
     helpers::{self, light_block::LightBlockExt},
-    programs::UpdateClientProgram,
-    prover::SP1ICS07TendermintProver,
     rpc::TendermintRpcExt,
 };
 use alloy::providers::ProviderBuilder;
 use alloy_sol_types::SolValue;
 use log::{debug, info};
 use reqwest::Url;
+use sp1_ics07_tendermint_prover::{
+    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver,
+};
 use sp1_ics07_tendermint_solidity::{
     sp1_ics07_tendermint, IICS07TendermintMsgs::Env, ISP1Msgs::SP1Proof,
     IUpdateClientMsgs::MsgUpdateClient,

@@ -3,14 +3,14 @@
 use crate::{
     cli::command::{genesis::Args, OutputPath},
     helpers::light_block::LightBlockExt,
-    programs::{
-        MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
-        UpdateClientProgram,
-    },
     rpc::TendermintRpcExt,
 };
 use alloy_sol_types::SolValue;
 use serde_with::serde_as;
+use sp1_ics07_tendermint_prover::programs::{
+    MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
+    UpdateClientProgram,
+};
 use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::path::PathBuf;

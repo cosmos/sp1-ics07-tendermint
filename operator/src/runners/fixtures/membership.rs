@@ -3,8 +3,6 @@
 use crate::{
     cli::command::{fixtures::MembershipCmd, OutputPath},
     helpers::union::convert_to_union_proof,
-    programs::MembershipProgram,
-    prover::SP1ICS07TendermintProver,
     rpc::TendermintRpcExt,
     runners::genesis::SP1ICS07TendermintGenesis,
 };
@@ -13,7 +11,7 @@ use core::str;
 use ibc_client_tendermint::types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
+use sp1_ics07_tendermint_prover::{programs::MembershipProgram, prover::SP1ICS07TendermintProver};
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState},
     IMembershipMsgs::{
@@ -28,7 +26,7 @@ use tendermint_rpc::{Client, HttpClient};
 use unionlabs::encoding::{EncodeAs, EthAbi};
 
 /// The fixture data to be used in [`MembershipProgram`] tests.
-#[serde_as]
+#[serde_with::serde_as]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SP1ICS07MembershipFixture {

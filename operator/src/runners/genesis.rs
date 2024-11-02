@@ -3,14 +3,13 @@
 use crate::{
     cli::command::{genesis::Args, OutputPath},
     helpers::light_block::LightBlockExt,
-    programs::{
-        MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
-        UpdateClientProgram,
-    },
     rpc::TendermintRpcExt,
 };
 use alloy_sol_types::SolValue;
-use serde_with::serde_as;
+use sp1_ics07_tendermint_prover::programs::{
+    MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
+    UpdateClientProgram,
+};
 use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::ConsensusState as SolConsensusState;
 use sp1_sdk::{utils::setup_logger, HashableKey};
 use std::path::PathBuf;
@@ -18,7 +17,7 @@ use tendermint_light_client_verifier::types::{LightBlock, TrustThreshold};
 use tendermint_rpc::HttpClient;
 
 /// The genesis data for the SP1 ICS07 Tendermint contract.
-#[serde_as]
+#[serde_with::serde_as]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(clippy::module_name_repetitions)]

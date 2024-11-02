@@ -4,7 +4,7 @@ use crate::programs::{
     MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
     UpdateClientProgram,
 };
-use ibc_client_tendermint::types::{Header, Misbehaviour};
+use ibc_client_tendermint_types::{Header, Misbehaviour};
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
 use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::{

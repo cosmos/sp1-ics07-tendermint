@@ -19,6 +19,7 @@ authors       = ["srdtrk <srdtrk@hotmail.com>"]
 sp1-zkvm = "3.0"
 
 sp1-ics07-tendermint-solidity = { path = "./packages/solidity/" }
+sp1-ics07-tendermint-prover = { path = "./packages/prover/" }
 sp1-ics07-tendermint-update-client = { path = "./programs/update-client/" }
 sp1-ics07-tendermint-membership = { path = "./programs/membership/" }
 sp1-ics07-tendermint-uc-and-membership = { path = "./programs/uc-and-membership/" }
@@ -81,7 +82,6 @@ subtle-encoding = "0.5"
 anyhow = "1.0"
 clap = { version = "4.0", features = ["derive", "env"] }
 log = "0.4"
-async-trait = "0.1"
 hex = "0.4"
 prost = { version = "0.13", default-features = false }
 futures = "0.3"

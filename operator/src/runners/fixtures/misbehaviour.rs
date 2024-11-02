@@ -1,17 +1,18 @@
 //! Runner for generating `misbehaviour` fixtures
 
-use crate::cli::command::fixtures::MisbehaviourCmd;
-use crate::cli::command::OutputPath;
-use crate::helpers::light_block::LightBlockExt;
-use crate::programs::MisbehaviourProgram;
-use crate::prover::SP1ICS07TendermintProver;
-use crate::rpc::TendermintRpcExt;
-use crate::runners::genesis::SP1ICS07TendermintGenesis;
+use crate::{
+    cli::command::{fixtures::MisbehaviourCmd, OutputPath},
+    helpers::light_block::LightBlockExt,
+    rpc::TendermintRpcExt,
+    runners::genesis::SP1ICS07TendermintGenesis,
+};
 use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::Misbehaviour;
 use ibc_proto::ibc::lightclients::tendermint::v1::Misbehaviour as RawMisbehaviour;
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
+use sp1_ics07_tendermint_prover::{
+    programs::MisbehaviourProgram, prover::SP1ICS07TendermintProver,
+};
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState, Env},
     IMisbehaviourMsgs::MsgSubmitMisbehaviour,
@@ -22,7 +23,7 @@ use std::path::PathBuf;
 use tendermint_rpc::HttpClient;
 
 /// The fixture data to be used in [`SP1ICS07SubmitMisbehaviourFixture`] tests.
-#[serde_as]
+#[serde_with::serde_as]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SP1ICS07SubmitMisbehaviourFixture {

@@ -3,14 +3,14 @@
 use crate::{
     cli::command::{fixtures::UpdateClientCmd, OutputPath},
     helpers::light_block::LightBlockExt,
-    programs::UpdateClientProgram,
-    prover::SP1ICS07TendermintProver,
     rpc::TendermintRpcExt,
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
+use sp1_ics07_tendermint_prover::{
+    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver,
+};
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState, Env},
     ISP1Msgs::SP1Proof,
@@ -21,7 +21,7 @@ use std::path::PathBuf;
 use tendermint_rpc::HttpClient;
 
 /// The fixture data to be used in [`UpdateClientProgram`] tests.
-#[serde_as]
+#[serde_with::serde_as]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SP1ICS07UpdateClientFixture {

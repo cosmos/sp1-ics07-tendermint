@@ -26,6 +26,7 @@ ibc-core-host-cosmos = { workspace = true }
 sp1-ics07-tendermint-update-client = { workspace = true }
 sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }
 sp1-ics07-tendermint-utils = { workspace = true }
+sp1-ics07-tendermint-prover = { workspace = true }
 
 unionlabs = { workspace = true }
 union-protos = { workspace = true }
@@ -40,16 +41,10 @@ futures = { workspace = true }
 serde_json = { workspace = true }
 serde = { workspace = true }
 serde_with = { workspace = true }
-bincode = { workspace = true }
-serde_cbor = { workspace = true }
 sha2 = { workspace = true }
 dotenv = { workspace = true }
 subtle-encoding = { workspace = true }
 anyhow = { workspace = true }
 clap = { workspace = true }
 log = { workspace = true }
-async-trait = { workspace = true }
 hex = { workspace = true }
-
-[build-dependencies]
-sp1-helper = { workspace = true }

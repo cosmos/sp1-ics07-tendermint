@@ -2,8 +2,6 @@
 
 use crate::{
     cli::command::{fixtures::UpdateClientCmd, OutputPath},
-    helpers::light_block::LightBlockExt,
-    rpc::TendermintRpcExt,
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
@@ -16,6 +14,7 @@ use sp1_ics07_tendermint_solidity::{
     ISP1Msgs::SP1Proof,
     IUpdateClientMsgs::{MsgUpdateClient, UpdateClientOutput},
 };
+use sp1_ics07_tendermint_utils::{light_block::LightBlockExt, rpc::TendermintRpcExt};
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::HttpClient;

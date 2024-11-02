@@ -17,7 +17,7 @@ sp1-ics07-tendermint-solidity = { workspace = true }
 tendermint-light-client-verifier = { workspace = true }
 ibc-client-tendermint-types = { workspace = true }
 ibc-core-client-types = { workspace = true }
-ibc-core-host-types = { workspace = true }
+ibc-core-host-types = { workspace = true, features = ["std"] }
 tendermint = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 alloy = { workspace = true }

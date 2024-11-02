@@ -2,6 +2,4 @@
 #![deny(missing_docs, clippy::nursery, clippy::pedantic, warnings)]
 
 pub mod cli;
-pub mod helpers;
-pub(crate) mod rpc;
 pub mod runners;

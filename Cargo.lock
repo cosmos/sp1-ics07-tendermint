@@ -7034,7 +7034,6 @@ dependencies = [
  "serde_json",
  "serde_with",
  "sha2 0.10.8",
- "sp1-helper",
  "sp1-ics07-tendermint-solidity",
  "sp1-ics07-tendermint-update-client",
  "sp1-ics07-tendermint-utils",
@@ -7051,10 +7050,13 @@ dependencies = [
 name = "sp1-ics07-tendermint-prover"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "ibc-client-tendermint-types",
  "ibc-core-commitment-types",
  "ibc-proto",
  "log",
+ "serde_cbor",
+ "sp1-helper",
  "sp1-ics07-tendermint-solidity",
  "sp1-sdk",
 ]

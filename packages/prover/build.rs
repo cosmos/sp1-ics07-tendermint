@@ -5,7 +5,7 @@ use sp1_helper::{build_program_with_args, BuildArgs};
 fn main() {
     // Build the update-client program.
     build_program_with_args(
-        "../programs/update-client",
+        "../../programs/update-client",
         BuildArgs {
             elf_name: "update-client-riscv32im-succinct-zkvm-elf".to_string(),
             ..Default::default()
@@ -13,7 +13,7 @@ fn main() {
     );
     // Build the membership program.
     build_program_with_args(
-        "../programs/membership",
+        "../../programs/membership",
         BuildArgs {
             elf_name: "membership-riscv32im-succinct-zkvm-elf".to_string(),
             ..Default::default()
@@ -21,7 +21,7 @@ fn main() {
     );
     // Build the uc-and-membership program.
     build_program_with_args(
-        "../programs/uc-and-membership",
+        "../../programs/uc-and-membership",
         BuildArgs {
             elf_name: "uc-and-membership-riscv32im-succinct-zkvm-elf".to_string(),
             ..Default::default()
@@ -29,7 +29,7 @@ fn main() {
     );
     // Build the misbehaviour program.
     build_program_with_args(
-        "../programs/misbehaviour",
+        "../../programs/misbehaviour",
         BuildArgs {
             elf_name: "misbehaviour-riscv32im-succinct-zkvm-elf".to_string(),
             ..Default::default()

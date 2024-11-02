@@ -10,7 +10,6 @@ use alloy_sol_types::SolValue;
 use ibc_client_tendermint::types::Misbehaviour;
 use ibc_proto::ibc::lightclients::tendermint::v1::Misbehaviour as RawMisbehaviour;
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
 use sp1_ics07_tendermint_prover::{
     programs::MisbehaviourProgram, prover::SP1ICS07TendermintProver,
 };
@@ -24,7 +23,7 @@ use std::path::PathBuf;
 use tendermint_rpc::HttpClient;
 
 /// The fixture data to be used in [`SP1ICS07SubmitMisbehaviourFixture`] tests.
-#[serde_as]
+#[serde_with::serde_as]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SP1ICS07SubmitMisbehaviourFixture {

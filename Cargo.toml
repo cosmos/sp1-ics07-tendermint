@@ -82,7 +82,6 @@ subtle-encoding = "0.5"
 anyhow = "1.0"
 clap = { version = "4.0", features = ["derive", "env"] }
 log = "0.4"
-async-trait = "0.1"
 hex = "0.4"
 prost = { version = "0.13", default-features = false }
 futures = "0.3"

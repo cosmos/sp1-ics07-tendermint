@@ -102,6 +102,10 @@ interface ISP1ICS07TendermintErrors {
     /// @param proofType The unknown membership proof type.
     error UnknownMembershipProofType(uint8 proofType);
 
+    /// @notice The error that is returned when the zk algorithm is unknown.
+    /// @param algorithm The unknown zk algorithm.
+    error UnknownZkAlgorithm(uint8 algorithm);
+
     /// @notice Returned when the feature is not supported.
     error FeatureNotSupported();
 

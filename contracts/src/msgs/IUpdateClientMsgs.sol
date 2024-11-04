@@ -7,7 +7,7 @@ import { ISP1Msgs } from "./ISP1Msgs.sol";
 /// @title Update Client Program Messages
 /// @author srdtrk
 /// @notice Defines shared types for the update client program.
-interface IUpdateClientMsgs is IICS07TendermintMsgs, ISP1Msgs {
+interface IUpdateClientMsgs is IICS07TendermintMsgs {
     /// @notice The message that is submitted to the updateClient function.
     /// @param sp1Proof The SP1 proof for updating the client.
     struct MsgUpdateClient {

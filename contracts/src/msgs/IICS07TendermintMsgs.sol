@@ -2,11 +2,12 @@
 pragma solidity ^0.8.28;
 
 import { IICS02ClientMsgs } from "solidity-ibc/msgs/IICS02ClientMsgs.sol";
+import { ISP1Msgs } from "./ISP1Msgs.sol";
 
 /// @title ICS07 Tendermint Messages
 /// @author srdtrk
 /// @notice Defines shared types for ICS07Tendermint implementations.
-interface IICS07TendermintMsgs is IICS02ClientMsgs {
+interface IICS07TendermintMsgs is IICS02ClientMsgs, ISP1Msgs {
     /// @notice Fraction of validator overlap needed to update header
     /// @param numerator Numerator of the fraction
     /// @param denominator Denominator of the fraction
@@ -23,6 +24,7 @@ interface IICS07TendermintMsgs is IICS02ClientMsgs {
     /// submitted headers are valid for upgrade in seconds.
     /// @param unbondingPeriod duration of the staking unbonding period in seconds
     /// @param isFrozen whether or not client is frozen (due to misbehavior)
+    /// @param zkAlgorithm The zk algorithm supported by this contract.
     struct ClientState {
         string chainId;
         TrustThreshold trustLevel;
@@ -30,6 +32,7 @@ interface IICS07TendermintMsgs is IICS02ClientMsgs {
         uint32 trustingPeriod;
         uint32 unbondingPeriod;
         bool isFrozen;
+        SupportedZkAlgorithm zkAlgorithm;
     }
 
     /// @notice Defines the Tendermint light client's consensus state at some height.

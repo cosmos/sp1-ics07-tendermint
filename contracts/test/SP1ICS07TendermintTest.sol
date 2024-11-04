@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
-import { Test } from "forge-std/Test.sol";
+import { Test, stdStorage, StdStorage } from "forge-std/Test.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
 import { IUpdateClientMsgs } from "../src/msgs/IUpdateClientMsgs.sol";
@@ -12,6 +12,7 @@ import { IUpdateClientAndMembershipMsgs } from "../src/msgs/IUcAndMembershipMsgs
 import { IMisbehaviourMsgs } from "../src/msgs/IMisbehaviourMsgs.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { ISP1ICS07TendermintErrors } from "../src/errors/ISP1ICS07TendermintErrors.sol";
+import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { SP1Verifier } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
@@ -36,6 +37,7 @@ abstract contract SP1ICS07TendermintTest is
     ILightClientMsgs
 {
     using stdJson for string;
+    using stdStorage for StdStorage;
 
     SP1Verifier public verifier;
 
@@ -51,13 +53,11 @@ abstract contract SP1ICS07TendermintTest is
 
         bytes32 trustedConsensusHash = keccak256(abi.encode(trustedConsensusState));
 
-        verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,
             genesisFixture.ucAndMembershipVkey,
             genesisFixture.misbehaviourVkey,
-            address(verifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
         );
@@ -68,12 +68,12 @@ abstract contract SP1ICS07TendermintTest is
             genesisFixture.membershipVkey,
             genesisFixture.ucAndMembershipVkey,
             genesisFixture.misbehaviourVkey,
-            address(mockVerifier),
             genesisFixture.trustedClientState,
             trustedConsensusHash
         );
+        stdstore.target(address(mockIcs07Tendermint)).sig(mockIcs07Tendermint.VERIFIER.selector).checked_write(address(mockVerifier));
 
-        ClientState memory clientState = mockIcs07Tendermint.getClientState();
+       ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(genesisFixture.trustedClientState));
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);

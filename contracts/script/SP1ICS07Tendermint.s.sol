@@ -4,7 +4,6 @@ pragma solidity ^0.8.28;
 import { Script } from "forge-std/Script.sol";
 import { stdJson } from "forge-std/StdJson.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
-import { SP1Verifier } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
 import { IICS07TendermintMsgs } from "../src/msgs/IICS07TendermintMsgs.sol";
 
 struct SP1ICS07TendermintGenesisJson {
@@ -32,13 +31,11 @@ contract SP1TendermintScript is Script, IICS07TendermintMsgs {
 
         vm.startBroadcast();
 
-        SP1Verifier verifier = new SP1Verifier();
         ics07Tendermint = new SP1ICS07Tendermint(
             genesis.updateClientVkey,
             genesis.membershipVkey,
             genesis.ucAndMembershipVkey,
             genesis.misbehaviourVkey,
-            address(verifier),
             genesis.trustedClientState,
             trustedConsensusHash
         );

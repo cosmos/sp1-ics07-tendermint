@@ -7,7 +7,7 @@ import { ISP1Msgs } from "./ISP1Msgs.sol";
 /// @title Misbehaviour Program Messages
 /// @author gjermundgaraba
 /// @notice Defines shared types for the misbehaviour program.
-interface IMisbehaviourMsgs is IICS07TendermintMsgs, ISP1Msgs {
+interface IMisbehaviourMsgs is IICS07TendermintMsgs {
     /// @notice The message that is submitted to the misbehaviour function.
     /// @param sp1Proof The SP1 proof for updating the client.
     struct MsgSubmitMisbehaviour {

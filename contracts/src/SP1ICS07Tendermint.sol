@@ -13,6 +13,8 @@ import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
 import { Paths } from "./utils/Paths.sol";
 import { UnionMembership } from "./utils/UnionMembership.sol";
+import { SP1Verifier as SP1VerifierPlonk } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
+import { SP1Verifier as SP1VerifierGroth16 } from "@sp1-contracts/v3.0.0/SP1VerifierGroth16.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -55,7 +57,6 @@ contract SP1ICS07Tendermint is
     /// @param membershipProgramVkey The verification key for the verify (non)membership program.
     /// @param updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
     /// @param misbehaviourProgramVkey The verification key for the misbehaviour program.
-    /// @param verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
     constructor(
@@ -63,7 +64,6 @@ contract SP1ICS07Tendermint is
         bytes32 membershipProgramVkey,
         bytes32 updateClientAndMembershipProgramVkey,
         bytes32 misbehaviourProgramVkey,
-        address verifier,
         bytes memory _clientState,
         bytes32 _consensusState
     ) {
@@ -71,10 +71,17 @@ contract SP1ICS07Tendermint is
         MEMBERSHIP_PROGRAM_VKEY = membershipProgramVkey;
         UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY = updateClientAndMembershipProgramVkey;
         MISBEHAVIOUR_PROGRAM_VKEY = misbehaviourProgramVkey;
-        VERIFIER = ISP1Verifier(verifier);
 
         clientState = abi.decode(_clientState, (ClientState));
         consensusStateHashes[clientState.latestHeight.revisionHeight] = _consensusState;
+
+        if (clientState.zkAlgorithm == SupportedZkAlgorithm.Groth16) {
+            VERIFIER = new SP1VerifierGroth16();
+        } else if (clientState.zkAlgorithm == SupportedZkAlgorithm.Plonk) {
+            VERIFIER = new SP1VerifierPlonk();
+        } else {
+            revert UnknownZkAlgorithm(uint8(clientState.zkAlgorithm));
+        }
 
         require(clientState.trustingPeriod <= clientState.unbondingPeriod, TrustingPeriodTooLong(
             clientState.trustingPeriod, clientState.unbondingPeriod

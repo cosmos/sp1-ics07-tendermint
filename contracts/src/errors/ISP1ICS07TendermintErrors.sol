@@ -39,6 +39,11 @@ interface ISP1ICS07TendermintErrors {
     /// @param actual The actual trusting period in seconds.
     error TrustingPeriodMismatch(uint256 expected, uint256 actual);
 
+    /// @notice The error that is returned when the unbonding period does not match the expected value.
+    /// @param expected The expected unbonding period in seconds.
+    /// @param actual The actual unbonding period in seconds.
+    error UnbondingPeriodMismatch(uint256 expected, uint256 actual);
+
     /// @notice The error that is returned when the trusting period is longer than the unbonding period.
     /// @param trustingPeriod The trusting period in seconds.
     /// @param unbondingPeriod The unbonding period in seconds.

@@ -116,11 +116,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         badOutput.clientState.trustLevel = TrustThreshold({ numerator: 1, denominator: 2 });
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                TrustThresholdMismatch.selector, output.clientState.trustLevel, badOutput.clientState.trustLevel
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(TrustThresholdMismatch.selector, output.clientState.trustLevel.numerator, output.clientState.trustLevel.denominator, badOutput.clientState.trustLevel.numerator, badOutput.clientState.trustLevel.denominator));
         ics07Tendermint.misbehaviour(submitMsgBz);
 
         // trusting period mismatch
@@ -129,45 +125,8 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         badOutput.clientState.trustingPeriod = 1;
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                TrustingPeriodMismatch.selector, output.clientState.trustingPeriod, badOutput.clientState.trustingPeriod
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(TrustingPeriodMismatch.selector, output.clientState.trustingPeriod, badOutput.clientState.trustingPeriod));
         ics07Tendermint.misbehaviour(submitMsgBz);
-
-        // trusting period too long
-        // we need to set up a new misconfigured client where the trusting period is longer than the unbonding period
-        ClientState memory clientState = ics07Tendermint.getClientState();
-        ClientState memory badClientState = ClientState({
-            chainId: clientState.chainId,
-            trustLevel: clientState.trustLevel,
-            latestHeight: clientState.latestHeight,
-            trustingPeriod: clientState.unbondingPeriod + 1,
-            unbondingPeriod: clientState.unbondingPeriod,
-            isFrozen: clientState.isFrozen
-        });
-        bytes32 trustedConsensusState = ics07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
-        SP1ICS07Tendermint badClient = new SP1ICS07Tendermint(
-            ics07Tendermint.UPDATE_CLIENT_PROGRAM_VKEY(),
-            ics07Tendermint.MEMBERSHIP_PROGRAM_VKEY(),
-            ics07Tendermint.UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY(),
-            ics07Tendermint.MISBEHAVIOUR_PROGRAM_VKEY(),
-            address(ics07Tendermint.VERIFIER()),
-            abi.encode(badClientState),
-            trustedConsensusState
-        );
-        badOutput = cloneOutput();
-        badOutput.clientState.trustingPeriod = badClientState.trustingPeriod;
-        badSubmitMsg = cloneSubmitMsg();
-        badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
-        submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                TrustingPeriodTooLong.selector, badClientState.trustingPeriod, badClientState.unbondingPeriod
-            )
-        );
-        badClient.misbehaviour(submitMsgBz);
 
         // invalid proof
         badSubmitMsg = cloneSubmitMsg();

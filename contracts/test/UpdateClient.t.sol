@@ -69,7 +69,7 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         assert(clientState.isFrozen == false);
 
         bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(output.newHeight.revisionHeight);
-        assert(consensusHash == keccak256(abi.encode(output.newHeight.revisionHeight)));
+        assertEq(consensusHash, keccak256(abi.encode(output.newConsensusState)));
     }
 
     // Confirm that submitting a real proof passes the verifier.

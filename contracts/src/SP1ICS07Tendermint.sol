@@ -75,6 +75,10 @@ contract SP1ICS07Tendermint is
 
         clientState = abi.decode(_clientState, (ClientState));
         consensusStateHashes[clientState.latestHeight.revisionHeight] = _consensusState;
+
+        require(clientState.trustingPeriod <= clientState.unbondingPeriod, TrustingPeriodTooLong(
+            clientState.trustingPeriod, clientState.unbondingPeriod
+        ));
     }
 
     /// @inheritdoc ISP1ICS07Tendermint
@@ -431,8 +435,31 @@ contract SP1ICS07Tendermint is
             revert ProofIsTooOld(block.timestamp, time);
         }
 
-        if (keccak256(abi.encode(publicClientState)) != keccak256(abi.encode(clientState))) {
-            revert ClientStateMismatch(abi.encode(clientState), abi.encode(publicClientState));
+        // NOTE: We do not check the equality of latest height and isFrozen
+        if (keccak256(bytes(publicClientState.chainId)) != keccak256(bytes(clientState.chainId))) {
+            revert ChainIdMismatch(clientState.chainId, publicClientState.chainId);
+        }
+        if (publicClientState.trustLevel.numerator != clientState.trustLevel.numerator) {
+            revert TrustThresholdMismatch(
+                clientState.trustLevel.numerator,
+                clientState.trustLevel.denominator,
+                publicClientState.trustLevel.numerator,
+                publicClientState.trustLevel.denominator
+            );
+        }
+        if (publicClientState.trustLevel.denominator != clientState.trustLevel.denominator) {
+            revert TrustThresholdMismatch(
+                clientState.trustLevel.numerator,
+                clientState.trustLevel.denominator,
+                publicClientState.trustLevel.numerator,
+                publicClientState.trustLevel.denominator
+            );
+        }
+        if (publicClientState.trustingPeriod != clientState.trustingPeriod) {
+            revert TrustingPeriodMismatch(clientState.trustingPeriod, publicClientState.trustingPeriod);
+        }
+        if (publicClientState.unbondingPeriod != clientState.unbondingPeriod) {
+            revert UnbondingPeriodMismatch(clientState.unbondingPeriod, publicClientState.unbondingPeriod);
         }
     }
 

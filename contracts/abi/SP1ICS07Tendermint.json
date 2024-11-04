@@ -162,6 +162,67 @@
             "internalType": "struct IUpdateClientMsgs.UpdateClientOutput",
             "components": [
               {
+                "name": "clientState",
+                "type": "tuple",
+                "internalType": "struct IICS07TendermintMsgs.ClientState",
+                "components": [
+                  {
+                    "name": "chainId",
+                    "type": "string",
+                    "internalType": "string"
+                  },
+                  {
+                    "name": "trustLevel",
+                    "type": "tuple",
+                    "internalType": "struct IICS07TendermintMsgs.TrustThreshold",
+                    "components": [
+                      {
+                        "name": "numerator",
+                        "type": "uint8",
+                        "internalType": "uint8"
+                      },
+                      {
+                        "name": "denominator",
+                        "type": "uint8",
+                        "internalType": "uint8"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "latestHeight",
+                    "type": "tuple",
+                    "internalType": "struct IICS02ClientMsgs.Height",
+                    "components": [
+                      {
+                        "name": "revisionNumber",
+                        "type": "uint32",
+                        "internalType": "uint32"
+                      },
+                      {
+                        "name": "revisionHeight",
+                        "type": "uint32",
+                        "internalType": "uint32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "trustingPeriod",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  },
+                  {
+                    "name": "unbondingPeriod",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  },
+                  {
+                    "name": "isFrozen",
+                    "type": "bool",
+                    "internalType": "bool"
+                  }
+                ]
+              },
+              {
                 "name": "trustedConsensusState",
                 "type": "tuple",
                 "internalType": "struct IICS07TendermintMsgs.ConsensusState",
@@ -206,43 +267,9 @@
                 ]
               },
               {
-                "name": "env",
-                "type": "tuple",
-                "internalType": "struct IICS07TendermintMsgs.Env",
-                "components": [
-                  {
-                    "name": "chainId",
-                    "type": "string",
-                    "internalType": "string"
-                  },
-                  {
-                    "name": "trustThreshold",
-                    "type": "tuple",
-                    "internalType": "struct IICS07TendermintMsgs.TrustThreshold",
-                    "components": [
-                      {
-                        "name": "numerator",
-                        "type": "uint8",
-                        "internalType": "uint8"
-                      },
-                      {
-                        "name": "denominator",
-                        "type": "uint8",
-                        "internalType": "uint8"
-                      }
-                    ]
-                  },
-                  {
-                    "name": "trustingPeriod",
-                    "type": "uint32",
-                    "internalType": "uint32"
-                  },
-                  {
-                    "name": "now",
-                    "type": "uint64",
-                    "internalType": "uint64"
-                  }
-                ]
+                "name": "time",
+                "type": "uint64",
+                "internalType": "uint64"
               },
               {
                 "name": "trustedHeight",
@@ -431,9 +458,9 @@
         "internalType": "struct IMisbehaviourMsgs.MisbehaviourOutput",
         "components": [
           {
-            "name": "env",
+            "name": "clientState",
             "type": "tuple",
-            "internalType": "struct IICS07TendermintMsgs.Env",
+            "internalType": "struct IICS07TendermintMsgs.ClientState",
             "components": [
               {
                 "name": "chainId",
@@ -441,7 +468,7 @@
                 "internalType": "string"
               },
               {
-                "name": "trustThreshold",
+                "name": "trustLevel",
                 "type": "tuple",
                 "internalType": "struct IICS07TendermintMsgs.TrustThreshold",
                 "components": [
@@ -458,16 +485,43 @@
                 ]
               },
               {
+                "name": "latestHeight",
+                "type": "tuple",
+                "internalType": "struct IICS02ClientMsgs.Height",
+                "components": [
+                  {
+                    "name": "revisionNumber",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  },
+                  {
+                    "name": "revisionHeight",
+                    "type": "uint32",
+                    "internalType": "uint32"
+                  }
+                ]
+              },
+              {
                 "name": "trustingPeriod",
                 "type": "uint32",
                 "internalType": "uint32"
               },
               {
-                "name": "now",
-                "type": "uint64",
-                "internalType": "uint64"
+                "name": "unbondingPeriod",
+                "type": "uint32",
+                "internalType": "uint32"
+              },
+              {
+                "name": "isFrozen",
+                "type": "bool",
+                "internalType": "bool"
               }
             ]
+          },
+          {
+            "name": "time",
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
             "name": "trustedHeight1",
@@ -866,6 +920,22 @@
         "name": "actual",
         "type": "string",
         "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ClientStateMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "actual",
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ]
   },

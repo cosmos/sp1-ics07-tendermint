@@ -1723,13 +1723,12 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "cosmos-sdk-proto"
-version = "0.23.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b2f63ab112b8c8e7b8a29c891adc48f43145beb21c0bfbf562957072c1e0beb"
+checksum = "a4c1a5856db92cd90dddc955bce308703d3519fb33ae3d0b8f3658e9cfd05c3f"
 dependencies = [
  "prost 0.13.3",
- "prost-types 0.13.3",
- "tendermint-proto",
+ "tendermint-proto 0.40.0",
 ]
 
 [[package]]
@@ -3602,9 +3601,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-client-tendermint"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3699afb0fd43f67b08318e48031c6e7efd40cd9dd2507e17cbc00e188ccef60f"
+checksum = "c6de9070707bf6334d3b4910e946c54aac96e792c6e6c85f5e81d701faa6367b"
 dependencies = [
  "derive_more 0.99.18",
  "ibc-client-tendermint-types",
@@ -3620,9 +3619,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-client-tendermint-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af2bbdc8edd4aa65a02e4255763e2ec11fefcbe019c784373bbba72e2a5cdf1f"
+checksum = "5ac46b736dc0ffde0873741185a4bbaf1c0e41e9c07ef1df87c3bc57cc0ca6f5"
 dependencies = [
  "displaydoc",
  "ibc-core-client-types",
@@ -3633,14 +3632,14 @@ dependencies = [
  "serde",
  "tendermint",
  "tendermint-light-client-verifier",
- "tendermint-proto",
+ "tendermint-proto 0.38.1",
 ]
 
 [[package]]
 name = "ibc-core-channel-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d0c1d8da6c2f6843d951ec2ccfe0df93f32e96f136870bed90182981648cfb1"
+checksum = "ce4a38ac9e8693c75eee6f82dc9cba488589463b7d7fd48ec5d9fea056f4262e"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3658,9 +3657,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-client"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3fdd2d1cbb6b4e003dec33ed8303254341e75bd828d028aa71deddf67f9ec45"
+checksum = "87c10ee61fec3009856483e2ae54c878c578262f580a7d45202886f350ed1f68"
 dependencies = [
  "ibc-core-client-context",
  "ibc-core-client-types",
@@ -3672,9 +3671,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-client-context"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "969c1f3411b2ca4e6a041ab8e222937f2cea5a26b26beca45164d05468dc4de4"
+checksum = "962445d764988cbc257e3422272721605a60de8dbbc04eb6b74c3d4355f0128e"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3689,9 +3688,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-client-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6799c8383872fd4bf523dceaadd8c884c2748ad1a542e84e93dcbbd667efc59"
+checksum = "300499a36eb03db0d5070821a9c1a90d09ddc2617ab8f0dd8e4007c8a583bddc"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3706,9 +3705,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-commitment-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c6e681fc7336d546f7606670b107e8487fd99867f317c2add7eb79b41060d09"
+checksum = "4a283aa05126b3987ac43d46f1044f53da88e9852d6a8854517fcacc4194fadf"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3722,9 +3721,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-connection-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c07695b8fba97aded7003031480dd25bdb194fdc1f0cca02508f2dcefe10385"
+checksum = "387277b973191c6b9f64aef51dc50d01d01fbe54f0189b678c7ad63379d89a33"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3740,9 +3739,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-handler-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3931e41a6feae1819c59788d2a0a4a08fa51bac3024b63cec4fb88d13882dbee"
+checksum = "79f744f2f6a135be02c0f960aaaeb40ab67475baf1fc453002d5c4aec9751e8e"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3761,9 +3760,9 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-host"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "856e37bcabd67cf26934bd127189844b9fc40004fb545b80bef899bef9092df3"
+checksum = "880ef7dfafd37bb6b8d738d682816ca2f6f2334916cf04bc72d3584a885b9dfe"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3780,21 +3779,23 @@ dependencies = [
 
 [[package]]
 name = "ibc-core-host-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e1b9b6000e8f55cc09e00f7552a7c4acb8c42548ef76088e2154ca839387aba"
+checksum = "cd0c7fba11984c56687f43cfea873aaf6832ccd24c82cf4468fc02725783effe"
 dependencies = [
+ "base64 0.22.1",
  "derive_more 0.99.18",
  "displaydoc",
  "ibc-primitives",
+ "prost 0.13.3",
  "serde",
 ]
 
 [[package]]
 name = "ibc-core-router-types"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90d27386ce69af9d3e3c63e590cf6e1d466f948c2b3e2b0911872cb6d88adf5b"
+checksum = "872ea68d6b22e0f63344a8cc6622ac2b2845b062bcd76b0291f56f265bb667c1"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
@@ -3808,16 +3809,15 @@ dependencies = [
 
 [[package]]
 name = "ibc-primitives"
-version = "0.54.0"
+version = "0.55.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95544f3bc56c8c9cc335910d5aa567a6743a3aeeb33084bb3e31dc6801936edb"
+checksum = "44e50ac39c6692d836dfb8047a2081a23a452ee9e2d371ff159fa6ba2abce1cc"
 dependencies = [
  "derive_more 0.99.18",
  "displaydoc",
  "ibc-proto",
  "prost 0.13.3",
  "serde",
- "tendermint",
  "time",
 ]
 
@@ -3835,7 +3835,7 @@ dependencies = [
  "prost 0.13.3",
  "serde",
  "subtle-encoding",
- "tendermint-proto",
+ "tendermint-proto 0.38.1",
 ]
 
 [[package]]
@@ -3858,6 +3858,124 @@ dependencies = [
 ]
 
 [[package]]
+name = "icu_collections"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db2fa452206ebee18c4b5c2274dbf1de17008e874b4dc4f0aea9d01ca79e4526"
+dependencies = [
+ "displaydoc",
+ "yoke",
+ "zerofrom",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_locid"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13acbb8371917fc971be86fc8057c41a64b521c184808a698c02acc242dbf637"
+dependencies = [
+ "displaydoc",
+ "litemap",
+ "tinystr",
+ "writeable",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_locid_transform"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01d11ac35de8e40fdeda00d9e1e9d92525f3f9d887cdd7aa81d727596788b54e"
+dependencies = [
+ "displaydoc",
+ "icu_locid",
+ "icu_locid_transform_data",
+ "icu_provider",
+ "tinystr",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_locid_transform_data"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fdc8ff3388f852bede6b579ad4e978ab004f139284d7b28715f773507b946f6e"
+
+[[package]]
+name = "icu_normalizer"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19ce3e0da2ec68599d193c93d088142efd7f9c5d6fc9b803774855747dc6a84f"
+dependencies = [
+ "displaydoc",
+ "icu_collections",
+ "icu_normalizer_data",
+ "icu_properties",
+ "icu_provider",
+ "smallvec",
+ "utf16_iter",
+ "utf8_iter",
+ "write16",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_normalizer_data"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8cafbf7aa791e9b22bec55a167906f9e1215fd475cd22adfcf660e03e989516"
+
+[[package]]
+name = "icu_properties"
+version = "1.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93d6020766cfc6302c15dbbc9c8778c37e62c14427cb7f6e601d849e092aeef5"
+dependencies = [
+ "displaydoc",
+ "icu_collections",
+ "icu_locid_transform",
+ "icu_properties_data",
+ "icu_provider",
+ "tinystr",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_properties_data"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67a8effbc3dd3e4ba1afa8ad918d5684b8868b3b26500753effea8d2eed19569"
+
+[[package]]
+name = "icu_provider"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ed421c8a8ef78d3e2dbc98a973be2f3770cb42b606e3ab18d6237c4dfde68d9"
+dependencies = [
+ "displaydoc",
+ "icu_locid",
+ "icu_provider_macros",
+ "stable_deref_trait",
+ "tinystr",
+ "writeable",
+ "yoke",
+ "zerofrom",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_provider_macros"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ec89e9337638ecdc08744df490b221a7399bf8d164eb52a665454e60e075ad6"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
+
+[[package]]
 name = "ident_case"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3865,12 +3983,23 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "idna"
-version = "0.5.0"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
+checksum = "686f825264d630750a544639377bae737628043f20d38bbc029e8f29ea968a7e"
 dependencies = [
- "unicode-bidi",
- "unicode-normalization",
+ "idna_adapter",
+ "smallvec",
+ "utf8_iter",
+]
+
+[[package]]
+name = "idna_adapter"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daca1df1c957320b2cf139ac61e7bd64fed304c5040df000a745aa1de3b4ef71"
+dependencies = [
+ "icu_normalizer",
+ "icu_properties",
 ]
 
 [[package]]
@@ -4216,6 +4345,12 @@ name = "linux-raw-sys"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78b3ae25bc7c8c38cec158d1f2757ee79e9b3740fbc7ccf0e59e4b08d793fa89"
+
+[[package]]
+name = "litemap"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "643cb0b8d4fcc284004d5fd0d67ccf61dfffadb7f75e1e71bc420f4688a3a704"
 
 [[package]]
 name = "lock_api"
@@ -7274,6 +7409,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "stable_deref_trait"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7423,6 +7564,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "synstructure"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8af7666ab7b6390ab78131fb5b0fce11d6b7a6951602017c35fa82800708971"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
+
+[[package]]
 name = "sysinfo"
 version = "0.30.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7522,7 +7674,7 @@ dependencies = [
  "signature",
  "subtle",
  "subtle-encoding",
- "tendermint-proto",
+ "tendermint-proto 0.38.1",
  "time",
  "zeroize",
 ]
@@ -7571,6 +7723,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tendermint-proto"
+version = "0.40.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c81ba1b023ec00763c3bc4f4376c67c0047f185cccf95c416c7a2f16272c4cbb"
+dependencies = [
+ "bytes",
+ "flex-error",
+ "prost 0.13.3",
+ "serde",
+ "serde_bytes",
+ "subtle-encoding",
+ "time",
+]
+
+[[package]]
 name = "tendermint-rpc"
 version = "0.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7593,7 +7760,7 @@ dependencies = [
  "subtle-encoding",
  "tendermint",
  "tendermint-config",
- "tendermint-proto",
+ "tendermint-proto 0.38.1",
  "thiserror",
  "time",
  "tokio",
@@ -7682,6 +7849,16 @@ source = "git+https://github.com/sp1-patches/tiny-keccak?branch=patch-v2.0.2#bf0
 dependencies = [
  "cfg-if",
  "crunchy",
+]
+
+[[package]]
+name = "tinystr"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9117f5d4db391c1cf6927e7bea3db74b9a1c1add8f7eda9ffd5364f40f57b82f"
+dependencies = [
+ "displaydoc",
+ "zerovec",
 ]
 
 [[package]]
@@ -8060,25 +8237,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eaea85b334db583fe3274d12b4cd1880032beab409c0d774be044d4480ab9a94"
 
 [[package]]
-name = "unicode-bidi"
-version = "0.3.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ab17db44d7388991a428b2ee655ce0c212e862eff1768a455c58f9aad6e7893"
-
-[[package]]
 name = "unicode-ident"
 version = "1.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe"
-
-[[package]]
-name = "unicode-normalization"
-version = "0.1.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5033c97c4262335cded6d6fc3e5c18ab755e1a3dc96376350f3d8e9f009ad956"
-dependencies = [
- "tinyvec",
-]
 
 [[package]]
 name = "unicode-width"
@@ -8157,9 +8319,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "url"
-version = "2.5.2"
+version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22784dbdf76fdde8af1aeda5622b546b422b6fc585325248a2bf9f5e41e94d6c"
+checksum = "8d157f1b96d14500ffdc1f10ba712e780825526c03d9a49b4d0324b0d9113ada"
 dependencies = [
  "form_urlencoded",
  "idna",
@@ -8171,6 +8333,18 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "utf16_iter"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8232dd3cdaed5356e0f716d285e4b40b932ac434100fe9b7e0e8e935b9e6246"
+
+[[package]]
+name = "utf8_iter"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "utf8parse"
@@ -8664,6 +8838,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "write16"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1890f4022759daae28ed4fe62859b1236caebfc61ede2f63ed4e695f3f6d936"
+
+[[package]]
+name = "writeable"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
+
+[[package]]
 name = "ws_stream_wasm"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8692,6 +8878,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "yoke"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c5b1314b079b0930c31e3af543d8ee1757b1951ae1e1565ec704403a7240ca5"
+dependencies = [
+ "serde",
+ "stable_deref_trait",
+ "yoke-derive",
+ "zerofrom",
+]
+
+[[package]]
+name = "yoke-derive"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "28cc31741b18cb6f1d5ff12f5b7523e3d6eb0852bbbad19d73905511d9849b95"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+ "synstructure",
+]
+
+[[package]]
 name = "zerocopy"
 version = "0.7.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8713,6 +8923,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "zerofrom"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91ec111ce797d0e0784a1116d0ddcdbea84322cd79e5d5ad173daeba4f93ab55"
+dependencies = [
+ "zerofrom-derive",
+]
+
+[[package]]
+name = "zerofrom-derive"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0ea7b4a3637ea8669cedf0f1fd5c286a17f3de97b8dd5a70a6c167a1730e63a5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+ "synstructure",
+]
+
+[[package]]
 name = "zeroize"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8726,6 +8957,28 @@ name = "zeroize_derive"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.87",
+]
+
+[[package]]
+name = "zerovec"
+version = "0.10.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aa2b893d79df23bfb12d5461018d408ea19dfafe76c2c7ef6d4eba614f8ff079"
+dependencies = [
+ "yoke",
+ "zerofrom",
+ "zerovec-derive",
+]
+
+[[package]]
+name = "zerovec-derive"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6eafa6dfb17584ea3e2bd6e76e0cc15ad7af12b09abdd1ca55961bed9b1063c6"
 dependencies = [
  "proc-macro2",
  "quote",

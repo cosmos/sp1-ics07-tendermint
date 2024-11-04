@@ -5,7 +5,7 @@ use ibc_client_tendermint::{
     consensus_state::ConsensusState as ConsensusStateWrapper, types::ConsensusState,
 };
 use ibc_core_client::context::{ClientValidationContext, ExtClientValidationContext};
-use ibc_core_handler_types::error::ContextError;
+use ibc_core_host_types::error::HostError;
 use ibc_primitives::Timestamp;
 use std::collections::HashMap;
 
@@ -37,7 +37,7 @@ impl ClientValidationContext for MisbehaviourValidationContext<'_> {
     fn consensus_state(
         &self,
         client_cons_state_path: &ibc_core_host_types::path::ClientConsensusStatePath,
-    ) -> Result<Self::ConsensusStateRef, ContextError> {
+    ) -> Result<Self::ConsensusStateRef, HostError> {
         let height = client_cons_state_path.revision_height;
         let trusted_consensus_state = self.trusted_consensus_states[&height];
 
@@ -47,7 +47,7 @@ impl ClientValidationContext for MisbehaviourValidationContext<'_> {
     fn client_state(
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
-    ) -> Result<Self::ClientStateRef, ContextError> {
+    ) -> Result<Self::ClientStateRef, HostError> {
         // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
@@ -56,18 +56,18 @@ impl ClientValidationContext for MisbehaviourValidationContext<'_> {
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
-    ) -> Result<(Timestamp, ibc_core_client::types::Height), ContextError> {
+    ) -> Result<(Timestamp, ibc_core_client::types::Height), HostError> {
         // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
 }
 
 impl ExtClientValidationContext for MisbehaviourValidationContext<'_> {
-    fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
+    fn host_timestamp(&self) -> Result<Timestamp, HostError> {
         Ok(Timestamp::from_nanoseconds(self.time * 1_000_000_000))
     }
 
-    fn host_height(&self) -> Result<ibc_core_client::types::Height, ContextError> {
+    fn host_height(&self) -> Result<ibc_core_client::types::Height, HostError> {
         // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
@@ -75,7 +75,7 @@ impl ExtClientValidationContext for MisbehaviourValidationContext<'_> {
     fn consensus_state_heights(
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
-    ) -> Result<Vec<ibc_core_client::types::Height>, ContextError> {
+    ) -> Result<Vec<ibc_core_client::types::Height>, HostError> {
         // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
@@ -84,7 +84,7 @@ impl ExtClientValidationContext for MisbehaviourValidationContext<'_> {
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
-    ) -> Result<Option<Self::ConsensusStateRef>, ContextError> {
+    ) -> Result<Option<Self::ConsensusStateRef>, HostError> {
         // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }
@@ -93,7 +93,7 @@ impl ExtClientValidationContext for MisbehaviourValidationContext<'_> {
         &self,
         _client_id: &ibc_core_host_types::identifiers::ClientId,
         _height: &ibc_core_client::types::Height,
-    ) -> Result<Option<Self::ConsensusStateRef>, ContextError> {
+    ) -> Result<Option<Self::ConsensusStateRef>, HostError> {
         // not needed by the `verify_misbehaviour` function
         unimplemented!()
     }

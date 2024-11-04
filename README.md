@@ -87,6 +87,13 @@ Foundry typically uses git submodules to manage contract dependencies, but this 
 bun install
 ```
 
+> [!TIP]
+> Nix users can enter a development shell with all the necessary dependencies by running:
+> 
+> ```sh
+> nix-shell shell.nix
+> ```
+
 ## Build the programs
 
 You should build the programs for zkVM by running the following command:

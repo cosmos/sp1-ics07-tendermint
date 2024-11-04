@@ -8,7 +8,7 @@ use ibc_client_tendermint_types::{Header, Misbehaviour};
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
 use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::{
-    ConsensusState as SolConsensusState, Env,
+    ClientState as SolClientState, ConsensusState as SolConsensusState,
 };
 use sp1_sdk::{ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
@@ -56,17 +56,16 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
     #[must_use]
     pub fn generate_proof(
         &self,
+        client_state: &SolClientState,
         trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
-        contract_env: &Env,
+        time: u64,
     ) -> SP1ProofWithPublicValues {
         // Encode the inputs into our program.
-        // NOTE: We are using SolConsensusState because I'm failing to serialize the
-        // ConsensusState struct properly. It always seems modified when deserialized.
-        let encoded_1 = bincode::serialize(&trusted_consensus_state).unwrap();
-        // NOTE: The Header struct is not deserializable by bincode, so we use CBOR instead.
-        let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
-        let encoded_3 = bincode::serialize(contract_env).unwrap();
+        let encoded_1 = bincode::serialize(client_state).unwrap();
+        let encoded_2 = bincode::serialize(&trusted_consensus_state).unwrap();
+        let encoded_3 = serde_cbor::to_vec(proposed_header).unwrap();
+        let encoded_4 = time.to_le_bytes().into();
         // TODO: find an encoding that works for all the structs above.
 
         // Write the encoded light blocks to stdin.
@@ -74,6 +73,7 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
         stdin.write_vec(encoded_1);
         stdin.write_vec(encoded_2);
         stdin.write_vec(encoded_3);
+        stdin.write_vec(encoded_4);
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
         let proof = self
@@ -146,20 +146,20 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
     #[must_use]
     pub fn generate_proof(
         &self,
+        client_state: &SolClientState,
         trusted_consensus_state: &SolConsensusState,
         proposed_header: &Header,
-        contract_env: &Env,
+        time: u64,
         kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)>,
     ) -> SP1ProofWithPublicValues {
         assert!(!kv_proofs.is_empty(), "No key-value pairs to prove");
         let len = u8::try_from(kv_proofs.len()).expect("too many key-value pairs");
         // Encode the inputs into our program.
-        // NOTE: We are using SolConsensusState because I'm failing to serialize the
-        // ConsensusState struct properly. It always seems modified when deserialized.
-        let encoded_1 = bincode::serialize(&trusted_consensus_state).unwrap();
+        let encoded_1 = bincode::serialize(client_state).unwrap();
+        let encoded_2 = bincode::serialize(&trusted_consensus_state).unwrap();
         // NOTE: The Header struct is not deserializable by bincode, so we use CBOR instead.
-        let encoded_2 = serde_cbor::to_vec(proposed_header).unwrap();
-        let encoded_3 = bincode::serialize(contract_env).unwrap();
+        let encoded_3 = serde_cbor::to_vec(proposed_header).unwrap();
+        let encoded_4 = time.to_le_bytes().into();
         // TODO: find an encoding that works for all the structs above.
 
         // Write the encoded light blocks to stdin.
@@ -167,6 +167,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
         stdin.write_vec(encoded_1);
         stdin.write_vec(encoded_2);
         stdin.write_vec(encoded_3);
+        stdin.write_vec(encoded_4);
         stdin.write_vec(vec![len]);
         for (path, value, proof) in kv_proofs {
             stdin.write_vec(bincode::serialize(&path).unwrap());
@@ -200,21 +201,24 @@ impl SP1ICS07TendermintProver<MisbehaviourProgram> {
     #[must_use]
     pub fn generate_proof(
         &self,
-        contract_env: &Env,
+        client_state: &SolClientState,
         misbehaviour: &Misbehaviour,
         trusted_consensus_state_1: &SolConsensusState,
         trusted_consensus_state_2: &SolConsensusState,
+        time: u64,
     ) -> SP1ProofWithPublicValues {
-        let encoded_1 = bincode::serialize(contract_env).unwrap();
+        let encoded_1 = bincode::serialize(client_state).unwrap();
         let encoded_2 = serde_cbor::to_vec(misbehaviour).unwrap();
         let encoded_3 = bincode::serialize(trusted_consensus_state_1).unwrap();
         let encoded_4 = bincode::serialize(trusted_consensus_state_2).unwrap();
+        let encoded_5 = time.to_le_bytes().into();
 
         let mut stdin = SP1Stdin::new();
         stdin.write_vec(encoded_1);
         stdin.write_vec(encoded_2);
         stdin.write_vec(encoded_3);
         stdin.write_vec(encoded_4);
+        stdin.write_vec(encoded_5);
 
         // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
         // network proof.

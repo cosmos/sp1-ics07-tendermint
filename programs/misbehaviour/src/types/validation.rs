@@ -7,30 +7,30 @@ use ibc_client_tendermint::{
 use ibc_core_client::context::{ClientValidationContext, ExtClientValidationContext};
 use ibc_core_handler_types::error::ContextError;
 use ibc_primitives::Timestamp;
-use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::Env;
 use std::collections::HashMap;
 
 /// The client validation context.
-pub struct MisbehaviourValidationContext<'a, 'b> {
-    env: &'a Env,
-    trusted_consensus_states: HashMap<u64, &'b ConsensusState>,
+pub struct MisbehaviourValidationContext<'a> {
+    /// Current time in seconds.
+    time: u64,
+    trusted_consensus_states: HashMap<u64, &'a ConsensusState>,
 }
 
-impl<'a, 'b> MisbehaviourValidationContext<'a, 'b> {
+impl<'a> MisbehaviourValidationContext<'a> {
     /// Create a new instance of the client validation context.
     #[must_use]
     pub const fn new(
-        env: &'a Env,
-        trusted_consensus_states: HashMap<u64, &'b ConsensusState>,
+        time: u64,
+        trusted_consensus_states: HashMap<u64, &'a ConsensusState>,
     ) -> Self {
         Self {
-            env,
+            time,
             trusted_consensus_states,
         }
     }
 }
 
-impl ClientValidationContext for MisbehaviourValidationContext<'_, '_> {
+impl ClientValidationContext for MisbehaviourValidationContext<'_> {
     type ClientStateRef = ClientStateWrapper;
     type ConsensusStateRef = ConsensusStateWrapper;
 
@@ -62,9 +62,9 @@ impl ClientValidationContext for MisbehaviourValidationContext<'_, '_> {
     }
 }
 
-impl ExtClientValidationContext for MisbehaviourValidationContext<'_, '_> {
+impl ExtClientValidationContext for MisbehaviourValidationContext<'_> {
     fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
-        Ok(Timestamp::from_nanoseconds(self.env.now * 1_000_000_000))
+        Ok(Timestamp::from_nanoseconds(self.time * 1_000_000_000))
     }
 
     fn host_height(&self) -> Result<ibc_core_client::types::Height, ContextError> {

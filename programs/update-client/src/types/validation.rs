@@ -7,26 +7,26 @@ use ibc_client_tendermint::{
 use ibc_core_client::context::{ClientValidationContext, ExtClientValidationContext};
 use ibc_core_handler_types::error::ContextError;
 use ibc_primitives::Timestamp;
-use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::Env;
 
 /// The client validation context.
-pub struct ClientValidationCtx<'a, 'b> {
-    env: &'a Env,
-    trusted_consensus_state: &'b ConsensusState,
+pub struct ClientValidationCtx<'a> {
+    /// Current time in seconds.
+    now: u64,
+    trusted_consensus_state: &'a ConsensusState,
 }
 
-impl<'a, 'b> ClientValidationCtx<'a, 'b> {
+impl<'a> ClientValidationCtx<'a> {
     /// Create a new instance of the client validation context.
     #[must_use]
-    pub const fn new(env: &'a Env, trusted_consensus_state: &'b ConsensusState) -> Self {
+    pub const fn new(now: u64, trusted_consensus_state: &'a ConsensusState) -> Self {
         Self {
-            env,
+            now,
             trusted_consensus_state,
         }
     }
 }
 
-impl ClientValidationContext for ClientValidationCtx<'_, '_> {
+impl ClientValidationContext for ClientValidationCtx<'_> {
     type ClientStateRef = ClientStateWrapper;
     type ConsensusStateRef = ConsensusStateWrapper;
 
@@ -57,9 +57,9 @@ impl ClientValidationContext for ClientValidationCtx<'_, '_> {
     }
 }
 
-impl ExtClientValidationContext for ClientValidationCtx<'_, '_> {
+impl ExtClientValidationContext for ClientValidationCtx<'_> {
     fn host_timestamp(&self) -> Result<Timestamp, ContextError> {
-        Ok(Timestamp::from_nanoseconds(self.env.now * 1_000_000_000))
+        Ok(Timestamp::from_nanoseconds(self.now * 1_000_000_000))
     }
 
     fn host_height(&self) -> Result<ibc_core_client::types::Height, ContextError> {

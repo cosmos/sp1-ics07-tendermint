@@ -10,7 +10,7 @@ use ibc_client_tendermint::client_state::{
 use ibc_client_tendermint::types::{ConsensusState, Misbehaviour, TENDERMINT_CLIENT_TYPE};
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
 use sp1_ics07_tendermint_solidity::{
-    IICS07TendermintMsgs::Env, IMisbehaviourMsgs::MisbehaviourOutput,
+    IICS07TendermintMsgs::ClientState, IMisbehaviourMsgs::MisbehaviourOutput,
 };
 use std::collections::HashMap;
 use std::time::Duration;
@@ -21,14 +21,15 @@ use tendermint_light_client_verifier::ProdVerifier;
 #[allow(clippy::missing_panics_doc)]
 #[must_use]
 pub fn check_for_misbehaviour(
-    env: Env,
+    client_state: ClientState,
     misbehaviour: &Misbehaviour,
     trusted_consensus_state_1: ConsensusState,
     trusted_consensus_state_2: ConsensusState,
+    time: u64,
 ) -> MisbehaviourOutput {
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
     assert_eq!(
-        env.chainId,
+        client_state.chainId,
         misbehaviour
             .header1()
             .signed_header
@@ -50,11 +51,11 @@ pub fn check_for_misbehaviour(
         ),
     ]);
     let ctx =
-        types::validation::MisbehaviourValidationContext::new(&env, trusted_consensus_state_map);
+        types::validation::MisbehaviourValidationContext::new(time, trusted_consensus_state_map);
 
     let options = Options {
-        trust_threshold: env.trustThreshold.clone().into(),
-        trusting_period: Duration::from_secs(env.trustingPeriod.into()),
+        trust_threshold: client_state.trustLevel.clone().into(),
+        trusting_period: Duration::from_secs(client_state.trustingPeriod.into()),
         clock_drift: Duration::default(),
     };
 
@@ -63,7 +64,7 @@ pub fn check_for_misbehaviour(
         &ctx,
         misbehaviour,
         &client_id,
-        &ChainId::new(&env.chainId).unwrap(),
+        &ChainId::new(&client_state.chainId).unwrap(),
         &options,
         &ProdVerifier::default(),
     )
@@ -80,10 +81,11 @@ pub fn check_for_misbehaviour(
     // Thus, the verifier must ensure that the trusted headers that were used in the proof are trusted consensus
     // states stored in its own internal state before it can accept the misbehaviour proof as valid.
     MisbehaviourOutput {
-        env,
+        clientState: client_state,
         trustedHeight1: misbehaviour.header1().trusted_height.try_into().unwrap(),
         trustedHeight2: misbehaviour.header2().trusted_height.try_into().unwrap(),
         trustedConsensusState1: trusted_consensus_state_1.into(),
         trustedConsensusState2: trusted_consensus_state_2.into(),
+        time,
     }
 }

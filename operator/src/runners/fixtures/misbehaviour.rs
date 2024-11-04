@@ -12,11 +12,11 @@ use sp1_ics07_tendermint_prover::{
     programs::MisbehaviourProgram, prover::SP1ICS07TendermintProver,
 };
 use sp1_ics07_tendermint_solidity::{
-    IICS07TendermintMsgs::{ClientState, ConsensusState, Env},
+    IICS07TendermintMsgs::{ClientState, ConsensusState},
     IMisbehaviourMsgs::MsgSubmitMisbehaviour,
     ISP1Msgs::SP1Proof,
 };
-use sp1_ics07_tendermint_utils::{light_block::LightBlockExt, rpc::TendermintRpcExt};
+use sp1_ics07_tendermint_utils::rpc::TendermintRpcExt;
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::HttpClient;
@@ -98,22 +98,17 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
 
     let verify_misbehaviour_prover = SP1ICS07TendermintProver::<MisbehaviourProgram>::default();
 
-    // construct contract env from the client state, which will be used by the light client contract
-    let contract_env = Env {
-        chainId: trusted_light_block_2.chain_id()?.to_string(),
-        trustThreshold: trusted_client_state_2.trustLevel,
-        trustingPeriod: trusted_client_state_2.trustingPeriod,
-        now: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)?
-            .as_secs(),
-    };
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
 
     let misbehaviour: Misbehaviour = Misbehaviour::try_from(raw_misbehaviour).unwrap();
     let proof_data = verify_misbehaviour_prover.generate_proof(
-        &contract_env,
+        &trusted_client_state_2,
         &misbehaviour,
         &trusted_consensus_state_1,
         &trusted_consensus_state_2,
+        now,
     );
 
     let submit_msg = MsgSubmitMisbehaviour {

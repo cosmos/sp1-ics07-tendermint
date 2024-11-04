@@ -11,8 +11,7 @@ use sp1_ics07_tendermint_prover::{
     programs::UpdateClientProgram, prover::SP1ICS07TendermintProver,
 };
 use sp1_ics07_tendermint_solidity::{
-    sp1_ics07_tendermint, IICS07TendermintMsgs::Env, ISP1Msgs::SP1Proof,
-    IUpdateClientMsgs::MsgUpdateClient,
+    sp1_ics07_tendermint, ISP1Msgs::SP1Proof, IUpdateClientMsgs::MsgUpdateClient,
 };
 use sp1_ics07_tendermint_utils::{eth, light_block::LightBlockExt, rpc::TendermintRpcExt};
 use sp1_sdk::{utils::setup_logger, HashableKey};
@@ -64,18 +63,17 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         // Get the proposed header from the target light block.
         let proposed_header = target_light_block.into_header(&trusted_light_block);
 
-        let contract_env = Env {
-            chainId: trusted_light_block.chain_id()?.to_string(),
-            trustThreshold: contract_client_state.trustLevel,
-            trustingPeriod: contract_client_state.trustingPeriod,
-            now: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)?
-                .as_secs(),
-        };
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs();
 
         // Generate a proof of the transition from the trusted block to the target block.
-        let proof_data =
-            prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
+        let proof_data = prover.generate_proof(
+            &contract_client_state,
+            &trusted_consensus_state,
+            &proposed_header,
+            now,
+        );
 
         let update_msg = MsgUpdateClient {
             sp1Proof: SP1Proof::new(

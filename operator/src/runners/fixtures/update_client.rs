@@ -10,7 +10,7 @@ use sp1_ics07_tendermint_prover::{
     programs::UpdateClientProgram, prover::SP1ICS07TendermintProver,
 };
 use sp1_ics07_tendermint_solidity::{
-    IICS07TendermintMsgs::{ClientState, ConsensusState, Env},
+    IICS07TendermintMsgs::{ClientState, ConsensusState},
     ISP1Msgs::SP1Proof,
     IUpdateClientMsgs::{MsgUpdateClient, UpdateClientOutput},
 };
@@ -67,18 +67,17 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;
 
     let proposed_header = target_light_block.into_header(&trusted_light_block);
-    let contract_env = Env {
-        chainId: trusted_light_block.chain_id()?.to_string(),
-        trustThreshold: trusted_client_state.trustLevel,
-        trustingPeriod: trusted_client_state.trustingPeriod,
-        now: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)?
-            .as_secs(),
-    };
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
 
     // Generate a header update proof for the specified blocks.
-    let proof_data =
-        uc_prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
+    let proof_data = uc_prover.generate_proof(
+        &trusted_client_state,
+        &trusted_consensus_state,
+        &proposed_header,
+        now,
+    );
 
     let output = UpdateClientOutput::abi_decode(proof_data.public_values.as_slice(), false)?;
 

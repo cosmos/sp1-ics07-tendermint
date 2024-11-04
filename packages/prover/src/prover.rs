@@ -7,8 +7,9 @@ use crate::programs::{
 use ibc_client_tendermint_types::{Header, Misbehaviour};
 use ibc_core_commitment_types::merkle::MerkleProof;
 use ibc_proto::Protobuf;
-use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::{
-    ClientState as SolClientState, ConsensusState as SolConsensusState,
+use sp1_ics07_tendermint_solidity::{
+    IICS07TendermintMsgs::{ClientState as SolClientState, ConsensusState as SolConsensusState},
+    ISP1Msgs::SupportedZkAlgorithm,
 };
 use sp1_sdk::{ProverClient, SP1ProofWithPublicValues, SP1ProvingKey, SP1Stdin, SP1VerifyingKey};
 
@@ -21,19 +22,30 @@ pub struct SP1ICS07TendermintProver<T: SP1Program> {
     pub pkey: SP1ProvingKey,
     /// The verifying key.
     pub vkey: SP1VerifyingKey,
+    /// The proof type.
+    pub proof_type: SupportedProofType,
     _phantom: std::marker::PhantomData<T>,
+}
+
+/// The supported proof types.
+#[derive(Clone, Debug, Copy)]
+pub enum SupportedProofType {
+    /// Groth16 proof.
+    Groth16,
+    /// Plonk proof.
+    Plonk,
 }
 
 impl<T: SP1Program> Default for SP1ICS07TendermintProver<T> {
     fn default() -> Self {
-        Self::new()
+        Self::new(SupportedProofType::Plonk)
     }
 }
 
 impl<T: SP1Program> SP1ICS07TendermintProver<T> {
     /// Create a new prover.
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(proof_type: SupportedProofType) -> Self {
         log::info!("Initializing SP1 ProverClient...");
         let prover_client = ProverClient::new();
         let (pkey, vkey) = prover_client.setup(T::ELF);
@@ -42,8 +54,38 @@ impl<T: SP1Program> SP1ICS07TendermintProver<T> {
             prover_client,
             pkey,
             vkey,
+            proof_type,
             _phantom: std::marker::PhantomData,
         }
+    }
+
+    /// Prove the given input.
+    /// # Panics
+    /// If the proof cannot be generated or validated.
+    #[must_use]
+    pub fn prove(&self, stdin: SP1Stdin) -> SP1ProofWithPublicValues {
+        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
+        // network proof.
+        let proof = match self.proof_type {
+            SupportedProofType::Plonk => self
+                .prover_client
+                .prove(&self.pkey, stdin)
+                .plonk()
+                .run()
+                .expect("proving failed"),
+            SupportedProofType::Groth16 => self
+                .prover_client
+                .prove(&self.pkey, stdin)
+                .groth16()
+                .run()
+                .expect("proving failed"),
+        };
+
+        self.prover_client
+            .verify(&proof, &self.vkey)
+            .expect("verification failed");
+
+        proof
     }
 }
 
@@ -75,21 +117,7 @@ impl SP1ICS07TendermintProver<UpdateClientProgram> {
         stdin.write_vec(encoded_3);
         stdin.write_vec(encoded_4);
 
-        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
-        let proof = self
-            .prover_client
-            .prove(&self.pkey, stdin)
-            .plonk()
-            .run()
-            .expect("proving failed");
-
-        // Verify proof.
-        self.prover_client
-            .verify(&proof, &self.vkey)
-            .expect("Verification failed");
-
-        // Return the proof.
-        proof
+        self.prove(stdin)
     }
 }
 
@@ -116,22 +144,7 @@ impl SP1ICS07TendermintProver<MembershipProgram> {
             stdin.write_vec(proof.encode_vec());
         }
 
-        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
-        // network proof.
-        let proof = self
-            .prover_client
-            .prove(&self.pkey, stdin)
-            .plonk()
-            .run()
-            .expect("proving failed");
-
-        // Verify proof.
-        self.prover_client
-            .verify(&proof, &self.vkey)
-            .expect("Verification failed");
-
-        // Return the proof.
-        proof
+        self.prove(stdin)
     }
 }
 
@@ -175,21 +188,7 @@ impl SP1ICS07TendermintProver<UpdateClientAndMembershipProgram> {
             stdin.write_vec(proof.encode_vec());
         }
 
-        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or network proof.
-        let proof = self
-            .prover_client
-            .prove(&self.pkey, stdin)
-            .plonk()
-            .run()
-            .expect("proving failed");
-
-        // Verify proof.
-        self.prover_client
-            .verify(&proof, &self.vkey)
-            .expect("Verification failed");
-
-        // Return the proof.
-        proof
+        self.prove(stdin)
     }
 }
 
@@ -220,21 +219,15 @@ impl SP1ICS07TendermintProver<MisbehaviourProgram> {
         stdin.write_vec(encoded_4);
         stdin.write_vec(encoded_5);
 
-        // Generate the proof. Depending on SP1_PROVER env variable, this may be a mock, local or
-        // network proof.
-        let proof = self
-            .prover_client
-            .prove(&self.pkey, stdin)
-            .plonk()
-            .run()
-            .expect("proving failed");
+        self.prove(stdin)
+    }
+}
 
-        // Verify proof.
-        self.prover_client
-            .verify(&proof, &self.vkey)
-            .expect("Verification failed");
-
-        // Return the proof.
-        proof
+impl From<SupportedProofType> for SupportedZkAlgorithm {
+    fn from(proof_type: SupportedProofType) -> Self {
+        match proof_type {
+            SupportedProofType::Groth16 => Self::from(0),
+            SupportedProofType::Plonk => Self::from(1),
+        }
     }
 }

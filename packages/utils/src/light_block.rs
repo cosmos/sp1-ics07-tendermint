@@ -7,6 +7,7 @@ use ibc_core_host_types::{error::IdentifierError, identifiers::ChainId};
 use sp1_ics07_tendermint_solidity::{
     IICS02ClientMsgs::Height,
     IICS07TendermintMsgs::{ClientState, TrustThreshold},
+    ISP1Msgs::SupportedZkAlgorithm,
 };
 use std::str::FromStr;
 use tendermint_light_client_verifier::types::LightBlock;
@@ -24,6 +25,7 @@ pub trait LightBlockExt {
         trust_level: TrustThreshold,
         unbonding_period: u32,
         trusting_period: u32,
+        zk_algorithm: SupportedZkAlgorithm,
     ) -> anyhow::Result<ClientState>;
     /// Convert the [`LightBlock`] to a new [`ConsensusState`].
     #[must_use]
@@ -47,6 +49,7 @@ impl LightBlockExt for LightBlock {
         trust_level: TrustThreshold,
         unbonding_period: u32,
         trusting_period: u32,
+        zk_algorithm: SupportedZkAlgorithm,
     ) -> anyhow::Result<ClientState> {
         let chain_id = ChainId::from_str(self.signed_header.header.chain_id.as_str())?;
         Ok(ClientState {
@@ -57,6 +60,7 @@ impl LightBlockExt for LightBlock {
                 revisionHeight: self.height().value().try_into()?,
             },
             isFrozen: false,
+            zkAlgorithm: zk_algorithm.into(),
             unbondingPeriod: unbonding_period,
             trustingPeriod: trusting_period,
         })

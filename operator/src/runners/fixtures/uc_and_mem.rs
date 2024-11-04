@@ -34,7 +34,8 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     );
 
     let tm_rpc_client = HttpClient::from_env();
-    let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
+    let uc_mem_prover =
+        SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::new(args.proof_type);
 
     let trusted_light_block = tm_rpc_client
         .get_light_block(Some(args.membership.trusted_block))
@@ -47,6 +48,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         &trusted_light_block,
         args.membership.trust_options.trusting_period,
         args.membership.trust_options.trust_level,
+        args.proof_type,
     )
     .await?;
     let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;

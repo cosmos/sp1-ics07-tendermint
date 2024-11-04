@@ -46,7 +46,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
     );
 
     let tm_rpc_client = HttpClient::from_env();
-    let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
+    let uc_prover = SP1ICS07TendermintProver::<UpdateClientProgram>::new(args.proof_type);
 
     let trusted_light_block = tm_rpc_client
         .get_light_block(Some(args.trusted_block))
@@ -59,6 +59,7 @@ pub async fn run(args: UpdateClientCmd) -> anyhow::Result<()> {
         &trusted_light_block,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
+        args.proof_type,
     )
     .await?;
 

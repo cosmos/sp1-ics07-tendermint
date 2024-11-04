@@ -77,6 +77,7 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
         &trusted_light_block_1,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
+        args.proof_type,
     )
     .await?;
     // use trusted light block 2 to instantiate a new SP1 tendermint client with light block 2 as initial trusted consensus state
@@ -84,6 +85,7 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
         &trusted_light_block_2,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
+        args.proof_type,
     )
     .await?;
 

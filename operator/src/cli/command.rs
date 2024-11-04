@@ -3,6 +3,7 @@
 use std::convert::Infallible;
 
 use clap::{command, Parser};
+use sp1_ics07_tendermint_prover::prover::SupportedProofType;
 use tendermint_light_client_verifier::types::TrustThreshold;
 
 /// The command line interface for the operator.
@@ -69,6 +70,11 @@ pub mod genesis {
         /// Trust options
         #[clap(flatten)]
         pub trust_options: super::TrustOptions,
+
+        /// The proof type
+        /// Supported proof types: groth16, plonk.
+        #[clap(long, short = 'p', value_parser = super::parse_proof_type, default_value = "plonk")]
+        pub proof_type: super::SupportedProofType,
     }
 }
 
@@ -130,6 +136,11 @@ pub mod fixtures {
         /// Trust options
         #[clap(flatten)]
         pub trust_options: super::TrustOptions,
+
+        /// The proof type
+        /// Supported proof types: groth16, plonk.
+        #[clap(long, short = 'p', value_parser = super::parse_proof_type, default_value = "plonk")]
+        pub proof_type: super::SupportedProofType,
     }
 
     /// The arguments for the `Membership` fixture executable.
@@ -140,9 +151,10 @@ pub mod fixtures {
         #[clap(flatten)]
         pub membership: MembershipArgs,
 
-        /// Whether to generate a union ics23 proof.
-        #[clap(long)]
-        pub union: bool,
+        /// The proof type.
+        /// Supported proof types: groth16, plonk, union.
+        #[clap(long, short = 'p', value_parser = super::parse_proof_type_with_union, default_value = "plonk")]
+        pub proof_type: ProofTypeWithUnion,
     }
 
     /// The arguments for generic membership proof generation.
@@ -181,6 +193,11 @@ pub mod fixtures {
         /// Membership arguments.
         #[clap(flatten)]
         pub membership: MembershipArgs,
+
+        /// The proof type
+        /// Supported proof types: groth16, plonk.
+        #[clap(long, short = 'p', value_parser = super::parse_proof_type, default_value = "plonk")]
+        pub proof_type: super::SupportedProofType,
     }
 
     /// The arguments for the `Misbehaviour` fixture executable.
@@ -198,6 +215,20 @@ pub mod fixtures {
         /// Trust options
         #[clap(flatten)]
         pub trust_options: super::TrustOptions,
+
+        /// The proof type
+        /// Supported proof types: groth16, plonk.
+        #[clap(long, short = 'p', value_parser = super::parse_proof_type, default_value = "plonk")]
+        pub proof_type: super::SupportedProofType,
+    }
+
+    /// The proof type with union.
+    #[derive(Debug, Clone)]
+    pub enum ProofTypeWithUnion {
+        /// The union ics23 proof type.
+        Union,
+        /// The supported sp1 proof types.
+        ProofType(super::SupportedProofType),
     }
 }
 
@@ -224,4 +255,25 @@ fn parse_trust_threshold(input: &str) -> anyhow::Result<TrustThreshold> {
         .map_err(|_| anyhow::anyhow!("invalid denominator for the fraction"))?;
     TrustThreshold::new(numerator, denominator)
         .map_err(|e| anyhow::anyhow!("invalid trust threshold: {}", e))
+}
+
+fn parse_proof_type(input: &str) -> anyhow::Result<SupportedProofType> {
+    match input {
+        "groth16" => Ok(SupportedProofType::Groth16),
+        "plonk" => Ok(SupportedProofType::Plonk),
+        _ => Err(anyhow::anyhow!("invalid proof type")),
+    }
+}
+
+fn parse_proof_type_with_union(input: &str) -> anyhow::Result<fixtures::ProofTypeWithUnion> {
+    match input {
+        "groth16" => Ok(fixtures::ProofTypeWithUnion::ProofType(
+            SupportedProofType::Groth16,
+        )),
+        "plonk" => Ok(fixtures::ProofTypeWithUnion::ProofType(
+            SupportedProofType::Plonk,
+        )),
+        "union" => Ok(fixtures::ProofTypeWithUnion::Union),
+        _ => Err(anyhow::anyhow!("invalid proof type")),
+    }
 }

@@ -1,7 +1,10 @@
 //! Runner for generating `membership` fixtures
 
 use crate::{
-    cli::command::{fixtures::MembershipCmd, OutputPath},
+    cli::command::{
+        fixtures::{MembershipCmd, ProofTypeWithUnion},
+        OutputPath,
+    },
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
@@ -9,7 +12,10 @@ use core::str;
 use ibc_client_tendermint_types::ConsensusState;
 use ibc_core_commitment_types::merkle::MerkleProof;
 use serde::{Deserialize, Serialize};
-use sp1_ics07_tendermint_prover::{programs::MembershipProgram, prover::SP1ICS07TendermintProver};
+use sp1_ics07_tendermint_prover::{
+    programs::MembershipProgram,
+    prover::{SP1ICS07TendermintProver, SupportedProofType},
+};
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState},
     IMembershipMsgs::{
@@ -56,6 +62,11 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         &trusted_light_block,
         args.membership.trust_options.trusting_period,
         args.membership.trust_options.trust_level,
+        match args.proof_type {
+            // Genesis requires a proof type, but it is not used in membership in the union case.
+            ProofTypeWithUnion::Union => SupportedProofType::Plonk,
+            ProofTypeWithUnion::ProofType(proof_type) => proof_type,
+        },
     )
     .await?;
 
@@ -63,24 +74,28 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let trusted_consensus_state =
         SolConsensusState::abi_decode(&genesis.trusted_consensus_state, false)?;
 
-    let membership_proof = if args.union {
-        run_union_membership(
-            &tm_rpc_client,
-            args.membership.base64,
-            args.membership.key_paths,
-            args.membership.trusted_block,
-            trusted_consensus_state,
-        )
-        .await?
-    } else {
-        run_sp1_membership(
-            &tm_rpc_client,
-            args.membership.base64,
-            args.membership.key_paths,
-            args.membership.trusted_block,
-            trusted_consensus_state,
-        )
-        .await?
+    let membership_proof = match args.proof_type {
+        ProofTypeWithUnion::Union => {
+            run_union_membership(
+                &tm_rpc_client,
+                args.membership.base64,
+                args.membership.key_paths,
+                args.membership.trusted_block,
+                trusted_consensus_state,
+            )
+            .await?
+        }
+        ProofTypeWithUnion::ProofType(proof_type) => {
+            run_sp1_membership(
+                &tm_rpc_client,
+                args.membership.base64,
+                args.membership.key_paths,
+                args.membership.trusted_block,
+                trusted_consensus_state,
+                proof_type,
+            )
+            .await?
+        }
     };
 
     let fixture = SP1ICS07MembershipFixture {
@@ -162,8 +177,9 @@ pub async fn run_sp1_membership(
     key_paths: Vec<String>,
     trusted_block: u32,
     trusted_consensus_state: SolConsensusState,
+    proof_type: SupportedProofType,
 ) -> anyhow::Result<MembershipProof> {
-    let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::default();
+    let verify_mem_prover = SP1ICS07TendermintProver::<MembershipProgram>::new(proof_type);
     let commitment_root_bytes = ConsensusState::from(trusted_consensus_state.clone())
         .root
         .as_bytes()

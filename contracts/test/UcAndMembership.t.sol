@@ -32,7 +32,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function test_Valid_UpdateClientAndVerifyMembership() public {
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
-        vm.warp(output.updateClientOutput.env.now + 300);
+        vm.warp(output.updateClientOutput.time + 300);
 
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
@@ -59,7 +59,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function test_Valid_UpdateClientAndVerifyNonMembership() public {
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
-        vm.warp(output.updateClientOutput.env.now + 300);
+        vm.warp(output.updateClientOutput.time + 300);
 
         MsgMembership memory nonMembershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
@@ -86,7 +86,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function test_Valid_CachedUpdateClientAndMembership() public {
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
-        vm.warp(output.updateClientOutput.env.now + 300);
+        vm.warp(output.updateClientOutput.time + 300);
 
         MsgMembership memory membershipMsg = MsgMembership({
             proof: abi.encode(fixture.membershipProof),
@@ -128,7 +128,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function test_Invalid_UpdateClientAndMembership() public {
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
-        vm.warp(output.updateClientOutput.env.now + 300);
+        vm.warp(output.updateClientOutput.time + 300);
 
         SP1MembershipAndUpdateClientProof memory ucAndMemProof = proof;
         ucAndMemProof.sp1Proof.proof = bytes("invalid");

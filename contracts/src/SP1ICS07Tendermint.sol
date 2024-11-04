@@ -386,7 +386,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        validateEnv(output.env);
+        validateEnv(output.clientState, output.time);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
         bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
@@ -401,7 +401,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        validateEnv(output.env);
+        validateEnv(output.clientState, output.time);
 
         // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
         // mapping
@@ -421,33 +421,18 @@ contract SP1ICS07Tendermint is
     }
 
     /// @notice Validates the Env public values.
-    /// @param env The public values.
-    function validateEnv(Env memory env) private view {
-        if (env.now > block.timestamp) {
-            revert ProofIsInTheFuture(block.timestamp, env.now);
+    /// @param publicClientState The public client state.
+    /// @param time The time.
+    function validateEnv(ClientState memory publicClientState, uint64 time) private view {
+        if (time > block.timestamp) {
+            revert ProofIsInTheFuture(block.timestamp, time);
         }
-        if (block.timestamp - env.now > ALLOWED_SP1_CLOCK_DRIFT) {
-            revert ProofIsTooOld(block.timestamp, env.now);
+        if (block.timestamp - time > ALLOWED_SP1_CLOCK_DRIFT) {
+            revert ProofIsTooOld(block.timestamp, time);
         }
-        if (keccak256(bytes(env.chainId)) != keccak256(bytes(clientState.chainId))) {
-            revert ChainIdMismatch(clientState.chainId, env.chainId);
-        }
-        if (
-            env.trustThreshold.numerator != clientState.trustLevel.numerator
-                || env.trustThreshold.denominator != clientState.trustLevel.denominator
-        ) {
-            revert TrustThresholdMismatch(
-                clientState.trustLevel.numerator,
-                clientState.trustLevel.denominator,
-                env.trustThreshold.numerator,
-                env.trustThreshold.denominator
-            );
-        }
-        if (env.trustingPeriod != clientState.trustingPeriod) {
-            revert TrustingPeriodMismatch(clientState.trustingPeriod, env.trustingPeriod);
-        }
-        if (env.trustingPeriod > clientState.unbondingPeriod) {
-            revert TrustingPeriodTooLong(env.trustingPeriod, clientState.unbondingPeriod);
+
+        if (keccak256(abi.encode(publicClientState)) != keccak256(abi.encode(clientState))) {
+            revert ClientStateMismatch(abi.encode(clientState), abi.encode(publicClientState));
         }
     }
 

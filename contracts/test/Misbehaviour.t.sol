@@ -22,8 +22,6 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     MsgSubmitMisbehaviour public submitMsg;
     MisbehaviourOutput public output;
 
-    Env public env;
-
     function setUpMisbehaviour(string memory fileName) public {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/contracts/fixtures/", fileName);
@@ -42,14 +40,13 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
 
         submitMsg = abi.decode(fixture.submitMsg, (IMisbehaviourMsgs.MsgSubmitMisbehaviour));
         output = abi.decode(submitMsg.sp1Proof.publicValues, (IMisbehaviourMsgs.MisbehaviourOutput));
-        env = output.env;
     }
 
     function test_ValidDoubleSignMisbehaviour() public {
         setUpMisbehaviour("misbehaviour_double_sign_fixture.json");
 
         // set a correct timestamp
-        vm.warp(env.now);
+        vm.warp(output.time);
         ics07Tendermint.misbehaviour(fixture.submitMsg);
 
         // to console
@@ -64,7 +61,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         setUpMisbehaviour("misbehaviour_breaking_time_monotonicity_fixture.json");
 
         // set a correct timestamp
-        vm.warp(env.now);
+        vm.warp(output.time);
         ics07Tendermint.misbehaviour(fixture.submitMsg);
 
         // to console
@@ -79,17 +76,17 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         setUpMisbehaviour("misbehaviour_double_sign_fixture.json");
 
         // proof is in the future
-        vm.warp(env.now - 300);
-        vm.expectRevert(abi.encodeWithSelector(ProofIsInTheFuture.selector, block.timestamp, env.now));
+        vm.warp(output.time - 300);
+        vm.expectRevert(abi.encodeWithSelector(ProofIsInTheFuture.selector, block.timestamp, output.time));
         ics07Tendermint.misbehaviour(fixture.submitMsg);
 
         // proof is too old
-        vm.warp(env.now + ics07Tendermint.ALLOWED_SP1_CLOCK_DRIFT() + 300);
-        vm.expectRevert(abi.encodeWithSelector(ProofIsTooOld.selector, block.timestamp, env.now));
+        vm.warp(output.time + ics07Tendermint.ALLOWED_SP1_CLOCK_DRIFT() + 300);
+        vm.expectRevert(abi.encodeWithSelector(ProofIsTooOld.selector, block.timestamp, output.time));
         ics07Tendermint.misbehaviour(fixture.submitMsg);
 
         // set a correct timestamp
-        vm.warp(env.now + 300);
+        vm.warp(output.time + 300);
 
         // wrong vkey
         MsgSubmitMisbehaviour memory badSubmitMsg = cloneSubmitMsg();
@@ -107,21 +104,21 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         // chain id mismatch
         badSubmitMsg = cloneSubmitMsg();
         MisbehaviourOutput memory badOutput = cloneOutput();
-        badOutput.env.chainId = "bad-chain-id";
+        badOutput.clientState.chainId = "bad-chain-id";
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(abi.encodeWithSelector(ChainIdMismatch.selector, output.env.chainId, badOutput.env.chainId));
+        vm.expectRevert(abi.encodeWithSelector(ChainIdMismatch.selector, output.clientState.chainId, badOutput.clientState.chainId));
         ics07Tendermint.misbehaviour(submitMsgBz);
 
         // trust threshold mismatch
         badSubmitMsg = cloneSubmitMsg();
         badOutput = cloneOutput();
-        badOutput.env.trustThreshold = TrustThreshold({ numerator: 1, denominator: 2 });
+        badOutput.clientState.trustLevel = TrustThreshold({ numerator: 1, denominator: 2 });
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
         vm.expectRevert(
             abi.encodeWithSelector(
-                TrustThresholdMismatch.selector, output.env.trustThreshold, badOutput.env.trustThreshold
+                TrustThresholdMismatch.selector, output.clientState.trustLevel, badOutput.clientState.trustLevel
             )
         );
         ics07Tendermint.misbehaviour(submitMsgBz);
@@ -129,12 +126,12 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         // trusting period mismatch
         badSubmitMsg = cloneSubmitMsg();
         badOutput = cloneOutput();
-        badOutput.env.trustingPeriod = 1;
+        badOutput.clientState.trustingPeriod = 1;
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
         vm.expectRevert(
             abi.encodeWithSelector(
-                TrustingPeriodMismatch.selector, output.env.trustingPeriod, badOutput.env.trustingPeriod
+                TrustingPeriodMismatch.selector, output.clientState.trustingPeriod, badOutput.clientState.trustingPeriod
             )
         );
         ics07Tendermint.misbehaviour(submitMsgBz);
@@ -161,7 +158,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
             trustedConsensusState
         );
         badOutput = cloneOutput();
-        badOutput.env.trustingPeriod = badClientState.trustingPeriod;
+        badOutput.clientState.trustingPeriod = badClientState.trustingPeriod;
         badSubmitMsg = cloneSubmitMsg();
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
@@ -175,7 +172,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         // invalid proof
         badSubmitMsg = cloneSubmitMsg();
         badOutput = cloneOutput();
-        badOutput.env.now = badOutput.env.now + 1;
+        badOutput.time = badOutput.time + 1;
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
         vm.expectRevert(abi.encodeWithSelector(SP1Verifier.InvalidProof.selector));
@@ -200,12 +197,8 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
 
     function cloneOutput() private view returns (MisbehaviourOutput memory) {
         MisbehaviourOutput memory clone = MisbehaviourOutput({
-            env: Env({
-                chainId: output.env.chainId,
-                trustThreshold: output.env.trustThreshold,
-                trustingPeriod: output.env.trustingPeriod,
-                now: output.env.now
-            }),
+            clientState: output.clientState,
+            time: output.time,
             trustedHeight1: output.trustedHeight1,
             trustedHeight2: output.trustedHeight2,
             trustedConsensusState1: output.trustedConsensusState1,

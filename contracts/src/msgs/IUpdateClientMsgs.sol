@@ -17,13 +17,14 @@ interface IUpdateClientMsgs is IICS07TendermintMsgs, ISP1Msgs {
     /// @notice The public value output for the sp1 update client program.
     /// @param trustedConsensusState The trusted consensus state.
     /// @param newConsensusState The new consensus state with the verified header.
-    /// @param env The validation environment.
+    /// @param time The time which the header was verified in seconds.
     /// @param trustedHeight The trusted height.
     /// @param newHeight The new height.
     struct UpdateClientOutput {
+        ClientState clientState;
         ConsensusState trustedConsensusState;
         ConsensusState newConsensusState;
-        Env env;
+        uint64 time;
         Height trustedHeight;
         Height newHeight;
     }

@@ -42,17 +42,4 @@ interface IICS07TendermintMsgs is IICS02ClientMsgs {
         bytes32 root;
         bytes32 nextValidatorsHash;
     }
-
-    /// @notice The environment output for the sp1 program.
-    /// @param chainId The chain ID of the chain that the client is tracking.
-    /// @param trustThreshold Fraction of validator overlap needed to update header
-    /// @param trustingPeriod Duration of the period since the `LatestTimestamp` during which the
-    /// submitted headers are valid for upgrade in seconds.
-    /// @param now Timestamp in seconds.
-    struct Env {
-        string chainId;
-        TrustThreshold trustThreshold;
-        uint32 trustingPeriod;
-        uint64 now;
-    }
 }

@@ -15,13 +15,14 @@ interface IMisbehaviourMsgs is IICS07TendermintMsgs, ISP1Msgs {
     }
 
     /// @notice The public value output for the sp1 misbehaviour program.
-    /// @param env The validation environment.
+    /// @param time The time which the misbehaviour was verified in seconds.
     /// @param trustedHeight1 The trusted height of header 1
     /// @param trustedHeight2 The trusted height of header 2
     /// @param trustedConsensusState1 The trusted consensus state of header 1
     /// @param trustedConsensusState2 The trusted consensus state of header 2
     struct MisbehaviourOutput {
-        Env env;
+        ClientState clientState;
+        uint64 time;
         Height trustedHeight1;
         Height trustedHeight2;
         ConsensusState trustedConsensusState1;

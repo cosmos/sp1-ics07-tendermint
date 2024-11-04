@@ -23,11 +23,6 @@
         "internalType": "bytes32"
       },
       {
-        "name": "verifier",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "_clientState",
         "type": "bytes",
         "internalType": "bytes"
@@ -219,6 +214,11 @@
                     "name": "isFrozen",
                     "type": "bool",
                     "internalType": "bool"
+                  },
+                  {
+                    "name": "zkAlgorithm",
+                    "type": "uint8",
+                    "internalType": "enum ISP1Msgs.SupportedZkAlgorithm"
                   }
                 ]
               },
@@ -515,6 +515,11 @@
                 "name": "isFrozen",
                 "type": "bool",
                 "internalType": "bool"
+              },
+              {
+                "name": "zkAlgorithm",
+                "type": "uint8",
+                "internalType": "enum ISP1Msgs.SupportedZkAlgorithm"
               }
             ]
           },
@@ -733,6 +738,11 @@
             "name": "isFrozen",
             "type": "bool",
             "internalType": "bool"
+          },
+          {
+            "name": "zkAlgorithm",
+            "type": "uint8",
+            "internalType": "enum ISP1Msgs.SupportedZkAlgorithm"
           }
         ]
       }
@@ -1157,10 +1167,37 @@
   },
   {
     "type": "error",
+    "name": "UnbondingPeriodMismatch",
+    "inputs": [
+      {
+        "name": "expected",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "actual",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "UnknownMembershipProofType",
     "inputs": [
       {
         "name": "proofType",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "UnknownZkAlgorithm",
+    "inputs": [
+      {
+        "name": "algorithm",
         "type": "uint8",
         "internalType": "uint8"
       }

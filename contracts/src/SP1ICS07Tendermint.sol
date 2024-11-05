@@ -398,7 +398,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        validateEnv(output.clientState, output.time);
+        validateClientStateAndTime(output.clientState, output.time);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
         bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
@@ -413,7 +413,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        validateEnv(output.clientState, output.time);
+        validateClientStateAndTime(output.clientState, output.time);
 
         // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
         // mapping
@@ -432,10 +432,11 @@ contract SP1ICS07Tendermint is
         }
     }
 
-    /// @notice Validates the Env public values.
+    /// @notice Validates the client state and time.
+    /// @dev This function does not check the equality of the latest height and isFrozen.
     /// @param publicClientState The public client state.
     /// @param time The time.
-    function validateEnv(ClientState memory publicClientState, uint64 time) private view {
+    function validateClientStateAndTime(ClientState memory publicClientState, uint64 time) private view {
         if (time > block.timestamp) {
             revert ProofIsInTheFuture(block.timestamp, time);
         }

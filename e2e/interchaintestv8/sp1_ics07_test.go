@@ -5,7 +5,6 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"os"
-	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -54,7 +53,7 @@ type SP1ICS07TendermintTestSuite struct {
 
 // SetupSuite calls the underlying SP1ICS07TendermintTestSuite's SetupSuite method
 // and deploys the SP1ICS07Tendermint contract
-func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context, opArgs ...string) {
+func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context, pt operator.SupportedProofType) {
 	s.TestSuite.SetupSuite(ctx)
 
 	eth, simd := s.ChainA, s.ChainB
@@ -90,7 +89,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context, opArgs ...
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
 			"-o", "contracts/script/genesis.json",
-		}, opArgs...)
+		}, pt.ToOpGenesisArgs()...)
 		s.Require().NoError(operator.RunGenesis(args...))
 
 		s.T().Cleanup(func() {
@@ -126,17 +125,17 @@ func TestWithSP1ICS07TendermintTestSuite(t *testing.T) {
 
 func (s *SP1ICS07TendermintTestSuite) TestDeploy_Groth16() {
 	ctx := context.Background()
-	s.DeployTest(ctx, "-p", "groth16")
+	s.DeployTest(ctx, operator.ProofTypeGroth16)
 }
 
 func (s *SP1ICS07TendermintTestSuite) TestDeploy_Plonk() {
 	ctx := context.Background()
-	s.DeployTest(ctx, "-p", "plonk")
+	s.DeployTest(ctx, operator.ProofTypePlonk)
 }
 
 // DeployTest tests the deployment of the SP1ICS07Tendermint contract with the given arguments
-func (s *SP1ICS07TendermintTestSuite) DeployTest(ctx context.Context, opArgs ...string) {
-	s.SetupSuite(ctx, opArgs...)
+func (s *SP1ICS07TendermintTestSuite) DeployTest(ctx context.Context, pt operator.SupportedProofType) {
+	s.SetupSuite(ctx, pt)
 
 	_, simd := s.ChainA, s.ChainB
 
@@ -160,17 +159,17 @@ func (s *SP1ICS07TendermintTestSuite) DeployTest(ctx context.Context, opArgs ...
 
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClient_Groth16() {
 	ctx := context.Background()
-	s.UpdateClientTest(ctx, "-p", "groth16")
+	s.UpdateClientTest(ctx, operator.ProofTypeGroth16)
 }
 
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClient_Plonk() {
 	ctx := context.Background()
-	s.UpdateClientTest(ctx, "-p", "plonk")
+	s.UpdateClientTest(ctx, operator.ProofTypePlonk)
 }
 
 // UpdateClientTest tests the update client functionality
-func (s *SP1ICS07TendermintTestSuite) UpdateClientTest(ctx context.Context, opArgs ...string) {
-	s.SetupSuite(ctx, opArgs...)
+func (s *SP1ICS07TendermintTestSuite) UpdateClientTest(ctx context.Context, pt operator.SupportedProofType) {
+	s.SetupSuite(ctx, pt)
 
 	_, simd := s.ChainA, s.ChainB
 
@@ -205,29 +204,24 @@ func (s *SP1ICS07TendermintTestSuite) UpdateClientTest(ctx context.Context, opAr
 
 // TestUnionMembership tests the verify (non)membership functionality with the --union flag
 func (s *SP1ICS07TendermintTestSuite) TestMembership_Union() {
-	s.MembershipTest("-p", "union")
+	s.MembershipTest(operator.ProofTypeUnion)
 }
 
 // TestSP1Membership tests the verify (non)membership functionality with the plonk flag
 func (s *SP1ICS07TendermintTestSuite) TestMembership_Plonk() {
-	s.MembershipTest("-p", "plonk")
+	s.MembershipTest(operator.ProofTypePlonk)
 }
 
 // TestSP1Membership tests the verify (non)membership functionality with the plonk flag
 func (s *SP1ICS07TendermintTestSuite) TestMembership_Groth16() {
-	s.MembershipTest("-p", "groth16")
+	s.MembershipTest(operator.ProofTypeGroth16)
 }
 
 // MembershipTest tests the verify (non)membership functionality with the given arguments
-func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
+func (s *SP1ICS07TendermintTestSuite) MembershipTest(pt operator.SupportedProofType) {
 	ctx := context.Background()
 
-	if slices.Equal(args, []string{"-p", "union"}) {
-		// union can't be used in genesis
-		s.SetupSuite(ctx)
-	} else {
-		s.SetupSuite(ctx, args...)
-	}
+	s.SetupSuite(ctx, pt)
 
 	eth, simd := s.ChainA, s.ChainB
 
@@ -263,7 +257,7 @@ func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 			expValue = resp.Value
 		}))
 
-		memArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		memArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, pt.ToOperatorArgs()...)
 		proofHeight, ucAndMemProof, err := operator.MembershipProof(
 			uint64(trustedHeight), operator.ToBase64KeyPaths(membershipKey), "",
 			memArgs...,
@@ -299,7 +293,7 @@ func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 
 		trustedHeight := clientState.LatestHeight.RevisionHeight
 
-		nonMemArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, args...)
+		nonMemArgs := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, pt.ToOperatorArgs()...)
 		proofHeight, ucAndMemProof, err := operator.MembershipProof(
 			uint64(trustedHeight), operator.ToBase64KeyPaths(nonMembershipKey), "",
 			nonMemArgs...,
@@ -324,17 +318,17 @@ func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership_Plonk() {
 	ctx := context.Background()
-	s.UpdateClientAndMembershipTest(ctx, "-p", "plonk")
+	s.UpdateClientAndMembershipTest(ctx, operator.ProofTypePlonk)
 }
 
 func (s *SP1ICS07TendermintTestSuite) TestUpdateClientAndMembership_Groth16() {
 	ctx := context.Background()
-	s.UpdateClientAndMembershipTest(ctx, "-p", "groth16")
+	s.UpdateClientAndMembershipTest(ctx, operator.ProofTypeGroth16)
 }
 
 // UpdateClientAndMembershipTest tests the update client and membership functionality with the given arguments
-func (s *SP1ICS07TendermintTestSuite) UpdateClientAndMembershipTest(ctx context.Context, opArgs ...string) {
-	s.SetupSuite(ctx, opArgs...)
+func (s *SP1ICS07TendermintTestSuite) UpdateClientAndMembershipTest(ctx context.Context, pt operator.SupportedProofType) {
+	s.SetupSuite(ctx, pt)
 
 	eth, simd := s.ChainA, s.ChainB
 
@@ -383,7 +377,7 @@ func (s *SP1ICS07TendermintTestSuite) UpdateClientAndMembershipTest(ctx context.
 			expValue = resp.Value
 		}))
 
-		args := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, opArgs...)
+		args := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, pt.ToOperatorArgs()...)
 		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(
 			uint64(trustedHeight), uint64(latestHeight),
 			operator.ToBase64KeyPaths(membershipKey, nonMembershipKey),
@@ -417,19 +411,19 @@ func (s *SP1ICS07TendermintTestSuite) UpdateClientAndMembershipTest(ctx context.
 
 func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour_Plonk() {
 	ctx := context.Background()
-	s.DoubleSignMisbehaviourTest(ctx, "double_sign-plonk", "-p", "plonk")
+	s.DoubleSignMisbehaviourTest(ctx, "double_sign-plonk", operator.ProofTypePlonk)
 }
 
 func (s *SP1ICS07TendermintTestSuite) TestDoubleSignMisbehaviour_Groth16() {
 	ctx := context.Background()
-	s.DoubleSignMisbehaviourTest(ctx, "double_sign-groth16", "-p", "groth16")
+	s.DoubleSignMisbehaviourTest(ctx, "double_sign-groth16", operator.ProofTypeGroth16)
 }
 
 // DoubleSignMisbehaviourTest tests the misbehaviour functionality with the given arguments
 // Fixture is only generated if the environment variable is set
 // Partially based on https://github.com/cosmos/relayer/blob/f9aaf3dd0ebfe99fbe98d190a145861d7df93804/interchaintest/misbehaviour_test.go#L38
-func (s *SP1ICS07TendermintTestSuite) DoubleSignMisbehaviourTest(ctx context.Context, fixName string, opArgs ...string) {
-	s.SetupSuite(ctx, opArgs...)
+func (s *SP1ICS07TendermintTestSuite) DoubleSignMisbehaviourTest(ctx context.Context, fixName string, pt operator.SupportedProofType) {
+	s.SetupSuite(ctx, pt)
 
 	eth, simd := s.ChainA, s.ChainB
 	_ = eth
@@ -473,7 +467,7 @@ func (s *SP1ICS07TendermintTestSuite) DoubleSignMisbehaviourTest(ctx context.Con
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
 		},
-			opArgs...,
+			pt.ToOperatorArgs()...,
 		)
 		_, err := operator.MisbehaviourProof(simd.GetCodec(), invalidMisbehaviour, "", args...)
 		s.Require().ErrorContains(err, "Misbehaviour is not detected")
@@ -502,7 +496,7 @@ func (s *SP1ICS07TendermintTestSuite) DoubleSignMisbehaviourTest(ctx context.Con
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
 		},
-			opArgs...,
+			pt.ToOperatorArgs()...,
 		)
 		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, fixtureName, args...)
 		s.Require().NoError(err)
@@ -522,22 +516,21 @@ func (s *SP1ICS07TendermintTestSuite) DoubleSignMisbehaviourTest(ctx context.Con
 
 func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour_Plonk() {
 	ctx := context.Background()
-	s.BreakingTimeMonotonicityMisbehaviourTest(ctx, "breaking_time_monotonicity-plonk", "-p", "plonk")
+	s.BreakingTimeMonotonicityMisbehaviourTest(ctx, "breaking_time_monotonicity-plonk", operator.ProofTypePlonk)
 }
 
 func (s *SP1ICS07TendermintTestSuite) TestBreakingTimeMonotonicityMisbehaviour_Groth16() {
 	ctx := context.Background()
-	s.BreakingTimeMonotonicityMisbehaviourTest(ctx, "breaking_time_monotonicity-groth16", "-p", "groth16")
+	s.BreakingTimeMonotonicityMisbehaviourTest(ctx, "breaking_time_monotonicity-groth16", operator.ProofTypeGroth16)
 }
 
 // TestBreakingTimeMonotonicityMisbehaviour tests the misbehaviour functionality
 // Fixture is only generated if the environment variable is set
 // Partially based on https://github.com/cosmos/relayer/blob/f9aaf3dd0ebfe99fbe98d190a145861d7df93804/interchaintest/misbehaviour_test.go#L38
-func (s *SP1ICS07TendermintTestSuite) BreakingTimeMonotonicityMisbehaviourTest(ctx context.Context, fixName string, opArgs ...string) {
-	s.SetupSuite(ctx, opArgs...)
+func (s *SP1ICS07TendermintTestSuite) BreakingTimeMonotonicityMisbehaviourTest(ctx context.Context, fixName string, pt operator.SupportedProofType) {
+	s.SetupSuite(ctx, pt)
 
 	eth, simd := s.ChainA, s.ChainB
-	_ = eth
 
 	var height clienttypes.Height
 	var trustedHeader tmclient.Header
@@ -594,7 +587,7 @@ func (s *SP1ICS07TendermintTestSuite) BreakingTimeMonotonicityMisbehaviourTest(c
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
 		},
-			opArgs...,
+			pt.ToOperatorArgs()...,
 		)
 		submitMsg, err := operator.MisbehaviourProof(simd.GetCodec(), misbehaviour, fixtureName, args...)
 		s.Require().NoError(err)

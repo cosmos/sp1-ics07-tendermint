@@ -14,6 +14,7 @@ interface IMisbehaviourMsgs is IICS07TendermintMsgs {
     }
 
     /// @notice The public value output for the sp1 misbehaviour program.
+    /// @param clientState The client state that was used to verify the misbehaviour.
     /// @param time The time which the misbehaviour was verified in seconds.
     /// @param trustedHeight1 The trusted height of header 1
     /// @param trustedHeight2 The trusted height of header 2

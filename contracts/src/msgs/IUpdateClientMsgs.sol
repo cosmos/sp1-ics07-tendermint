@@ -14,6 +14,7 @@ interface IUpdateClientMsgs is IICS07TendermintMsgs {
     }
 
     /// @notice The public value output for the sp1 update client program.
+    /// @param clientState The client state that was used to verify the header.
     /// @param trustedConsensusState The trusted consensus state.
     /// @param newConsensusState The new consensus state with the verified header.
     /// @param time The time which the header was verified in seconds.

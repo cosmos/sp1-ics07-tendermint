@@ -43,7 +43,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     }
 
     function test_ValidDoubleSignMisbehaviour() public {
-        setUpMisbehaviour("misbehaviour_double_sign_fixture.json");
+        setUpMisbehaviour("misbehaviour_double_sign-plonk_fixture.json");
 
         // set a correct timestamp
         vm.warp(output.time);
@@ -58,7 +58,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     }
 
     function test_ValidBreakingTimeMonotonicityMisbehaviour() public {
-        setUpMisbehaviour("misbehaviour_breaking_time_monotonicity_fixture.json");
+        setUpMisbehaviour("misbehaviour_breaking_time_monotonicity-groth16_fixture.json");
 
         // set a correct timestamp
         vm.warp(output.time);
@@ -73,7 +73,7 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
     }
 
     function test_InvalidMisbehaviour() public {
-        setUpMisbehaviour("misbehaviour_double_sign_fixture.json");
+        setUpMisbehaviour("misbehaviour_double_sign-plonk_fixture.json");
 
         // proof is in the future
         vm.warp(output.time - 300);

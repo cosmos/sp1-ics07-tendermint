@@ -19,10 +19,10 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
 
     UpdateClientOutput public output;
 
-    function setUp() public {
-        fixture = loadFixture("update_client_fixture.json");
+    function setUpTestWithFixture(string memory fileName) public {
+        fixture = loadFixture(fileName);
 
-        setUpTest("update_client_fixture.json");
+        setUpTest(fileName);
 
         MsgUpdateClient memory updateMsg = abi.decode(fixture.updateMsg, (MsgUpdateClient));
         output = abi.decode(updateMsg.sp1Proof.publicValues, (UpdateClientOutput));
@@ -32,6 +32,68 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
 
         vm.expectRevert();
         mockIcs07Tendermint.getConsensusStateHash(output.newHeight.revisionHeight);
+    }
+
+    function fixtureTestCases() public pure returns (FixtureTestCase[] memory) {
+        FixtureTestCase[] memory testCases = new FixtureTestCase[](2);
+        testCases[0] = FixtureTestCase({ name: "groth16", fileName: "update_client_fixture-groth16.json" });
+        testCases[1] = FixtureTestCase({ name: "plonk", fileName: "update_client_fixture-plonk.json" });
+
+        return testCases;
+    }
+
+    // Confirm that submitting a real proof passes the verifier.
+    function test_ValidUpdateClient() public {
+        FixtureTestCase[] memory testCases = fixtureTestCases();
+
+        for (uint i = 0; i < testCases.length; i++) {
+            setUpTestWithFixture(testCases[i].fileName);
+
+            // set a correct timestamp
+            vm.warp(output.time + 300);
+
+            // run verify
+            UpdateResult res = ics07Tendermint.updateClient(fixture.updateMsg);
+
+            // to console
+            console.log("UpdateClient-", testCases[i].name, "gas used: ", vm.lastCallGas().gasTotalUsed);
+            assert(res == UpdateResult.Update);
+
+            ClientState memory clientState = ics07Tendermint.getClientState();
+            assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
+            assert(clientState.latestHeight.revisionHeight == output.newHeight.revisionHeight);
+            assert(clientState.isFrozen == false);
+
+            bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(output.newHeight.revisionHeight);
+            assertEq(consensusHash, keccak256(abi.encode(output.newConsensusState)));
+        }
+    }
+
+    // Confirm that submitting a real proof passes the verifier.
+    function test_ValidNoOpUpdateClient() public {
+        // Doesn't matter which fixture we use since this is a no-op
+        setUpTestWithFixture("update_client_fixture-plonk.json");
+        // set a correct timestamp
+        vm.warp(output.time + 300);
+
+        // run verify
+        UpdateResult res = ics07Tendermint.updateClient(fixture.updateMsg);
+        assert(res == UpdateResult.Update);
+
+        // run verify again
+        res = ics07Tendermint.updateClient(fixture.updateMsg);
+
+        // to console
+        console.log("UpdateClient_NoOp gas used: ", vm.lastCallGas().gasTotalUsed);
+        assert(res == UpdateResult.NoOp);
+    }
+
+    function test_Invalid_UpdateClient() public {
+        // Doesn't matter which fixture we use since this is a fail
+        setUpTestWithFixture("update_client_fixture-plonk.json");
+
+        vm.expectRevert();
+        ics07Tendermint.updateClient(bytes("invalid"));
     }
 
     function loadFixture(string memory fileName) public view returns (SP1ICS07UpdateClientFixtureJson memory) {
@@ -49,49 +111,5 @@ contract SP1ICS07UpdateClientTest is SP1ICS07TendermintTest {
         });
 
         return fix;
-    }
-
-    // Confirm that submitting a real proof passes the verifier.
-    function test_ValidUpdateClient() public {
-        // set a correct timestamp
-        vm.warp(output.time + 300);
-
-        // run verify
-        UpdateResult res = ics07Tendermint.updateClient(fixture.updateMsg);
-
-        // to console
-        console.log("UpdateClient gas used: ", vm.lastCallGas().gasTotalUsed);
-        assert(res == UpdateResult.Update);
-
-        ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(keccak256(bytes(clientState.chainId)) == keccak256(bytes("mocha-4")));
-        assert(clientState.latestHeight.revisionHeight == output.newHeight.revisionHeight);
-        assert(clientState.isFrozen == false);
-
-        bytes32 consensusHash = ics07Tendermint.getConsensusStateHash(output.newHeight.revisionHeight);
-        assertEq(consensusHash, keccak256(abi.encode(output.newConsensusState)));
-    }
-
-    // Confirm that submitting a real proof passes the verifier.
-    function test_ValidNoOpUpdateClient() public {
-        // set a correct timestamp
-        vm.warp(output.time + 300);
-
-        // run verify
-        UpdateResult res = ics07Tendermint.updateClient(fixture.updateMsg);
-        assert(res == UpdateResult.Update);
-
-        // run verify again
-        res = ics07Tendermint.updateClient(fixture.updateMsg);
-
-        // to console
-        console.log("UpdateClient_NoOp gas used: ", vm.lastCallGas().gasTotalUsed);
-        assert(res == UpdateResult.NoOp);
-    }
-
-    // Confirm that submitting a random proof with the real verifier fails.
-    function test_Invalid_UpdateClient() public {
-        vm.expectRevert();
-        ics07Tendermint.updateClient(bytes("invalid"));
     }
 }

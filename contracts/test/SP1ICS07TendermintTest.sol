@@ -39,8 +39,6 @@ abstract contract SP1ICS07TendermintTest is
     using stdJson for string;
     using stdStorage for StdStorage;
 
-    SP1Verifier public verifier;
-
     SP1ICS07Tendermint public ics07Tendermint;
     SP1ICS07Tendermint public mockIcs07Tendermint;
 
@@ -62,7 +60,6 @@ abstract contract SP1ICS07TendermintTest is
             trustedConsensusHash
         );
 
-        SP1MockVerifier mockVerifier = new SP1MockVerifier();
         mockIcs07Tendermint = new SP1ICS07Tendermint(
             genesisFixture.updateClientVkey,
             genesisFixture.membershipVkey,
@@ -71,9 +68,10 @@ abstract contract SP1ICS07TendermintTest is
             genesisFixture.trustedClientState,
             trustedConsensusHash
         );
-        stdstore.target(address(mockIcs07Tendermint)).sig(mockIcs07Tendermint.VERIFIER.selector).checked_write(address(mockVerifier));
+        SP1MockVerifier mockVerifier = new SP1MockVerifier();
+        vm.mockFunction(address(mockIcs07Tendermint.VERIFIER()), address(mockVerifier), abi.encodeWithSelector(ISP1Verifier.verifyProof.selector));
 
-       ClientState memory clientState = mockIcs07Tendermint.getClientState();
+        ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(genesisFixture.trustedClientState));
 
         bytes32 consensusHash = mockIcs07Tendermint.getConsensusStateHash(clientState.latestHeight.revisionHeight);
@@ -101,5 +99,10 @@ abstract contract SP1ICS07TendermintTest is
         });
 
         return fix;
+    }
+
+    struct FixtureTestCase {
+        string name;
+        string fileName;
     }
 }

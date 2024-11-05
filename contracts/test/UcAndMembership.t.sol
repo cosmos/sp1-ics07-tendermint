@@ -11,8 +11,8 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
 
     SP1MembershipAndUpdateClientProof public proof;
 
-    function setUp() public {
-        setUpTestWithFixtures("uc_and_memberships_fixture.json");
+    function setUpUcAndMemTestWithFixtures(string memory fileName) public {
+        setUpTestWithFixtures(fileName);
 
         proof = abi.decode(fixture.membershipProof.proof, (SP1MembershipAndUpdateClientProof));
 
@@ -22,68 +22,85 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
         assert(clientState.latestHeight.revisionHeight < output.updateClientOutput.newHeight.revisionHeight);
     }
 
-    function verifyMembershipValue() public view returns (bytes memory) {
-        UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
+    function fixtureTestCases() public pure returns (FixtureTestCase[] memory) {
+        FixtureTestCase[] memory testCases = new FixtureTestCase[](2);
+        testCases[0] = FixtureTestCase({ name: "groth16", fileName: "uc_and_memberships_fixture-groth16.json" });
+        testCases[1] = FixtureTestCase({ name: "plonk", fileName: "uc_and_memberships_fixture-plonk.json" });
 
-        return output.kvPairs[0].value;
+        return testCases;
     }
 
     // Confirm that submitting a real proof passes the verifier.
     function test_Valid_UpdateClientAndVerifyMembership() public {
-        UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
-        // set a correct timestamp
-        vm.warp(output.updateClientOutput.time + 300);
+        FixtureTestCase[] memory testCases = fixtureTestCases();
 
-        MsgMembership memory membershipMsg = MsgMembership({
-            proof: abi.encode(fixture.membershipProof),
-            proofHeight: fixture.proofHeight,
-            path: verifyMembershipPath,
-            value: verifyMembershipValue()
-        });
+        for (uint i = 0; i < testCases.length; i++) {
+            setUpUcAndMemTestWithFixtures(testCases[i].fileName);
 
-        // run verify
-        ics07Tendermint.membership(membershipMsg);
+            UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
+            // set a correct timestamp
+            vm.warp(output.updateClientOutput.time + 300);
 
-        console.log("UpdateClientAndVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+            MsgMembership memory membershipMsg = MsgMembership({
+                proof: abi.encode(fixture.membershipProof),
+                proofHeight: fixture.proofHeight,
+                path: verifyMembershipPath,
+                value: VERIFY_MEMBERSHIP_VALUE
+            });
 
-        ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
-        assert(clientState.isFrozen == false);
+            // run verify
+            ics07Tendermint.membership(membershipMsg);
 
-        bytes32 consensusHash =
-            ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
-        assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
+            console.log("UpdateClientAndVerifyMembership-", testCases[i].name, "gas used: ", vm.lastCallGas().gasTotalUsed);
+
+            ClientState memory clientState = ics07Tendermint.getClientState();
+            assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
+            assert(clientState.isFrozen == false);
+
+            bytes32 consensusHash =
+                ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
+            assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
+        }
     }
 
     // Confirm that submitting a real proof passes the verifier.
     function test_Valid_UpdateClientAndVerifyNonMembership() public {
-        UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
-        // set a correct timestamp
-        vm.warp(output.updateClientOutput.time + 300);
+        FixtureTestCase[] memory testCases = fixtureTestCases();
 
-        MsgMembership memory nonMembershipMsg = MsgMembership({
-            proof: abi.encode(fixture.membershipProof),
-            proofHeight: fixture.proofHeight,
-            path: verifyNonMembershipPath,
-            value: bytes("")
-        });
+        for (uint i = 0; i < testCases.length; i++) {
+            setUpUcAndMemTestWithFixtures(testCases[i].fileName);
 
-        // run verify
-        ics07Tendermint.membership(nonMembershipMsg);
+            UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
+            // set a correct timestamp
+            vm.warp(output.updateClientOutput.time + 300);
 
-        console.log("UpdateClientAndVerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+            MsgMembership memory nonMembershipMsg = MsgMembership({
+                proof: abi.encode(fixture.membershipProof),
+                proofHeight: fixture.proofHeight,
+                path: verifyNonMembershipPath,
+                value: bytes("")
+            });
 
-        ClientState memory clientState = ics07Tendermint.getClientState();
-        assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
-        assert(clientState.isFrozen == false);
+            // run verify
+            ics07Tendermint.membership(nonMembershipMsg);
 
-        bytes32 consensusHash =
-            ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
-        assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
+            console.log("UpdateClientAndVerifyNonMembership-", testCases[i].name ,"gas used: ", vm.lastCallGas().gasTotalUsed);
+
+            ClientState memory clientState = ics07Tendermint.getClientState();
+            assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
+            assert(clientState.isFrozen == false);
+
+            bytes32 consensusHash =
+                ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
+            assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
+        }
     }
 
     // Confirm that submitting a real proof passes the verifier.
     function test_Valid_CachedUpdateClientAndMembership() public {
+        // It doesn't matter which fixture we use since this is a cached proof
+        setUpUcAndMemTestWithFixtures("uc_and_memberships_fixture-groth16.json");
+
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
         vm.warp(output.updateClientOutput.time + 300);
@@ -92,7 +109,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
             proof: abi.encode(fixture.membershipProof),
             proofHeight: fixture.proofHeight,
             path: verifyMembershipPath,
-            value: verifyMembershipValue()
+            value: VERIFY_MEMBERSHIP_VALUE
         });
 
         // run verify
@@ -126,6 +143,9 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
 
     // Confirm that submitting a real proof passes the verifier.
     function test_Invalid_UpdateClientAndMembership() public {
+        // It doesn't matter which fixture we use since this is an invalid proof
+        setUpUcAndMemTestWithFixtures("uc_and_memberships_fixture-groth16.json");
+
         UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
         // set a correct timestamp
         vm.warp(output.updateClientOutput.time + 300);

@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"os"
+	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -221,7 +222,12 @@ func (s *SP1ICS07TendermintTestSuite) TestMembership_Groth16() {
 func (s *SP1ICS07TendermintTestSuite) MembershipTest(args ...string) {
 	ctx := context.Background()
 
-	s.SetupSuite(ctx, args...)
+	if slices.Equal(args, []string{"-p", "union"}) {
+		// union can't be used in genesis
+		s.SetupSuite(ctx)
+	} else {
+		s.SetupSuite(ctx, args...)
+	}
 
 	eth, simd := s.ChainA, s.ChainB
 
@@ -377,12 +383,11 @@ func (s *SP1ICS07TendermintTestSuite) UpdateClientAndMembershipTest(ctx context.
 			expValue = resp.Value
 		}))
 
+		args := append([]string{"--trust-level", testvalues.DefaultTrustLevel.String(), "--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod), "--base64"}, opArgs...)
 		proofHeight, ucAndMemProof, err := operator.UpdateClientAndMembershipProof(
 			uint64(trustedHeight), uint64(latestHeight),
 			operator.ToBase64KeyPaths(membershipKey, nonMembershipKey),
-			"--trust-level", testvalues.DefaultTrustLevel.String(),
-			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
-			"--base64",
+			args...,
 		)
 		s.Require().NoError(err)
 

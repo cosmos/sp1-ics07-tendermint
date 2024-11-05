@@ -36,12 +36,6 @@ pub enum SupportedProofType {
     Plonk,
 }
 
-impl<T: SP1Program> Default for SP1ICS07TendermintProver<T> {
-    fn default() -> Self {
-        Self::new(SupportedProofType::Plonk)
-    }
-}
-
 impl<T: SP1Program> SP1ICS07TendermintProver<T> {
     /// Create a new prover.
     #[must_use]
@@ -228,6 +222,18 @@ impl From<SupportedProofType> for SupportedZkAlgorithm {
         match proof_type {
             SupportedProofType::Groth16 => Self::from(0),
             SupportedProofType::Plonk => Self::from(1),
+        }
+    }
+}
+
+impl TryFrom<u8> for SupportedProofType {
+    type Error = String;
+
+    fn try_from(n: u8) -> Result<Self, Self::Error> {
+        match n {
+            0 => Ok(Self::Groth16),
+            1 => Ok(Self::Plonk),
+            n => Err(format!("Unsupported proof type: {n}")),
         }
     }
 }

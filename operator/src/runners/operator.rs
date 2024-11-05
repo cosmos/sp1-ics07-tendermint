@@ -5,10 +5,12 @@ use std::env;
 use crate::cli::command::operator::Args;
 use alloy::providers::ProviderBuilder;
 use alloy_sol_types::SolValue;
+use anyhow::anyhow;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_prover::{
-    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver,
+    programs::UpdateClientProgram,
+    prover::{SP1ICS07TendermintProver, SupportedProofType},
 };
 use sp1_ics07_tendermint_solidity::{
     sp1_ics07_tendermint, ISP1Msgs::SP1Proof, IUpdateClientMsgs::MsgUpdateClient,
@@ -37,8 +39,11 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         .on_http(Url::parse(rpc_url.as_str())?);
 
     let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
+    let contract_client_state = contract.getClientState().call().await?._0;
     let tendermint_rpc_client = HttpClient::from_env();
-    let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
+    let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::new(
+        SupportedProofType::try_from(contract_client_state.zkAlgorithm).map_err(|e| anyhow!(e))?,
+    );
 
     loop {
         let contract_client_state = contract.getClientState().call().await?._0;

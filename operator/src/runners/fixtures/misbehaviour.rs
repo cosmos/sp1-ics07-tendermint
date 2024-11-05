@@ -98,7 +98,8 @@ pub async fn run(args: MisbehaviourCmd) -> anyhow::Result<()> {
     // use the client state from genesis_2 as the client state since they will both be the same
     let trusted_client_state_2 = ClientState::abi_decode(&genesis_2.trusted_client_state, false)?;
 
-    let verify_misbehaviour_prover = SP1ICS07TendermintProver::<MisbehaviourProgram>::default();
+    let verify_misbehaviour_prover =
+        SP1ICS07TendermintProver::<MisbehaviourProgram>::new(args.proof_type);
 
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)?

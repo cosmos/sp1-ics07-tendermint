@@ -38,13 +38,19 @@ jobs:
       matrix:
         test:
           # List your tests here
-          - TestWithSP1ICS07TendermintTestSuite/TestDeploy
-          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient
-          - TestWithSP1ICS07TendermintTestSuite/TestUnionMembership
-          - TestWithSP1ICS07TendermintTestSuite/TestSP1Membership
-          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership
-          - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour
-          - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour
+          - TestWithSP1ICS07TendermintTestSuite/TestDeploy_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/TestDeploy_Plonk
+          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient_Plonk
+          - TestWithSP1ICS07TendermintTestSuite/TestMembership_Union
+          - TestWithSP1ICS07TendermintTestSuite/TestMembership_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/TestMembership_Plonk
+          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership_Plonk
+          - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour_Plonk
+          - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour_Plonk
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:
@@ -54,7 +60,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           check-latest: true
           cache-dependency-path: e2e/interchaintestv8/go.sum
       - name: Install rust toolchain

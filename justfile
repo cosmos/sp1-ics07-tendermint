@@ -54,14 +54,17 @@ fixtures: build-operator
   TRUSTED_HEIGHT=$(($CURRENT_HEIGHT-100)) && \
   TARGET_HEIGHT=$(($CURRENT_HEIGHT-10)) && \
   echo "For celestia fixtures, trusted block: $TRUSTED_HEIGHT, target block: $TARGET_HEIGHT, from $TENDERMINT_RPC_URL" && \
-  parallel --progress --shebang --ungroup -j 6 ::: \
-    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState --trusted-block $TRUSTED_HEIGHT --union -o 'contracts/fixtures/union_membership_fixture.json'" \
-    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --union -o 'contracts/fixtures/union_nonmembership_fixture.json'" \
-    "RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/update_client_fixture.json'" \
-    "sleep 20 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/uc_and_memberships_fixture.json'" \
-    "sleep 40 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -o 'contracts/fixtures/memberships_fixture.json'"
-  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour$' -timeout 40m
-  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour' -timeout 40m
+  parallel --progress --shebang --ungroup -j 8 ::: \
+    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState --trusted-block $TRUSTED_HEIGHT -p union -o 'contracts/fixtures/union_membership_fixture.json'" \
+    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -p union -o 'contracts/fixtures/union_nonmembership_fixture.json'" \
+    "RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/update_client_fixture-plonk.json'" \
+    "sleep 20 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -p groth16 -o 'contracts/fixtures/update_client_fixture-groth16.json'" \
+    "sleep 40 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/uc_and_memberships_fixture-plonk.json'" \
+    "sleep 60 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -p groth16 -o 'contracts/fixtures/uc_and_memberships_fixture-groth16.json'" \
+    "sleep 80 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -o 'contracts/fixtures/memberships_fixture-plonk.json'" \
+    "sleep 100 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -p groth16 -o 'contracts/fixtures/memberships_fixture-groth16.json'"
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour_Plonk$' -timeout 40m
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour_Groth16' -timeout 40m
   @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract

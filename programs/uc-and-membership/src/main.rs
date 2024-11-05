@@ -18,7 +18,7 @@ use ibc_core_commitment_types::merkle::MerkleProof;
 
 use ibc_client_tendermint_types::Header;
 use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::{
-    ConsensusState as SolConsensusState, Env,
+    ClientState as SolClientState, ConsensusState as SolConsensusState,
 };
 
 /// The main function of the program.
@@ -29,18 +29,21 @@ pub fn main() {
     let encoded_1 = sp1_zkvm::io::read_vec();
     let encoded_2 = sp1_zkvm::io::read_vec();
     let encoded_3 = sp1_zkvm::io::read_vec();
-    // encoded_4 is the number of key-value pairs we want to verify
+    let encoded_4 = sp1_zkvm::io::read_vec();
+    // encoded_5 is the number of key-value pairs we want to verify
     let request_len = sp1_zkvm::io::read_vec()[0];
     assert!(request_len != 0);
 
-    // input 1: the trusted consensus state
-    let trusted_consensus_state = bincode::deserialize::<SolConsensusState>(&encoded_1)
+    // input 1: the client state
+    let client_state = bincode::deserialize::<SolClientState>(&encoded_1).unwrap();
+    // input 2: the trusted consensus state
+    let trusted_consensus_state = bincode::deserialize::<SolConsensusState>(&encoded_2)
         .unwrap()
         .into();
-    // input 2: the proposed header
-    let proposed_header = serde_cbor::from_slice::<Header>(&encoded_2).unwrap();
-    // input 3: environment
-    let env = bincode::deserialize::<Env>(&encoded_3).unwrap();
+    // input 3: the proposed header
+    let proposed_header = serde_cbor::from_slice::<Header>(&encoded_3).unwrap();
+    // input 4: time
+    let time = u64::from_le_bytes(encoded_4.try_into().unwrap());
     // TODO: find an encoding that works for all the structs above.
 
     let request_iter = (0..request_len).map(|_| {
@@ -58,8 +61,13 @@ pub fn main() {
         (path, value, merkle_proof)
     });
 
-    let output =
-        update_client_and_membership(trusted_consensus_state, proposed_header, env, request_iter);
+    let output = update_client_and_membership(
+        client_state,
+        trusted_consensus_state,
+        proposed_header,
+        time,
+        request_iter,
+    );
 
     sp1_zkvm::io::commit_slice(&output.abi_encode());
 }

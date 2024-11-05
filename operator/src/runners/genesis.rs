@@ -2,9 +2,12 @@
 
 use crate::cli::command::{genesis::Args, OutputPath};
 use alloy_sol_types::SolValue;
-use sp1_ics07_tendermint_prover::programs::{
-    MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
-    UpdateClientProgram,
+use sp1_ics07_tendermint_prover::{
+    programs::{
+        MembershipProgram, MisbehaviourProgram, SP1Program, UpdateClientAndMembershipProgram,
+        UpdateClientProgram,
+    },
+    prover::SupportedProofType,
 };
 use sp1_ics07_tendermint_solidity::IICS07TendermintMsgs::ConsensusState as SolConsensusState;
 use sp1_ics07_tendermint_utils::{light_block::LightBlockExt, rpc::TendermintRpcExt};
@@ -43,6 +46,7 @@ impl SP1ICS07TendermintGenesis {
         trusted_light_block: &LightBlock,
         trusting_period: Option<u32>,
         trust_level: TrustThreshold,
+        proof_type: SupportedProofType,
     ) -> anyhow::Result<Self> {
         setup_logger();
         if dotenv::dotenv().is_err() {
@@ -71,6 +75,7 @@ impl SP1ICS07TendermintGenesis {
             trust_level.try_into()?,
             unbonding_period,
             trusting_period,
+            proof_type.into(),
         )?;
         let trusted_consensus_state = trusted_light_block.to_consensus_state();
 
@@ -102,6 +107,7 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         &trusted_light_block,
         args.trust_options.trusting_period,
         args.trust_options.trust_level,
+        args.proof_type,
     )
     .await?;
 

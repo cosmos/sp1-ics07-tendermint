@@ -5,14 +5,15 @@ use std::env;
 use crate::cli::command::operator::Args;
 use alloy::providers::ProviderBuilder;
 use alloy_sol_types::SolValue;
+use anyhow::anyhow;
 use log::{debug, info};
 use reqwest::Url;
 use sp1_ics07_tendermint_prover::{
-    programs::UpdateClientProgram, prover::SP1ICS07TendermintProver,
+    programs::UpdateClientProgram,
+    prover::{SP1ICS07TendermintProver, SupportedProofType},
 };
 use sp1_ics07_tendermint_solidity::{
-    sp1_ics07_tendermint, IICS07TendermintMsgs::Env, ISP1Msgs::SP1Proof,
-    IUpdateClientMsgs::MsgUpdateClient,
+    sp1_ics07_tendermint, ISP1Msgs::SP1Proof, IUpdateClientMsgs::MsgUpdateClient,
 };
 use sp1_ics07_tendermint_utils::{eth, light_block::LightBlockExt, rpc::TendermintRpcExt};
 use sp1_sdk::{utils::setup_logger, HashableKey};
@@ -38,8 +39,11 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         .on_http(Url::parse(rpc_url.as_str())?);
 
     let contract = sp1_ics07_tendermint::new(contract_address.parse()?, provider);
+    let contract_client_state = contract.getClientState().call().await?._0;
     let tendermint_rpc_client = HttpClient::from_env();
-    let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::default();
+    let prover = SP1ICS07TendermintProver::<UpdateClientProgram>::new(
+        SupportedProofType::try_from(contract_client_state.zkAlgorithm).map_err(|e| anyhow!(e))?,
+    );
 
     loop {
         let contract_client_state = contract.getClientState().call().await?._0;
@@ -64,18 +68,17 @@ pub async fn run(args: Args) -> anyhow::Result<()> {
         // Get the proposed header from the target light block.
         let proposed_header = target_light_block.into_header(&trusted_light_block);
 
-        let contract_env = Env {
-            chainId: trusted_light_block.chain_id()?.to_string(),
-            trustThreshold: contract_client_state.trustLevel,
-            trustingPeriod: contract_client_state.trustingPeriod,
-            now: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)?
-                .as_secs(),
-        };
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs();
 
         // Generate a proof of the transition from the trusted block to the target block.
-        let proof_data =
-            prover.generate_proof(&trusted_consensus_state, &proposed_header, &contract_env);
+        let proof_data = prover.generate_proof(
+            &contract_client_state,
+            &trusted_consensus_state,
+            &proposed_header,
+            now,
+        );
 
         let update_msg = MsgUpdateClient {
             sp1Proof: SP1Proof::new(

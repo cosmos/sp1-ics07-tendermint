@@ -39,6 +39,11 @@ interface ISP1ICS07TendermintErrors {
     /// @param actual The actual trusting period in seconds.
     error TrustingPeriodMismatch(uint256 expected, uint256 actual);
 
+    /// @notice The error that is returned when the unbonding period does not match the expected value.
+    /// @param expected The expected unbonding period in seconds.
+    /// @param actual The actual unbonding period in seconds.
+    error UnbondingPeriodMismatch(uint256 expected, uint256 actual);
+
     /// @notice The error that is returned when the trusting period is longer than the unbonding period.
     /// @param trustingPeriod The trusting period in seconds.
     /// @param unbondingPeriod The unbonding period in seconds.
@@ -72,6 +77,11 @@ interface ISP1ICS07TendermintErrors {
     /// @param actual The actual consensus state root.
     error ConsensusStateRootMismatch(bytes32 expected, bytes32 actual);
 
+    /// @notice The error that is returned when the client state does not match the expected value.
+    /// @param expected The expected client state.
+    /// @param actual The actual client state.
+    error ClientStateMismatch(bytes expected, bytes actual);
+
     /// @notice The error that is returned when the update client and membership program contains misbehavior.
     /// @dev Misbehavior cannot be handled in membership handler, so it is returned as an error.
     error CannotHandleMisbehavior();
@@ -91,6 +101,10 @@ interface ISP1ICS07TendermintErrors {
     /// @notice The error that is returned when the membership proof type is unknown.
     /// @param proofType The unknown membership proof type.
     error UnknownMembershipProofType(uint8 proofType);
+
+    /// @notice The error that is returned when the zk algorithm is unknown.
+    /// @param algorithm The unknown zk algorithm.
+    error UnknownZkAlgorithm(uint8 algorithm);
 
     /// @notice Returned when the feature is not supported.
     error FeatureNotSupported();

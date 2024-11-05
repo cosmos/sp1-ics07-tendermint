@@ -13,6 +13,8 @@ import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
 import { Paths } from "./utils/Paths.sol";
 import { UnionMembership } from "./utils/UnionMembership.sol";
+import { SP1Verifier as SP1VerifierPlonk } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
+import { SP1Verifier as SP1VerifierGroth16 } from "@sp1-contracts/v3.0.0/SP1VerifierGroth16.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -55,7 +57,6 @@ contract SP1ICS07Tendermint is
     /// @param membershipProgramVkey The verification key for the verify (non)membership program.
     /// @param updateClientAndMembershipProgramVkey The verification key for the update client and membership program.
     /// @param misbehaviourProgramVkey The verification key for the misbehaviour program.
-    /// @param verifier The address of the SP1 verifier contract.
     /// @param _clientState The encoded initial client state.
     /// @param _consensusState The encoded initial consensus state.
     constructor(
@@ -63,7 +64,6 @@ contract SP1ICS07Tendermint is
         bytes32 membershipProgramVkey,
         bytes32 updateClientAndMembershipProgramVkey,
         bytes32 misbehaviourProgramVkey,
-        address verifier,
         bytes memory _clientState,
         bytes32 _consensusState
     ) {
@@ -71,10 +71,22 @@ contract SP1ICS07Tendermint is
         MEMBERSHIP_PROGRAM_VKEY = membershipProgramVkey;
         UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY = updateClientAndMembershipProgramVkey;
         MISBEHAVIOUR_PROGRAM_VKEY = misbehaviourProgramVkey;
-        VERIFIER = ISP1Verifier(verifier);
 
         clientState = abi.decode(_clientState, (ClientState));
         consensusStateHashes[clientState.latestHeight.revisionHeight] = _consensusState;
+
+        if (clientState.zkAlgorithm == SupportedZkAlgorithm.Groth16) {
+            VERIFIER = new SP1VerifierGroth16();
+        } else if (clientState.zkAlgorithm == SupportedZkAlgorithm.Plonk) {
+            VERIFIER = new SP1VerifierPlonk();
+        } else {
+            revert UnknownZkAlgorithm(uint8(clientState.zkAlgorithm));
+        }
+
+        require(
+            clientState.trustingPeriod <= clientState.unbondingPeriod,
+            TrustingPeriodTooLong(clientState.trustingPeriod, clientState.unbondingPeriod)
+        );
     }
 
     /// @inheritdoc ISP1ICS07Tendermint
@@ -386,7 +398,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        validateEnv(output.env);
+        validateClientStateAndTime(output.clientState, output.time);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
         bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
@@ -401,7 +413,7 @@ contract SP1ICS07Tendermint is
         if (clientState.isFrozen) {
             revert FrozenClientState();
         }
-        validateEnv(output.env);
+        validateClientStateAndTime(output.clientState, output.time);
 
         // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
         // mapping
@@ -420,34 +432,43 @@ contract SP1ICS07Tendermint is
         }
     }
 
-    /// @notice Validates the Env public values.
-    /// @param env The public values.
-    function validateEnv(Env memory env) private view {
-        if (env.now > block.timestamp) {
-            revert ProofIsInTheFuture(block.timestamp, env.now);
+    /// @notice Validates the client state and time.
+    /// @dev This function does not check the equality of the latest height and isFrozen.
+    /// @param publicClientState The public client state.
+    /// @param time The time.
+    function validateClientStateAndTime(ClientState memory publicClientState, uint64 time) private view {
+        if (time > block.timestamp) {
+            revert ProofIsInTheFuture(block.timestamp, time);
         }
-        if (block.timestamp - env.now > ALLOWED_SP1_CLOCK_DRIFT) {
-            revert ProofIsTooOld(block.timestamp, env.now);
+        if (block.timestamp - time > ALLOWED_SP1_CLOCK_DRIFT) {
+            revert ProofIsTooOld(block.timestamp, time);
         }
-        if (keccak256(bytes(env.chainId)) != keccak256(bytes(clientState.chainId))) {
-            revert ChainIdMismatch(clientState.chainId, env.chainId);
+
+        // NOTE: We do not check the equality of latest height and isFrozen
+        if (keccak256(bytes(publicClientState.chainId)) != keccak256(bytes(clientState.chainId))) {
+            revert ChainIdMismatch(clientState.chainId, publicClientState.chainId);
         }
-        if (
-            env.trustThreshold.numerator != clientState.trustLevel.numerator
-                || env.trustThreshold.denominator != clientState.trustLevel.denominator
-        ) {
+        if (publicClientState.trustLevel.numerator != clientState.trustLevel.numerator) {
             revert TrustThresholdMismatch(
                 clientState.trustLevel.numerator,
                 clientState.trustLevel.denominator,
-                env.trustThreshold.numerator,
-                env.trustThreshold.denominator
+                publicClientState.trustLevel.numerator,
+                publicClientState.trustLevel.denominator
             );
         }
-        if (env.trustingPeriod != clientState.trustingPeriod) {
-            revert TrustingPeriodMismatch(clientState.trustingPeriod, env.trustingPeriod);
+        if (publicClientState.trustLevel.denominator != clientState.trustLevel.denominator) {
+            revert TrustThresholdMismatch(
+                clientState.trustLevel.numerator,
+                clientState.trustLevel.denominator,
+                publicClientState.trustLevel.numerator,
+                publicClientState.trustLevel.denominator
+            );
         }
-        if (env.trustingPeriod > clientState.unbondingPeriod) {
-            revert TrustingPeriodTooLong(env.trustingPeriod, clientState.unbondingPeriod);
+        if (publicClientState.trustingPeriod != clientState.trustingPeriod) {
+            revert TrustingPeriodMismatch(clientState.trustingPeriod, publicClientState.trustingPeriod);
+        }
+        if (publicClientState.unbondingPeriod != clientState.unbondingPeriod) {
+            revert UnbondingPeriodMismatch(clientState.unbondingPeriod, publicClientState.unbondingPeriod);
         }
     }
 

@@ -12,7 +12,7 @@ use ibc_client_tendermint::{
 };
 use ibc_core_host_types::identifiers::{ChainId, ClientId};
 use sp1_ics07_tendermint_solidity::{
-    IICS07TendermintMsgs::Env, IUpdateClientMsgs::UpdateClientOutput,
+    IICS07TendermintMsgs::ClientState, IUpdateClientMsgs::UpdateClientOutput,
 };
 
 use tendermint_light_client_verifier::{options::Options, ProdVerifier};
@@ -21,19 +21,20 @@ use tendermint_light_client_verifier::{options::Options, ProdVerifier};
 #[allow(clippy::missing_panics_doc)]
 #[must_use]
 pub fn update_client(
+    client_state: ClientState,
     trusted_consensus_state: ConsensusState,
     proposed_header: Header,
-    env: Env,
+    time: u64,
 ) -> UpdateClientOutput {
     let client_id = ClientId::new(TENDERMINT_CLIENT_TYPE, 0).unwrap();
-    let chain_id = ChainId::from_str(&env.chainId).unwrap();
+    let chain_id = ChainId::from_str(&client_state.chainId).unwrap();
     let options = Options {
-        trust_threshold: env.trustThreshold.clone().into(),
-        trusting_period: Duration::from_secs(env.trustingPeriod.into()),
+        trust_threshold: client_state.trustLevel.clone().into(),
+        trusting_period: Duration::from_secs(client_state.trustingPeriod.into()),
         clock_drift: Duration::default(),
     };
 
-    let ctx = types::validation::ClientValidationCtx::new(&env, &trusted_consensus_state);
+    let ctx = types::validation::ClientValidationCtx::new(time, &trusted_consensus_state);
 
     verify_header::<_, sha2::Sha256>(
         &ctx,
@@ -50,9 +51,10 @@ pub fn update_client(
     let new_consensus_state = ConsensusState::from(proposed_header);
 
     UpdateClientOutput {
+        clientState: client_state,
         trustedConsensusState: trusted_consensus_state.into(),
         newConsensusState: new_consensus_state.into(),
-        env,
+        time,
         trustedHeight: trusted_height,
         newHeight: new_height,
     }

@@ -14,7 +14,7 @@ use sp1_ics07_tendermint_prover::{
     programs::UpdateClientAndMembershipProgram, prover::SP1ICS07TendermintProver,
 };
 use sp1_ics07_tendermint_solidity::{
-    IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState, Env},
+    IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState},
     IMembershipMsgs::{MembershipProof, SP1MembershipAndUpdateClientProof},
     ISP1Msgs::SP1Proof,
     IUpdateClientAndMembershipMsgs::UcAndMembershipOutput,
@@ -34,7 +34,8 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     );
 
     let tm_rpc_client = HttpClient::from_env();
-    let uc_mem_prover = SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::default();
+    let uc_mem_prover =
+        SP1ICS07TendermintProver::<UpdateClientAndMembershipProgram>::new(args.proof_type);
 
     let trusted_light_block = tm_rpc_client
         .get_light_block(Some(args.membership.trusted_block))
@@ -47,6 +48,7 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         &trusted_light_block,
         args.membership.trust_options.trusting_period,
         args.membership.trust_options.trust_level,
+        args.proof_type,
     )
     .await?;
     let trusted_client_state = ClientState::abi_decode(&genesis.trusted_client_state, false)?;
@@ -54,14 +56,9 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
         SolConsensusState::abi_decode(&genesis.trusted_consensus_state, false)?.into();
 
     let proposed_header = target_light_block.into_header(&trusted_light_block);
-    let contract_env = Env {
-        chainId: trusted_light_block.chain_id()?.to_string(),
-        trustThreshold: trusted_client_state.trustLevel,
-        trustingPeriod: trusted_client_state.trustingPeriod,
-        now: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)?
-            .as_secs(),
-    };
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
 
     let kv_proofs: Vec<(Vec<Vec<u8>>, Vec<u8>, MerkleProof)> =
         futures::future::try_join_all(args.membership.key_paths.into_iter().map(|path| async {
@@ -96,9 +93,10 @@ pub async fn run(args: UpdateClientAndMembershipCmd) -> anyhow::Result<()> {
     let kv_len = kv_proofs.len();
     // Generate a header update proof for the specified blocks.
     let proof_data = uc_mem_prover.generate_proof(
+        &trusted_client_state,
         &trusted_consensus_state.into(),
         &proposed_header,
-        &contract_env,
+        now,
         kv_proofs,
     );
 

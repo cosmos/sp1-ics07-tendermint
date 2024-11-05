@@ -3,7 +3,6 @@ pragma solidity ^0.8.28;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/console.sol";
-import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { SP1ICS07TendermintTest } from "./SP1ICS07TendermintTest.sol";
 import { IMisbehaviourMsgs } from "../src/msgs/IMisbehaviourMsgs.sol";
 import { SP1Verifier } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
@@ -107,7 +106,9 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         badOutput.clientState.chainId = "bad-chain-id";
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(abi.encodeWithSelector(ChainIdMismatch.selector, output.clientState.chainId, badOutput.clientState.chainId));
+        vm.expectRevert(
+            abi.encodeWithSelector(ChainIdMismatch.selector, output.clientState.chainId, badOutput.clientState.chainId)
+        );
         ics07Tendermint.misbehaviour(submitMsgBz);
 
         // trust threshold mismatch
@@ -116,7 +117,15 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         badOutput.clientState.trustLevel = TrustThreshold({ numerator: 1, denominator: 2 });
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(abi.encodeWithSelector(TrustThresholdMismatch.selector, output.clientState.trustLevel.numerator, output.clientState.trustLevel.denominator, badOutput.clientState.trustLevel.numerator, badOutput.clientState.trustLevel.denominator));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                TrustThresholdMismatch.selector,
+                output.clientState.trustLevel.numerator,
+                output.clientState.trustLevel.denominator,
+                badOutput.clientState.trustLevel.numerator,
+                badOutput.clientState.trustLevel.denominator
+            )
+        );
         ics07Tendermint.misbehaviour(submitMsgBz);
 
         // trusting period mismatch
@@ -125,7 +134,11 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         badOutput.clientState.trustingPeriod = 1;
         badSubmitMsg.sp1Proof.publicValues = abi.encode(badOutput);
         submitMsgBz = abi.encode(badSubmitMsg);
-        vm.expectRevert(abi.encodeWithSelector(TrustingPeriodMismatch.selector, output.clientState.trustingPeriod, badOutput.clientState.trustingPeriod));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                TrustingPeriodMismatch.selector, output.clientState.trustingPeriod, badOutput.clientState.trustingPeriod
+            )
+        );
         ics07Tendermint.misbehaviour(submitMsgBz);
 
         // invalid proof

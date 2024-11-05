@@ -20,5 +20,4 @@ interface ISP1Msgs {
         Groth16,
         Plonk
     }
-
 }

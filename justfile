@@ -112,7 +112,7 @@ lint-fix:
   cargo fmt --all
   cargo clippy --fix --allow-dirty --allow-staged
   @echo "Fixing the Solidity code..."
-  forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
+  forge fmt && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol'
   @echo "Fixing the Go code..."
   cd e2e/interchaintestv8 && golangci-lint run --fix
 

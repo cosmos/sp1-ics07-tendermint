@@ -83,9 +83,10 @@ contract SP1ICS07Tendermint is
             revert UnknownZkAlgorithm(uint8(clientState.zkAlgorithm));
         }
 
-        require(clientState.trustingPeriod <= clientState.unbondingPeriod, TrustingPeriodTooLong(
-            clientState.trustingPeriod, clientState.unbondingPeriod
-        ));
+        require(
+            clientState.trustingPeriod <= clientState.unbondingPeriod,
+            TrustingPeriodTooLong(clientState.trustingPeriod, clientState.unbondingPeriod)
+        );
     }
 
     /// @inheritdoc ISP1ICS07Tendermint

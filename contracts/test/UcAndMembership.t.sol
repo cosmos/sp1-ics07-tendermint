@@ -34,7 +34,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function test_Valid_UpdateClientAndVerifyMembership() public {
         FixtureTestCase[] memory testCases = fixtureTestCases();
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             setUpUcAndMemTestWithFixtures(testCases[i].fileName);
 
             UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
@@ -51,7 +51,9 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
             // run verify
             ics07Tendermint.membership(membershipMsg);
 
-            console.log("UpdateClientAndVerifyMembership-", testCases[i].name, "gas used: ", vm.lastCallGas().gasTotalUsed);
+            console.log(
+                "UpdateClientAndVerifyMembership-", testCases[i].name, "gas used: ", vm.lastCallGas().gasTotalUsed
+            );
 
             ClientState memory clientState = ics07Tendermint.getClientState();
             assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);
@@ -67,7 +69,7 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
     function test_Valid_UpdateClientAndVerifyNonMembership() public {
         FixtureTestCase[] memory testCases = fixtureTestCases();
 
-        for (uint i = 0; i < testCases.length; i++) {
+        for (uint256 i = 0; i < testCases.length; i++) {
             setUpUcAndMemTestWithFixtures(testCases[i].fileName);
 
             UcAndMembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
@@ -84,7 +86,9 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
             // run verify
             ics07Tendermint.membership(nonMembershipMsg);
 
-            console.log("UpdateClientAndVerifyNonMembership-", testCases[i].name ,"gas used: ", vm.lastCallGas().gasTotalUsed);
+            console.log(
+                "UpdateClientAndVerifyNonMembership-", testCases[i].name, "gas used: ", vm.lastCallGas().gasTotalUsed
+            );
 
             ClientState memory clientState = ics07Tendermint.getClientState();
             assert(clientState.latestHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight);

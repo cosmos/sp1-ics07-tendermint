@@ -13,7 +13,6 @@ import { IMisbehaviourMsgs } from "../src/msgs/IMisbehaviourMsgs.sol";
 import { SP1ICS07Tendermint } from "../src/SP1ICS07Tendermint.sol";
 import { ISP1ICS07TendermintErrors } from "../src/errors/ISP1ICS07TendermintErrors.sol";
 import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
-import { SP1Verifier } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
 import { SP1MockVerifier } from "@sp1-contracts/SP1MockVerifier.sol";
 import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
 
@@ -69,7 +68,11 @@ abstract contract SP1ICS07TendermintTest is
             trustedConsensusHash
         );
         SP1MockVerifier mockVerifier = new SP1MockVerifier();
-        vm.mockFunction(address(mockIcs07Tendermint.VERIFIER()), address(mockVerifier), abi.encodeWithSelector(ISP1Verifier.verifyProof.selector));
+        vm.mockFunction(
+            address(mockIcs07Tendermint.VERIFIER()),
+            address(mockVerifier),
+            abi.encodeWithSelector(ISP1Verifier.verifyProof.selector)
+        );
 
         ClientState memory clientState = mockIcs07Tendermint.getClientState();
         assert(keccak256(abi.encode(clientState)) == keccak256(genesisFixture.trustedClientState));

@@ -148,8 +148,11 @@ contract SP1ICS07Tendermint is
     /// @return timestamp The timestamp of the trusted consensus state.
     /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
-        if (msgMembership.proof.length == 0) { // cached proof
-            return getCachedKvPair(msgMembership.proofHeight.revisionHeight, KVPair(msgMembership.path, msgMembership.value));
+        if (msgMembership.proof.length == 0) {
+            // cached proof
+            return getCachedKvPair(
+                msgMembership.proofHeight.revisionHeight, KVPair(msgMembership.path, msgMembership.value)
+            );
         }
 
         MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
@@ -372,7 +375,9 @@ contract SP1ICS07Tendermint is
 
         // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
         if (output.kvPairs.length > 1) {
-            cacheKvPairs(proofHeight.revisionHeight, output.kvPairs, output.updateClientOutput.newConsensusState.timestamp);
+            cacheKvPairs(
+                proofHeight.revisionHeight, output.kvPairs, output.updateClientOutput.newConsensusState.timestamp
+            );
         }
         return output.updateClientOutput.newConsensusState.timestamp;
     }

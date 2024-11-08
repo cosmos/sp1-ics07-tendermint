@@ -125,11 +125,7 @@ contract SP1ICS07MembershipTest is MembershipTest {
             path: verifyMembershipPath,
             value: bytes("invalid")
         });
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                KeyValuePairNotInCache.selector, verifyMembershipPath, bytes("invalid")
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(KeyValuePairNotInCache.selector, verifyMembershipPath, bytes("invalid")));
         ics07Tendermint.membership(invalidCachedMembershipMsg);
     }
 

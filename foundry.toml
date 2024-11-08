@@ -10,6 +10,7 @@ fs_permissions = [{ access = "read-write", path = "./" },]
 via_ir = true
 no_match_path = "node_modules/**/test/**"
 solc = "0.8.28"
+evm_version = "cancun"
 
 [fmt]
 bracket_spacing = true

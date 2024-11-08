@@ -6,15 +6,21 @@ import { IUpdateClientMsgs } from "./msgs/IUpdateClientMsgs.sol";
 import { IMembershipMsgs } from "./msgs/IMembershipMsgs.sol";
 import { IUpdateClientAndMembershipMsgs } from "./msgs/IUcAndMembershipMsgs.sol";
 import { IMisbehaviourMsgs } from "./msgs/IMisbehaviourMsgs.sol";
-import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { ISP1ICS07TendermintErrors } from "./errors/ISP1ICS07TendermintErrors.sol";
 import { ISP1ICS07Tendermint } from "./ISP1ICS07Tendermint.sol";
-import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
-import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
+
 import { Paths } from "./utils/Paths.sol";
 import { UnionMembership } from "./utils/UnionMembership.sol";
+
+import { ILightClientMsgs } from "solidity-ibc/msgs/ILightClientMsgs.sol";
+import { ILightClient } from "solidity-ibc/interfaces/ILightClient.sol";
+
+import { ISP1Verifier } from "@sp1-contracts/ISP1Verifier.sol";
 import { SP1Verifier as SP1VerifierPlonk } from "@sp1-contracts/v3.0.0/SP1VerifierPlonk.sol";
 import { SP1Verifier as SP1VerifierGroth16 } from "@sp1-contracts/v3.0.0/SP1VerifierGroth16.sol";
+
+import { Multicall } from "@openzeppelin/utils/Multicall.sol";
+import { TransientSlot } from "@openzeppelin/utils/TransientSlot.sol";
 
 /// @title SP1 ICS07 Tendermint Light Client
 /// @author srdtrk
@@ -28,8 +34,11 @@ contract SP1ICS07Tendermint is
     IMisbehaviourMsgs,
     ISP1ICS07TendermintErrors,
     ILightClientMsgs,
-    ISP1ICS07Tendermint
+    ISP1ICS07Tendermint,
+    Multicall
 {
+    using TransientSlot for *;
+
     /// @inheritdoc ISP1ICS07Tendermint
     bytes32 public immutable UPDATE_CLIENT_PROGRAM_VKEY;
     /// @inheritdoc ISP1ICS07Tendermint
@@ -45,8 +54,6 @@ contract SP1ICS07Tendermint is
     ClientState private clientState;
     /// @notice The mapping from height to consensus state keccak256 hashes.
     mapping(uint32 height => bytes32 hash) private consensusStateHashes;
-    /// @notice The collection of verified SP1 proofs for caching.
-    mapping(bytes32 sp1ProofHash => bool isVerified) private verifiedProofs;
 
     /// @notice Allowed clock drift in seconds.
     /// @inheritdoc ISP1ICS07Tendermint
@@ -141,6 +148,10 @@ contract SP1ICS07Tendermint is
     /// @return timestamp The timestamp of the trusted consensus state.
     /// @inheritdoc ILightClient
     function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
+        if (msgMembership.proof.length == 0) { // cached proof
+            return getCachedKvPair(msgMembership.proofHeight.revisionHeight, KVPair(msgMembership.path, msgMembership.value));
+        }
+
         MembershipProof memory membershipProof = abi.decode(msgMembership.proof, (MembershipProof));
         if (membershipProof.proofType == MembershipProofType.SP1MembershipProof) {
             return handleSP1MembershipProof(
@@ -260,13 +271,12 @@ contract SP1ICS07Tendermint is
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
 
-        // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
-        if (output.kvPairs.length == 1) {
-            verifySP1Proof(proof.sp1Proof);
-        } else {
-            verifySP1ProofCached(proof.sp1Proof);
-        }
+        verifySP1Proof(proof.sp1Proof);
 
+        // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
+        if (output.kvPairs.length > 1) {
+            cacheKvPairs(proofHeight.revisionHeight, output.kvPairs, proof.trustedConsensusState.timestamp);
+        }
         return proof.trustedConsensusState.timestamp;
     }
 
@@ -314,12 +324,7 @@ contract SP1ICS07Tendermint is
 
             validateUpdateClientPublicValues(output.updateClientOutput);
 
-            // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
-            if (output.kvPairs.length == 1) {
-                verifySP1Proof(proof.sp1Proof);
-            } else {
-                verifySP1ProofCached(proof.sp1Proof);
-            }
+            verifySP1Proof(proof.sp1Proof);
         }
 
         // check update result
@@ -365,6 +370,10 @@ contract SP1ICS07Tendermint is
             output.updateClientOutput.newConsensusState
         );
 
+        // We avoid the cost of caching for single kv pairs, as reusing the proof is not necessary
+        if (output.kvPairs.length > 1) {
+            cacheKvPairs(proofHeight.revisionHeight, output.kvPairs, output.updateClientOutput.newConsensusState.timestamp);
+        }
         return output.updateClientOutput.newConsensusState.timestamp;
     }
 
@@ -502,17 +511,27 @@ contract SP1ICS07Tendermint is
         VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
     }
 
-    /// @notice Verifies the SP1 proof and stores the hash of the proof.
-    /// @dev If the proof is already cached, it does not verify the proof again.
-    /// @param proof The SP1 proof.
-    function verifySP1ProofCached(SP1Proof memory proof) private {
-        bytes32 proofHash = keccak256(abi.encode(proof));
-        if (verifiedProofs[proofHash]) {
-            return;
+    /// @notice Caches the key-value pairs to the transient storage with the timestamp.
+    /// @param proofHeight The height of the proof.
+    /// @param kvPairs The key-value pairs.
+    /// @param timestamp The timestamp of the trusted consensus state.
+    /// @dev WARNING: Transient store is not reverted even if a message within a transaction reverts.
+    /// @dev WARNING: This function must be called after all proof and validation checks.
+    function cacheKvPairs(uint32 proofHeight, KVPair[] memory kvPairs, uint256 timestamp) private {
+        for (uint8 i = 0; i < kvPairs.length; i++) {
+            bytes32 kvPairHash = keccak256(abi.encode(proofHeight, kvPairs[i]));
+            kvPairHash.asUint256().tstore(timestamp);
         }
+    }
 
-        VERIFIER.verifyProof(proof.vKey, proof.publicValues, proof.proof);
-        verifiedProofs[proofHash] = true;
+    /// @notice Gets the timestamp of the cached key-value pair from the transient storage.
+    /// @param proofHeight The height of the proof.
+    /// @param kvPair The key-value pair.
+    function getCachedKvPair(uint32 proofHeight, KVPair memory kvPair) private view returns (uint256) {
+        bytes32 kvPairHash = keccak256(abi.encode(proofHeight, kvPair));
+        uint256 timestamp = kvPairHash.asUint256().tload();
+        require(timestamp != 0, KeyValuePairNotInCache(kvPair.path, kvPair.value));
+        return timestamp;
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

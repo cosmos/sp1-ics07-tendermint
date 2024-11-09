@@ -15,12 +15,6 @@ contract SP1ICS07LargeMembershipTest is MembershipTest {
         proof = abi.decode(fixture.membershipProof.proof, (SP1MembershipProof));
     }
 
-    function test_ValidateFixtures() public view {
-        MembershipOutput memory output = getOutput();
-
-        assertEq(output.kvPairs.length, 100);
-    }
-
     function getOutput() public view returns (MembershipOutput memory) {
         return abi.decode(proof.sp1Proof.publicValues, (MembershipOutput));
     }

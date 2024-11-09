@@ -532,6 +532,7 @@ contract SP1ICS07Tendermint is
     /// @notice Gets the timestamp of the cached key-value pair from the transient storage.
     /// @param proofHeight The height of the proof.
     /// @param kvPair The key-value pair.
+    /// @return The timestamp of the cached key-value pair.
     function getCachedKvPair(uint32 proofHeight, KVPair memory kvPair) private view returns (uint256) {
         bytes32 kvPairHash = keccak256(abi.encode(proofHeight, kvPair));
         uint256 timestamp = kvPairHash.asUint256().tload();

@@ -30,7 +30,9 @@ contract SP1ICS07LargeMembershipTest is MembershipTest {
     }
 
     function test_ValidLargeCachedVerifyMembership_100_groth16() public {
-        ValidCachedMulticallMembershipTest("membership_100-groth16_fixture.json", 100, "100 key-value pairs with groth16");
+        ValidCachedMulticallMembershipTest(
+            "membership_100-groth16_fixture.json", 100, "100 key-value pairs with groth16"
+        );
     }
 
     function ValidCachedMulticallMembershipTest(string memory fileName, uint32 n, string memory metadata) public {

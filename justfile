@@ -65,6 +65,8 @@ fixtures: build-operator
     "sleep 100 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -p groth16 -o 'contracts/fixtures/memberships_fixture-groth16.json'"
   cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour_Plonk$' -timeout 40m
   cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour_Groth16' -timeout 40m
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/Test100Membership_Groth16' -timeout 40m
+  cd e2e/interchaintestv8 && RUST_LOG=info SP1_PROVER=network GENERATE_FIXTURES=true go test -v -run '^TestWithSP1ICS07TendermintTestSuite/Test25Membership_Plonk' -timeout 40m
   @echo "Fixtures generated at 'contracts/fixtures'"
 
 # Generate the `SP1ICS07Tendermint.json` file containing the ABI of the SP1ICS07Tendermint contract

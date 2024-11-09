@@ -51,6 +51,8 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestDoubleSignMisbehaviour_Plonk
           - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour_Groth16
           - TestWithSP1ICS07TendermintTestSuite/TestBreakingTimeMonotonicityMisbehaviour_Plonk
+          - TestWithSP1ICS07TendermintTestSuite/Test100Membership_Groth16
+          - TestWithSP1ICS07TendermintTestSuite/Test25Membership_Plonk
     name: ${{ matrix.test }}
     runs-on: ubuntu-latest
     steps:

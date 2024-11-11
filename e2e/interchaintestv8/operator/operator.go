@@ -58,6 +58,7 @@ func StartOperator(args ...string) error {
 	args = append([]string{"start"}, args...)
 	cmd := exec.Command("target/release/operator", args...)
 	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 

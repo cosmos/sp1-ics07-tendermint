@@ -111,4 +111,9 @@ interface ISP1ICS07TendermintErrors {
 
     /// @notice Returned when the membership proof is invalid.
     error InvalidMembershipProof();
+
+    /// @notice Returned when a key-value pair is not in the cache.
+    /// @param path The path of the key-value pair.
+    /// @param value The value of the key-value pair.
+    error KeyValuePairNotInCache(bytes[] path, bytes value);
 }

@@ -95,22 +95,38 @@ contract SP1ICS07MembershipTest is MembershipTest {
 
         ics07Tendermint.membership(membershipMsg);
 
-        // resubmit the same proof
-        ics07Tendermint.membership(membershipMsg);
+        // resubmit cached membership proof
+        MsgMembership memory cachedMembershipMsg = MsgMembership({
+            proof: bytes(""),
+            proofHeight: fixture.proofHeight,
+            path: verifyMembershipPath,
+            value: VERIFY_MEMBERSHIP_VALUE
+        });
+        ics07Tendermint.membership(cachedMembershipMsg);
 
         console.log("Cached VerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
-        // resubmit the same proof as non-membership
-        MsgMembership memory nonMembershipMsg = MsgMembership({
-            proof: abi.encode(fixture.membershipProof),
+        // resubmit cached non-membership proof
+        MsgMembership memory cachedNonMembershipMsg = MsgMembership({
+            proof: bytes(""),
             proofHeight: fixture.proofHeight,
             path: verifyNonMembershipPath,
             value: bytes("")
         });
 
-        ics07Tendermint.membership(nonMembershipMsg);
+        ics07Tendermint.membership(cachedNonMembershipMsg);
 
         console.log("Cached VerifyNonMembership gas used: ", vm.lastCallGas().gasTotalUsed);
+
+        // resubmit invalid cached membership proof
+        MsgMembership memory invalidCachedMembershipMsg = MsgMembership({
+            proof: bytes(""),
+            proofHeight: fixture.proofHeight,
+            path: verifyMembershipPath,
+            value: bytes("invalid")
+        });
+        vm.expectRevert(abi.encodeWithSelector(KeyValuePairNotInCache.selector, verifyMembershipPath, bytes("invalid")));
+        ics07Tendermint.membership(invalidCachedMembershipMsg);
     }
 
     // Confirm that submitting an invalid proof with the real verifier fails.

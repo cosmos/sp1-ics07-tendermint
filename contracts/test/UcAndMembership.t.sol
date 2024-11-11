@@ -127,13 +127,20 @@ contract SP1ICS07UpdateClientAndMembershipTest is MembershipTest {
             ics07Tendermint.getConsensusStateHash(output.updateClientOutput.newHeight.revisionHeight);
         assert(consensusHash == keccak256(abi.encode(output.updateClientOutput.newConsensusState)));
 
-        // resubmit the same proof
-        ics07Tendermint.membership(membershipMsg);
+        // submit cached membership proof
+        MsgMembership memory cachedMembershipMsg = MsgMembership({
+            proof: bytes(""),
+            proofHeight: fixture.proofHeight,
+            path: verifyMembershipPath,
+            value: VERIFY_MEMBERSHIP_VALUE
+        });
+        ics07Tendermint.membership(cachedMembershipMsg);
 
         console.log("Cached UpdateClientAndVerifyMembership gas used: ", vm.lastCallGas().gasTotalUsed);
 
+        // submit cached non-membership proof
         MsgMembership memory nonMembershipMsg = MsgMembership({
-            proof: abi.encode(fixture.membershipProof),
+            proof: bytes(""),
             proofHeight: fixture.proofHeight,
             path: verifyNonMembershipPath,
             value: bytes("")

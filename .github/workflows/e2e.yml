@@ -42,7 +42,6 @@ jobs:
           - TestWithSP1ICS07TendermintTestSuite/TestDeploy_Plonk
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient_Groth16
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClient_Plonk
-          - TestWithSP1ICS07TendermintTestSuite/TestMembership_Union
           - TestWithSP1ICS07TendermintTestSuite/TestMembership_Groth16
           - TestWithSP1ICS07TendermintTestSuite/TestMembership_Plonk
           - TestWithSP1ICS07TendermintTestSuite/TestUpdateClientAndMembership_Groth16

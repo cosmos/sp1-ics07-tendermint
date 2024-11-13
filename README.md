@@ -71,7 +71,6 @@ This project contains the following Solidity contracts and libraries (interfaces
 | **Contract** | **Description** |
 |:---:|:---:|
 | `SP1ICS07Tendermint.sol` | The light client contract, and the entry point for SP1 proofs. |
-| `UnionMembership.sol` | A library wrapping Union's ICS23 implementation for verifying (non)membership purely in solidity (without SP1). |
 
 ## Requirements
 

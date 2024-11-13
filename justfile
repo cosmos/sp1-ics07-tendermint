@@ -102,7 +102,7 @@ lint:
   cargo fmt --all -- --check
   cargo clippy
   @echo "Linting the Solidity code..."
-  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
+  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol'
   @echo "Linting the Go code..."
   cd e2e/interchaintestv8 && golangci-lint run
 

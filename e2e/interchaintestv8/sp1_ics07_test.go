@@ -96,7 +96,7 @@ func (s *SP1ICS07TendermintTestSuite) SetupSuite(ctx context.Context, pt operato
 			"--trust-level", testvalues.DefaultTrustLevel.String(),
 			"--trusting-period", strconv.Itoa(testvalues.DefaultTrustPeriod),
 			"-o", "contracts/script/genesis.json",
-		}, pt.ToOpGenesisArgs()...)
+		}, pt.ToOperatorArgs()...)
 		s.Require().NoError(operator.RunGenesis(args...))
 
 		s.T().Cleanup(func() {
@@ -207,11 +207,6 @@ func (s *SP1ICS07TendermintTestSuite) UpdateClientTest(ctx context.Context, pt o
 		s.Require().Equal(uint32(1), clientState.LatestHeight.RevisionNumber)
 		s.Require().Greater(clientState.LatestHeight.RevisionHeight, initialHeight)
 	}))
-}
-
-// TestUnionMembership tests the verify (non)membership functionality with the --union flag
-func (s *SP1ICS07TendermintTestSuite) TestMembership_Union() {
-	s.MembershipTest(operator.ProofTypeUnion)
 }
 
 // TestSP1Membership tests the verify (non)membership functionality with the plonk flag

@@ -25,9 +25,6 @@ sp1-ics07-tendermint-solidity = { workspace = true, features = ["rpc"] }
 sp1-ics07-tendermint-utils = { workspace = true }
 sp1-ics07-tendermint-prover = { workspace = true }
 
-unionlabs = { workspace = true }
-union-protos = { workspace = true }
-
 alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy = { workspace = true, features = ["full", "node-bindings"] }

@@ -54,9 +54,7 @@ fixtures: build-operator
   TRUSTED_HEIGHT=$(($CURRENT_HEIGHT-100)) && \
   TARGET_HEIGHT=$(($CURRENT_HEIGHT-10)) && \
   echo "For celestia fixtures, trusted block: $TRUSTED_HEIGHT, target block: $TARGET_HEIGHT, from $TENDERMINT_RPC_URL" && \
-  parallel --progress --shebang --ungroup -j 8 ::: \
-    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-0/clientState --trusted-block $TRUSTED_HEIGHT -p union -o 'contracts/fixtures/union_membership_fixture.json'" \
-    "RUST_LOG=info ./target/release/operator fixtures membership --key-paths clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT -p union -o 'contracts/fixtures/union_nonmembership_fixture.json'" \
+  parallel --progress --shebang --ungroup -j 6 ::: \
     "RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/update_client_fixture-plonk.json'" \
     "sleep 20 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -p groth16 -o 'contracts/fixtures/update_client_fixture-groth16.json'" \
     "sleep 40 && RUST_LOG=info SP1_PROVER=network ./target/release/operator fixtures update-client-and-membership --key-paths clients/07-tendermint-0/clientState,clients/07-tendermint-001/clientState --trusted-block $TRUSTED_HEIGHT --target-block $TARGET_HEIGHT -o 'contracts/fixtures/uc_and_memberships_fixture-plonk.json'" \
@@ -104,7 +102,7 @@ lint:
   cargo fmt --all -- --check
   cargo clippy
   @echo "Linting the Solidity code..."
-  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol' && bun natspec-smells --enforceInheritdoc false --include 'contracts/src/**/*.sol'
+  forge fmt --check && bun solhint -w 0 -c .solhint.json 'contracts/**/*.sol'
   @echo "Linting the Go code..."
   cd e2e/interchaintestv8 && golangci-lint run
 

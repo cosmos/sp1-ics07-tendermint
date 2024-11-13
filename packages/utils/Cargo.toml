@@ -21,6 +21,3 @@ ibc-core-host-types = { workspace = true, features = ["std"] }
 tendermint = { workspace = true }
 ibc-core-commitment-types = { workspace = true }
 alloy = { workspace = true }
-
-union-protos = { workspace = true }
-unionlabs = { workspace = true }

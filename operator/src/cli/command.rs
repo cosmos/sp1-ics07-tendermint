@@ -152,9 +152,9 @@ pub mod fixtures {
         pub membership: MembershipArgs,
 
         /// The proof type.
-        /// Supported proof types: groth16, plonk, union.
-        #[clap(long, short = 'p', value_parser = super::parse_proof_type_with_union, default_value = "plonk")]
-        pub proof_type: ProofTypeWithUnion,
+        /// Supported proof types: groth16, plonk.
+        #[clap(long, short = 'p', value_parser = super::parse_proof_type, default_value = "plonk")]
+        pub proof_type: super::SupportedProofType,
     }
 
     /// The arguments for generic membership proof generation.
@@ -221,15 +221,6 @@ pub mod fixtures {
         #[clap(long, short = 'p', value_parser = super::parse_proof_type, default_value = "plonk")]
         pub proof_type: super::SupportedProofType,
     }
-
-    /// The proof type with union.
-    #[derive(Debug, Clone)]
-    pub enum ProofTypeWithUnion {
-        /// The union ics23 proof type.
-        Union,
-        /// The supported sp1 proof types.
-        ProofType(super::SupportedProofType),
-    }
 }
 
 #[allow(clippy::unnecessary_wraps)]
@@ -261,19 +252,6 @@ fn parse_proof_type(input: &str) -> anyhow::Result<SupportedProofType> {
     match input {
         "groth16" => Ok(SupportedProofType::Groth16),
         "plonk" => Ok(SupportedProofType::Plonk),
-        _ => Err(anyhow::anyhow!("invalid proof type")),
-    }
-}
-
-fn parse_proof_type_with_union(input: &str) -> anyhow::Result<fixtures::ProofTypeWithUnion> {
-    match input {
-        "groth16" => Ok(fixtures::ProofTypeWithUnion::ProofType(
-            SupportedProofType::Groth16,
-        )),
-        "plonk" => Ok(fixtures::ProofTypeWithUnion::ProofType(
-            SupportedProofType::Plonk,
-        )),
-        "union" => Ok(fixtures::ProofTypeWithUnion::Union),
         _ => Err(anyhow::anyhow!("invalid proof type")),
     }
 }

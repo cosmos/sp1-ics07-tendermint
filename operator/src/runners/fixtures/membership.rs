@@ -1,10 +1,7 @@
 //! Runner for generating `membership` fixtures
 
 use crate::{
-    cli::command::{
-        fixtures::{MembershipCmd, ProofTypeWithUnion},
-        OutputPath,
-    },
+    cli::command::{fixtures::MembershipCmd, OutputPath},
     runners::genesis::SP1ICS07TendermintGenesis,
 };
 use alloy_sol_types::SolValue;
@@ -18,18 +15,13 @@ use sp1_ics07_tendermint_prover::{
 };
 use sp1_ics07_tendermint_solidity::{
     IICS07TendermintMsgs::{ClientState, ConsensusState as SolConsensusState},
-    IMembershipMsgs::{
-        MembershipOutput, MembershipProof, SP1MembershipProof, UnionMembershipProof,
-    },
+    IMembershipMsgs::{MembershipOutput, MembershipProof, SP1MembershipProof},
     ISP1Msgs::SP1Proof,
 };
-use sp1_ics07_tendermint_utils::{
-    merkle::convert_tm_to_ics_merkle_proof, rpc::TendermintRpcExt, union::convert_to_union_proof,
-};
+use sp1_ics07_tendermint_utils::{merkle::convert_tm_to_ics_merkle_proof, rpc::TendermintRpcExt};
 use sp1_sdk::HashableKey;
 use std::path::PathBuf;
 use tendermint_rpc::{Client, HttpClient};
-use unionlabs::encoding::{EncodeAs, EthAbi};
 
 /// The fixture data to be used in [`MembershipProgram`] tests.
 #[serde_with::serde_as]
@@ -62,11 +54,7 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
         &trusted_light_block,
         args.membership.trust_options.trusting_period,
         args.membership.trust_options.trust_level,
-        match args.proof_type {
-            // Genesis requires a proof type, but it is not used in membership in the union case.
-            ProofTypeWithUnion::Union => SupportedProofType::Plonk,
-            ProofTypeWithUnion::ProofType(proof_type) => proof_type,
-        },
+        args.proof_type,
     )
     .await?;
 
@@ -74,29 +62,15 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     let trusted_consensus_state =
         SolConsensusState::abi_decode(&genesis.trusted_consensus_state, false)?;
 
-    let membership_proof = match args.proof_type {
-        ProofTypeWithUnion::Union => {
-            run_union_membership(
-                &tm_rpc_client,
-                args.membership.base64,
-                args.membership.key_paths,
-                args.membership.trusted_block,
-                trusted_consensus_state,
-            )
-            .await?
-        }
-        ProofTypeWithUnion::ProofType(proof_type) => {
-            run_sp1_membership(
-                &tm_rpc_client,
-                args.membership.base64,
-                args.membership.key_paths,
-                args.membership.trusted_block,
-                trusted_consensus_state,
-                proof_type,
-            )
-            .await?
-        }
-    };
+    let membership_proof = run_sp1_membership(
+        &tm_rpc_client,
+        args.membership.base64,
+        args.membership.key_paths,
+        args.membership.trusted_block,
+        trusted_consensus_state,
+        args.proof_type,
+    )
+    .await?;
 
     let fixture = SP1ICS07MembershipFixture {
         genesis,
@@ -115,54 +89,6 @@ pub async fn run(args: MembershipCmd) -> anyhow::Result<()> {
     }
 
     Ok(())
-}
-
-/// Generates a union membership proof for the given args
-#[allow(
-    clippy::missing_errors_doc,
-    clippy::missing_panics_doc,
-    clippy::module_name_repetitions
-)]
-pub async fn run_union_membership(
-    tm_rpc_client: &HttpClient,
-    is_base64: bool,
-    key_paths: Vec<String>,
-    trusted_block: u32,
-    trusted_consensus_state: SolConsensusState,
-) -> anyhow::Result<MembershipProof> {
-    assert!(
-        key_paths.len() == 1,
-        "Union membership only supports one key-value pair"
-    );
-
-    let path: Vec<Vec<u8>> = if is_base64 {
-        key_paths[0]
-            .split('\\')
-            .map(subtle_encoding::base64::decode)
-            .collect::<Result<_, _>>()?
-    } else {
-        vec![b"ibc".into(), key_paths[0].as_bytes().to_vec()]
-    };
-
-    // the program could support longer key paths, but the operator only supports 2
-    // because the current assumption is that the Cosmos SDK will always have 2
-    assert_eq!(path.len(), 2);
-
-    let res = tm_rpc_client
-        .abci_query(
-            Some(format!("store/{}/key", str::from_utf8(&path[0])?)),
-            path[1].as_slice(),
-            // Proof height should be the block before the target block.
-            Some((trusted_block - 1).into()),
-            true,
-        )
-        .await?;
-
-    let union_proof = convert_to_union_proof(res.proof.unwrap())?;
-    Ok(MembershipProof::from(UnionMembershipProof {
-        ics23Proof: union_proof.encode_as::<EthAbi>().into(),
-        trustedConsensusState: trusted_consensus_state,
-    }))
 }
 
 /// Generates an sp1 membership proof for the given args

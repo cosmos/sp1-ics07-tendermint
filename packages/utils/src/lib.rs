@@ -5,4 +5,3 @@ pub mod eth;
 pub mod light_block;
 pub mod merkle;
 pub mod rpc;
-pub mod union;

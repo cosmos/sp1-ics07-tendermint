@@ -103,9 +103,7 @@ contract SP1ICS07Tendermint is
     /// @inheritdoc ISP1ICS07Tendermint
     function getConsensusStateHash(uint32 revisionHeight) public view returns (bytes32) {
         bytes32 hash = consensusStateHashes[revisionHeight];
-        if (hash == 0) {
-            revert ConsensusStateNotFound();
-        }
+        require(hash != 0, ConsensusStateNotFound());
         return hash;
     }
 
@@ -114,11 +112,12 @@ contract SP1ICS07Tendermint is
     /// @param updateMsg The encoded update message.
     /// @return The result of the update.
     /// @inheritdoc ILightClient
-    function updateClient(bytes calldata updateMsg) public returns (UpdateResult) {
+    function updateClient(bytes calldata updateMsg) public notFrozen returns (UpdateResult) {
         MsgUpdateClient memory msgUpdateClient = abi.decode(updateMsg, (MsgUpdateClient));
-        if (msgUpdateClient.sp1Proof.vKey != UPDATE_CLIENT_PROGRAM_VKEY) {
-            revert VerificationKeyMismatch(UPDATE_CLIENT_PROGRAM_VKEY, msgUpdateClient.sp1Proof.vKey);
-        }
+        require(
+            msgUpdateClient.sp1Proof.vKey == UPDATE_CLIENT_PROGRAM_VKEY,
+            VerificationKeyMismatch(UPDATE_CLIENT_PROGRAM_VKEY, msgUpdateClient.sp1Proof.vKey)
+        );
 
         UpdateClientOutput memory output = abi.decode(msgUpdateClient.sp1Proof.publicValues, (UpdateClientOutput));
 
@@ -146,7 +145,7 @@ contract SP1ICS07Tendermint is
     /// @param msgMembership The membership message.
     /// @return timestamp The timestamp of the trusted consensus state.
     /// @inheritdoc ILightClient
-    function membership(MsgMembership calldata msgMembership) public returns (uint256 timestamp) {
+    function membership(MsgMembership calldata msgMembership) public notFrozen returns (uint256 timestamp) {
         if (msgMembership.proof.length == 0) {
             // cached proof
             return getCachedKvPair(
@@ -170,11 +169,12 @@ contract SP1ICS07Tendermint is
 
     /// @notice The entrypoint for misbehaviour.
     /// @inheritdoc ILightClient
-    function misbehaviour(bytes calldata misbehaviourMsg) public {
+    function misbehaviour(bytes calldata misbehaviourMsg) public notFrozen {
         MsgSubmitMisbehaviour memory msgSubmitMisbehaviour = abi.decode(misbehaviourMsg, (MsgSubmitMisbehaviour));
-        if (msgSubmitMisbehaviour.sp1Proof.vKey != MISBEHAVIOUR_PROGRAM_VKEY) {
-            revert VerificationKeyMismatch(MISBEHAVIOUR_PROGRAM_VKEY, msgSubmitMisbehaviour.sp1Proof.vKey);
-        }
+        require(
+            msgSubmitMisbehaviour.sp1Proof.vKey == MISBEHAVIOUR_PROGRAM_VKEY,
+            VerificationKeyMismatch(MISBEHAVIOUR_PROGRAM_VKEY, msgSubmitMisbehaviour.sp1Proof.vKey)
+        );
 
         MisbehaviourOutput memory output = abi.decode(msgSubmitMisbehaviour.sp1Proof.publicValues, (MisbehaviourOutput));
 
@@ -188,7 +188,7 @@ contract SP1ICS07Tendermint is
 
     /// @notice The entrypoint for upgrading the client.
     /// @inheritdoc ILightClient
-    function upgradeClient(bytes calldata) public pure {
+    function upgradeClient(bytes calldata) public view notFrozen {
         // TODO: Not yet implemented. (#78)
         revert FeatureNotSupported();
     }
@@ -209,14 +209,15 @@ contract SP1ICS07Tendermint is
         returns (uint256)
     {
         SP1MembershipProof memory proof = abi.decode(proofBytes, (SP1MembershipProof));
-        if (proof.sp1Proof.vKey != MEMBERSHIP_PROGRAM_VKEY) {
-            revert VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
-        }
+        require(
+            proof.sp1Proof.vKey == MEMBERSHIP_PROGRAM_VKEY,
+            VerificationKeyMismatch(MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey)
+        );
 
         MembershipOutput memory output = abi.decode(proof.sp1Proof.publicValues, (MembershipOutput));
-        if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
-            revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
-        }
+        require(
+            output.kvPairs.length > 0 && output.kvPairs.length <= 256, LengthIsOutOfRange(output.kvPairs.length, 1, 256)
+        );
 
         {
             // loop through the key-value pairs and validate them
@@ -226,16 +227,16 @@ contract SP1ICS07Tendermint is
                     continue;
                 }
 
-                if (keccak256(output.kvPairs[i].value) != keccak256(kvValue)) {
-                    revert MembershipProofValueMismatch(kvValue, output.kvPairs[i].value);
-                }
+                bytes memory value = output.kvPairs[i].value;
+                require(
+                    value.length == kvValue.length && keccak256(value) == keccak256(kvValue),
+                    MembershipProofValueMismatch(kvValue, value)
+                );
 
                 found = true;
                 break;
             }
-            if (!found) {
-                revert MembershipProofKeyNotFound(kvPath);
-            }
+            require(found, MembershipProofKeyNotFound(kvPath));
         }
 
         validateMembershipOutput(output.commitmentRoot, proofHeight.revisionHeight, proof.trustedConsensusState);
@@ -270,26 +271,27 @@ contract SP1ICS07Tendermint is
         UcAndMembershipOutput memory output;
         {
             SP1MembershipAndUpdateClientProof memory proof = abi.decode(proofBytes, (SP1MembershipAndUpdateClientProof));
-            if (proof.sp1Proof.vKey != UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY) {
-                revert VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey);
-            }
+            require(
+                proof.sp1Proof.vKey == UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY,
+                VerificationKeyMismatch(UPDATE_CLIENT_AND_MEMBERSHIP_PROGRAM_VKEY, proof.sp1Proof.vKey)
+            );
 
             output = abi.decode(proof.sp1Proof.publicValues, (UcAndMembershipOutput));
-            if (output.kvPairs.length == 0 || output.kvPairs.length > 256) {
-                revert LengthIsOutOfRange(output.kvPairs.length, 1, 256);
-            }
+            require(
+                output.kvPairs.length > 0 && output.kvPairs.length <= 256,
+                LengthIsOutOfRange(output.kvPairs.length, 1, 256)
+            );
 
-            if (
-                proofHeight.revisionHeight != output.updateClientOutput.newHeight.revisionHeight
-                    || proofHeight.revisionNumber != output.updateClientOutput.newHeight.revisionNumber
-            ) {
-                revert ProofHeightMismatch(
+            require(
+                proofHeight.revisionHeight == output.updateClientOutput.newHeight.revisionHeight
+                    && proofHeight.revisionNumber == output.updateClientOutput.newHeight.revisionNumber,
+                ProofHeightMismatch(
                     proofHeight.revisionNumber,
                     proofHeight.revisionHeight,
                     output.updateClientOutput.newHeight.revisionNumber,
                     output.updateClientOutput.newHeight.revisionHeight
-                );
-            }
+                )
+            );
 
             validateUpdateClientPublicValues(output.updateClientOutput);
 
@@ -321,16 +323,15 @@ contract SP1ICS07Tendermint is
                 }
 
                 bytes memory value = output.kvPairs[i].value;
-                if (keccak256(value) != keccak256(kvValue)) {
-                    revert MembershipProofValueMismatch(kvValue, value);
-                }
+                require(
+                    value.length == kvValue.length && keccak256(value) == keccak256(kvValue),
+                    MembershipProofValueMismatch(kvValue, value)
+                );
 
                 found = true;
                 break;
             }
-            if (!found) {
-                revert MembershipProofKeyNotFound(kvPath);
-            }
+            require(found, MembershipProofKeyNotFound(kvPath));
         }
 
         validateMembershipOutput(
@@ -351,7 +352,7 @@ contract SP1ICS07Tendermint is
     /// @notice Validates the MembershipOutput public values.
     /// @param outputCommitmentRoot The commitment root of the output.
     /// @param proofHeight The height of the proof.
-    /// @param trustedConsensusState The trusted consensus state.
+    /// @param trustedConsensusState The trusted consensus state
     function validateMembershipOutput(
         bytes32 outputCommitmentRoot,
         uint32 proofHeight,
@@ -360,56 +361,54 @@ contract SP1ICS07Tendermint is
         private
         view
     {
-        if (clientState.isFrozen) {
-            revert FrozenClientState();
-        }
-        if (outputCommitmentRoot != trustedConsensusState.root) {
-            revert ConsensusStateRootMismatch(trustedConsensusState.root, outputCommitmentRoot);
-        }
         bytes32 trustedConsensusStateHash = keccak256(abi.encode(trustedConsensusState));
-        if (consensusStateHashes[proofHeight] != trustedConsensusStateHash) {
-            revert ConsensusStateHashMismatch(trustedConsensusStateHash, consensusStateHashes[proofHeight]);
-        }
+        bytes32 storedConsensusStateHash = getConsensusStateHash(proofHeight);
+        require(
+            trustedConsensusStateHash == storedConsensusStateHash,
+            ConsensusStateHashMismatch(storedConsensusStateHash, trustedConsensusStateHash)
+        );
+
+        require(
+            outputCommitmentRoot == trustedConsensusState.root,
+            ConsensusStateRootMismatch(trustedConsensusState.root, outputCommitmentRoot)
+        );
     }
 
     /// @notice Validates the SP1ICS07UpdateClientOutput public values.
     /// @param output The public values.
     function validateUpdateClientPublicValues(UpdateClientOutput memory output) private view {
-        if (clientState.isFrozen) {
-            revert FrozenClientState();
-        }
         validateClientStateAndTime(output.clientState, output.time);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
-        bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
-        if (outputConsensusStateHash != trustedConsensusStateHash) {
-            revert ConsensusStateHashMismatch(trustedConsensusStateHash, outputConsensusStateHash);
-        }
+        bytes32 storedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
+        require(
+            outputConsensusStateHash == storedConsensusStateHash,
+            ConsensusStateHashMismatch(storedConsensusStateHash, outputConsensusStateHash)
+        );
     }
 
     /// @notice Validates the SP1ICS07MisbehaviourOutput public values.
     /// @param output The public values.
     function validateMisbehaviourOutput(MisbehaviourOutput memory output) private view {
-        if (clientState.isFrozen) {
-            revert FrozenClientState();
-        }
         validateClientStateAndTime(output.clientState, output.time);
 
         // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
         // mapping
         bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
-        bytes32 trustedConsensusState1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
-        if (outputConsensusStateHash1 != trustedConsensusState1) {
-            revert ConsensusStateHashMismatch(trustedConsensusState1, outputConsensusStateHash1);
-        }
+        bytes32 storedConsensusStateHash1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
+        require(
+            outputConsensusStateHash1 == storedConsensusStateHash1,
+            ConsensusStateHashMismatch(storedConsensusStateHash1, outputConsensusStateHash1)
+        );
 
         // make sure the trusted consensus state from header 2 is known (trusted) by matching it with the the one in the
         // mapping
         bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
-        bytes32 trustedConsensusState2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
-        if (outputConsensusStateHash2 != trustedConsensusState2) {
-            revert ConsensusStateHashMismatch(trustedConsensusState2, outputConsensusStateHash2);
-        }
+        bytes32 storedConsensusStateHash2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
+        require(
+            outputConsensusStateHash2 == storedConsensusStateHash2,
+            ConsensusStateHashMismatch(storedConsensusStateHash2, outputConsensusStateHash2)
+        );
     }
 
     /// @notice Validates the client state and time.
@@ -417,39 +416,34 @@ contract SP1ICS07Tendermint is
     /// @param publicClientState The public client state.
     /// @param time The time.
     function validateClientStateAndTime(ClientState memory publicClientState, uint64 time) private view {
-        if (time > block.timestamp) {
-            revert ProofIsInTheFuture(block.timestamp, time);
-        }
-        if (block.timestamp - time > ALLOWED_SP1_CLOCK_DRIFT) {
-            revert ProofIsTooOld(block.timestamp, time);
-        }
+        require(time <= block.timestamp, ProofIsInTheFuture(block.timestamp, time));
+        require(block.timestamp - time <= ALLOWED_SP1_CLOCK_DRIFT, ProofIsTooOld(block.timestamp, time));
 
+        // Check client state equality
         // NOTE: We do not check the equality of latest height and isFrozen
-        if (keccak256(bytes(publicClientState.chainId)) != keccak256(bytes(clientState.chainId))) {
-            revert ChainIdMismatch(clientState.chainId, publicClientState.chainId);
-        }
-        if (publicClientState.trustLevel.numerator != clientState.trustLevel.numerator) {
-            revert TrustThresholdMismatch(
+        require(
+            bytes(publicClientState.chainId).length == bytes(clientState.chainId).length
+                && keccak256(bytes(publicClientState.chainId)) == keccak256(bytes(clientState.chainId)),
+            ChainIdMismatch(clientState.chainId, publicClientState.chainId)
+        );
+        require(
+            publicClientState.trustLevel.numerator == clientState.trustLevel.numerator
+                && publicClientState.trustLevel.denominator == clientState.trustLevel.denominator,
+            TrustThresholdMismatch(
                 clientState.trustLevel.numerator,
                 clientState.trustLevel.denominator,
                 publicClientState.trustLevel.numerator,
                 publicClientState.trustLevel.denominator
-            );
-        }
-        if (publicClientState.trustLevel.denominator != clientState.trustLevel.denominator) {
-            revert TrustThresholdMismatch(
-                clientState.trustLevel.numerator,
-                clientState.trustLevel.denominator,
-                publicClientState.trustLevel.numerator,
-                publicClientState.trustLevel.denominator
-            );
-        }
-        if (publicClientState.trustingPeriod != clientState.trustingPeriod) {
-            revert TrustingPeriodMismatch(clientState.trustingPeriod, publicClientState.trustingPeriod);
-        }
-        if (publicClientState.unbondingPeriod != clientState.unbondingPeriod) {
-            revert UnbondingPeriodMismatch(clientState.unbondingPeriod, publicClientState.unbondingPeriod);
-        }
+            )
+        );
+        require(
+            publicClientState.trustingPeriod == clientState.trustingPeriod,
+            TrustingPeriodMismatch(clientState.trustingPeriod, publicClientState.trustingPeriod)
+        );
+        require(
+            publicClientState.unbondingPeriod == clientState.unbondingPeriod,
+            UnbondingPeriodMismatch(clientState.unbondingPeriod, publicClientState.unbondingPeriod)
+        );
     }
 
     /// @notice Checks for basic misbehaviour.
@@ -504,6 +498,11 @@ contract SP1ICS07Tendermint is
         uint256 timestamp = kvPairHash.asUint256().tload();
         require(timestamp != 0, KeyValuePairNotInCache(kvPair.path, kvPair.value));
         return timestamp;
+    }
+
+    modifier notFrozen() {
+        require(!clientState.isFrozen, FrozenClientState());
+        _;
     }
 
     /// @notice A dummy function to generate the ABI for the parameters.

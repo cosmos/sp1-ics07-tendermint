@@ -71,6 +71,35 @@ contract SP1ICS07MisbehaviourTest is SP1ICS07TendermintTest {
         assertTrue(clientState.isFrozen);
     }
 
+    function test_FrozenClientState() public {
+        setUpMisbehaviour("misbehaviour_double_sign-plonk_fixture.json");
+
+        // set a correct timestamp
+        vm.warp(output.time);
+        ics07Tendermint.misbehaviour(fixture.submitMsg);
+
+        // verify that the client is frozen
+        ClientState memory clientState = ics07Tendermint.getClientState();
+        assertTrue(clientState.isFrozen);
+
+        // try to submit a updateClient msg
+        vm.expectRevert(abi.encodeWithSelector(FrozenClientState.selector));
+        ics07Tendermint.updateClient(bytes(""));
+
+        // try to submit a membership msg
+        MsgMembership memory membership;
+        vm.expectRevert(abi.encodeWithSelector(FrozenClientState.selector));
+        ics07Tendermint.membership(membership);
+
+        // try to submit a misbehaviour msg
+        vm.expectRevert(abi.encodeWithSelector(FrozenClientState.selector));
+        ics07Tendermint.misbehaviour(fixture.submitMsg);
+
+        // try to submit upgrade client
+        vm.expectRevert(abi.encodeWithSelector(FrozenClientState.selector));
+        ics07Tendermint.upgradeClient(bytes(""));
+    }
+
     function test_InvalidMisbehaviour() public {
         setUpMisbehaviour("misbehaviour_double_sign-plonk_fixture.json");
 

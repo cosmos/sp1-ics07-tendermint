@@ -352,25 +352,25 @@ contract SP1ICS07Tendermint is
     /// @notice Validates the MembershipOutput public values.
     /// @param outputCommitmentRoot The commitment root of the output.
     /// @param proofHeight The height of the proof.
-    /// @param outputConsensusState The trusted consensus state used in the output
+    /// @param trustedConsensusState The trusted consensus state
     function validateMembershipOutput(
         bytes32 outputCommitmentRoot,
         uint32 proofHeight,
-        ConsensusState memory outputConsensusState
+        ConsensusState memory trustedConsensusState
     )
         private
         view
     {
+        bytes32 trustedConsensusStateHash = keccak256(abi.encode(trustedConsensusState));
+        bytes32 storedConsensusStateHash = getConsensusStateHash(proofHeight);
         require(
-            outputCommitmentRoot == outputConsensusState.root,
-            ConsensusStateRootMismatch(outputConsensusState.root, outputCommitmentRoot)
+           trustedConsensusStateHash == storedConsensusStateHash,
+            ConsensusStateHashMismatch(storedConsensusStateHash, trustedConsensusStateHash)
         );
 
-        bytes32 outputConsensusStateHash = keccak256(abi.encode(outputConsensusState));
-        bytes32 trustedConsensusStateHash = getConsensusStateHash(proofHeight);
         require(
-            outputConsensusStateHash == trustedConsensusStateHash,
-            ConsensusStateHashMismatch(trustedConsensusStateHash, outputConsensusStateHash)
+            outputCommitmentRoot == trustedConsensusState.root,
+            ConsensusStateRootMismatch(trustedConsensusState.root, outputCommitmentRoot)
         );
     }
 
@@ -380,10 +380,10 @@ contract SP1ICS07Tendermint is
         validateClientStateAndTime(output.clientState, output.time);
 
         bytes32 outputConsensusStateHash = keccak256(abi.encode(output.trustedConsensusState));
-        bytes32 trustedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
+        bytes32 storedConsensusStateHash = getConsensusStateHash(output.trustedHeight.revisionHeight);
         require(
-            outputConsensusStateHash == trustedConsensusStateHash,
-            ConsensusStateHashMismatch(trustedConsensusStateHash, outputConsensusStateHash)
+            outputConsensusStateHash == storedConsensusStateHash,
+            ConsensusStateHashMismatch(storedConsensusStateHash, outputConsensusStateHash)
         );
     }
 
@@ -395,19 +395,19 @@ contract SP1ICS07Tendermint is
         // make sure the trusted consensus state from header 1 is known (trusted) by matching it with the the one in the
         // mapping
         bytes32 outputConsensusStateHash1 = keccak256(abi.encode(output.trustedConsensusState1));
-        bytes32 trustedConsensusStateHash1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
+        bytes32 storedConsensusStateHash1 = getConsensusStateHash(output.trustedHeight1.revisionHeight);
         require(
-            outputConsensusStateHash1 == trustedConsensusStateHash1,
-            ConsensusStateHashMismatch(trustedConsensusStateHash1, outputConsensusStateHash1)
+            outputConsensusStateHash1 == storedConsensusStateHash1,
+            ConsensusStateHashMismatch(storedConsensusStateHash1, outputConsensusStateHash1)
         );
 
         // make sure the trusted consensus state from header 2 is known (trusted) by matching it with the the one in the
         // mapping
         bytes32 outputConsensusStateHash2 = keccak256(abi.encode(output.trustedConsensusState2));
-        bytes32 trustedConsensusStateHash2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
+        bytes32 storedConsensusStateHash2 = getConsensusStateHash(output.trustedHeight2.revisionHeight);
         require(
-            outputConsensusStateHash2 == trustedConsensusStateHash2,
-            ConsensusStateHashMismatch(trustedConsensusStateHash2, outputConsensusStateHash2)
+            outputConsensusStateHash2 == storedConsensusStateHash2,
+            ConsensusStateHashMismatch(storedConsensusStateHash2, outputConsensusStateHash2)
         );
     }
 

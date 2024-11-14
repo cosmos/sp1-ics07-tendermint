@@ -364,7 +364,7 @@ contract SP1ICS07Tendermint is
         bytes32 trustedConsensusStateHash = keccak256(abi.encode(trustedConsensusState));
         bytes32 storedConsensusStateHash = getConsensusStateHash(proofHeight);
         require(
-           trustedConsensusStateHash == storedConsensusStateHash,
+            trustedConsensusStateHash == storedConsensusStateHash,
             ConsensusStateHashMismatch(storedConsensusStateHash, trustedConsensusStateHash)
         );
 

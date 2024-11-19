@@ -849,7 +849,7 @@
       }
     ],
     "outputs": [],
-    "stateMutability": "pure"
+    "stateMutability": "view"
   },
   {
     "type": "error",

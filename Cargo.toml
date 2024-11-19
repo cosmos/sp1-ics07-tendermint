@@ -26,19 +26,19 @@ sp1-ics07-tendermint-uc-and-membership = { path = "./programs/uc-and-membership/
 sp1-ics07-tendermint-misbehaviour = { path = "./programs/misbehaviour/" }
 
 # ibc-proto
-ibc-proto = { version = "0.47", default-features = false }
+ibc-proto = { version = "0.51", default-features = false }
 
 # tendermint-rs
-tendermint-light-client-verifier = { version = "0.38", default-features = false }
+tendermint-light-client-verifier = { version = "0.40", default-features = false }
 
 # ibc-rs
-ibc-client-tendermint = { version = "0.55", default-features = false, features = ["serde"] }
-ibc-core-host-types = { version = "0.55", default-features = false }
-ibc-core-client = { version = "0.55", default-features = false }
-ibc-primitives = { version = "0.55", default-features = false }
-ibc-core-handler-types = { version = "0.55", default-features = false }
-ibc-client-tendermint-types = { version = "0.55", default-features = false }
-ibc-core-commitment-types = { version = "0.55", default-features = false }
+ibc-client-tendermint = { version = "0.56", default-features = false, features = ["serde"] }
+ibc-core-host-types = { version = "0.56", default-features = false }
+ibc-core-client = { version = "0.56", default-features = false }
+ibc-primitives = { version = "0.56", default-features = false }
+ibc-core-handler-types = { version = "0.56", default-features = false }
+ibc-client-tendermint-types = { version = "0.56", default-features = false }
+ibc-core-commitment-types = { version = "0.56", default-features = false }
 
 # Other dependencies
 serde = { version = "1.0", default-features = false }
@@ -57,12 +57,12 @@ sp1-ics07-tendermint-utils = { path = "./packages/utils/" }
 cosmos-sdk-proto = { version = "0.26", default-features = false }
 
 # tendermint-rs
-tendermint = { version = "0.38", default-features = false }
-tendermint-rpc = { version = "0.38", features = ["http-client"] }
+tendermint = { version = "0.40", default-features = false }
+tendermint-rpc = { version = "0.40", features = ["http-client"] }
 
 # ibc-rs
-ibc-core-client-types = { version = "0.55", default-features = false }
-ibc-core-host-cosmos = { version = "0.55", default-features = false }
+ibc-core-client-types = { version = "0.56", default-features = false }
+ibc-core-host-cosmos = { version = "0.56", default-features = false }
 
 # Other dependencies
 reqwest = { version = "0.12", features = ["json"] }
